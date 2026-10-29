@@ -132,6 +132,7 @@ set(HEADER_FILES
 	world/ChunkLightmap.hpp
 	world/Dimension.hpp
 	world/Heightmap.hpp
+	world/RetroTerrain.hpp
 	world/Key.hpp
 	world/PlacementEntry.hpp
 	world/Player.hpp

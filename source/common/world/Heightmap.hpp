@@ -30,7 +30,7 @@
 #include <cstring>
 #include <unordered_map>
 
-#include <FastNoiseLite.hpp>
+#include "common/world/RetroTerrain.hpp"
 
 #include "common/core/EngineConfig.hpp"
 #include "common/core/IntTypes.hpp"
@@ -46,6 +46,7 @@ class HeightmapChunk {
 		}
 
 		void generate();
+		double densityAt(int x, int y, int z) const { return retro::Terrain::sample(m_density, x, y, z); }
 
 		s32 landHeightAt(s8 x, s8 y) const;
 		void setLandHeight(s8 x, s8 y, s32 height);
@@ -57,6 +58,7 @@ class HeightmapChunk {
 		s32 m_y = 0;
 
 		s32 m_map[CHUNK_WIDTH * CHUNK_DEPTH];
+		std::array<double, 425> m_density{};
 };
 
 class Heightmap {
@@ -70,13 +72,11 @@ class Heightmap {
 
 		void setSeed(s32 seed);
 
-		FastNoiseLite noise1;
-		FastNoiseLite noise2;
-		FastNoiseLite noise3;
-		FastNoiseLite noise4;
+		const retro::Terrain &terrain() const { return m_terrain; }
 
 	private:
 		std::unordered_map<Vector2i, HeightmapChunk> m_chunks;
+		retro::Terrain m_terrain;
 };
 
 #endif // HEIGHTMAP_HPP_

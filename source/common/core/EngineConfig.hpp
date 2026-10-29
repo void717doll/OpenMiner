@@ -66,7 +66,7 @@ namespace {
 	static_assert(CHUNK_HEIGHT >= -128 && CHUNK_HEIGHT < 128, "CHUNK_HEIGHT out of range");
 	static_assert(CHUNK_DEPTH >= -128 && CHUNK_DEPTH < 128, "CHUNK_DEPTH out of range");
 
-	constexpr int SEALEVEL = 48;
+	constexpr int SEALEVEL = 64;
 
 	constexpr const char *BLOCK_AIR = "_:air";
 }

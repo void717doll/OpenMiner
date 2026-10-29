@@ -72,7 +72,7 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 			// Land blocks
 			for(s8 z = 0 ; z < CHUNK_HEIGHT ; z++) {
 				// Are we above "ground" level?
-				if(z + chunk.z() * CHUNK_HEIGHT > h) {
+				if (heightmap.densityAt(x, y, z + chunk.z() * CHUNK_HEIGHT) <= 0) {
 					// If we are not yet up to sea level, fill with water blocks
 					if (z + chunk.z() * CHUNK_HEIGHT < SEALEVEL) {
 						chunk.setBlockRaw(x, y, z, biome.getLiquidBlockID());
