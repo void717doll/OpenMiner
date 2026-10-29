@@ -1,3 +1,5 @@
+#include <glm/gtc/quaternion.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -20,7 +22,7 @@
 namespace {
 
 constexpr float pi = 3.14159265358979323846f;
-constexpr u64 swingDuration = 300;
+constexpr u64 swingDuration = 286;
 
 void appendQuad(std::vector<Vertex> &vertices, const glm::vec3 (&points)[4], const FloatRect &uv) {
 	constexpr int order[] = {0,1,2,0,2,3};
@@ -88,7 +90,6 @@ void WieldRenderer::setItem(const Item *item) {
 	m_itemID = id;
 	m_cube.reset();
 	m_itemVertexCount = 0;
-	m_isTool = item && item->getGroupValue("group:om_tool_type");
 	if (!item) return;
 	if (item->isBlock() && Registry::getInstance().hasBlock(id)) {
 		const Block &block = Registry::getInstance().getBlockFromStringID(id);
@@ -98,7 +99,7 @@ void WieldRenderer::setItem(const Item *item) {
 			const std::string &filename = blockTexture ? state.tiles().getTextureForFace(0) : state.inventoryImage();
 			buildItem(*item, filename, blockTexture);
 		} else {
-			m_cube = std::make_unique<InventoryCube>(0.5f, true);
+			m_cube = std::make_unique<InventoryCube>(0.3f, true);
 			m_cube->updateVertexBuffer(block);
 		}
 	}
@@ -108,7 +109,7 @@ void WieldRenderer::setItem(const Item *item) {
 void WieldRenderer::buildItem(const Item &item, const std::string &filename, bool blockTexture) {
 	const FloatRect uv = m_atlas.getTexCoords(filename);
 	std::vector<Vertex> vertices;
-	constexpr float half = 0.28f, depth = 0.0175f;
+	constexpr float half = 0.2f, depth = 0.02f;
 	glm::vec3 front[4] = {{-half,half,depth},{half,half,depth},{half,-half,depth},{-half,-half,depth}};
 	glm::vec3 back[4] = {{-half,half,-depth},{half,half,-depth},{half,-half,-depth},{-half,-half,-depth}};
 	appendQuad(vertices, front, uv);
@@ -189,10 +190,10 @@ void WieldRenderer::update() {
 	m_lastX = m_player.x();
 	m_lastY = m_player.y();
 	if (Config::isViewBobbingEnabled && m_player.onGround() && distance > 0.0001 && distance < 1) {
-		m_walkPhase += float(distance) * 8;
-		m_bob = std::sin(m_walkPhase) * 0.012f;
+		m_walkPhase += float(distance) * 1.5f;
+		m_bob = std::min(1.f, m_bob + elapsed * 8);
 	}
-	else m_bob *= 0.8f;
+	else m_bob = std::max(0.f, m_bob - elapsed * 8);
 }
 
 void WieldRenderer::draw(RenderTarget &target, RenderStates states) const {
@@ -211,33 +212,44 @@ void WieldRenderer::draw(RenderTarget &target, RenderStates states) const {
 
 	u64 now = GameClock::getInstance().getTicks();
 	float progress = m_swinging ? std::min(float(now - m_swingStart) / swingDuration, 1.f) : 0;
-	float swing = std::sin(std::sqrt(progress) * pi);
-	float strike = std::sin(progress * progress * pi);
-	float x = std::min(aspect, 1.6f) * std::tan(36.f * pi / 180) * 1.15f * 0.58f;
-	states.transform.translate(x - swing * 0.26f, -0.47f + m_bob - (1 - m_equip) * 0.8f
-		+ std::sin(std::sqrt(progress) * 2 * pi) * 0.1f, -1.15f - strike * 0.15f);
-	float widthScale = std::min(1.f, aspect / 1.3f);
-	states.transform.scale(widthScale, widthScale, widthScale);
+	// adapted from lunarchy's camera.cpp (lgpl-2.1-or-later),
+	// copyright (c) 2010-2013 celeron55, perttu ahola <celeron55@gmail.com>.
+	// source wield units are divided by 100 and its forward z axis is reflected.
+	glm::vec3 position{0.55f, -0.35f - (1 - m_equip) * 0.4f, 0.65f};
+	position.x *= std::min(1.f, aspect / 1.6f);
+	glm::quat rotation{glm::radians(glm::vec3{-100, 120, -100})};
+	if (m_swinging) {
+		position.x -= 0.5f * std::sin(std::pow(progress, 0.8f) * pi);
+		position.y += 0.24f * std::sin(progress * 1.8f * pi);
+		position.z += 0.125f;
+		glm::quat end{glm::radians(glm::vec3{80, 30, 100})};
+		rotation = glm::slerp(rotation, end, std::sin(progress * pi));
+	}
+	else {
+		position.x -= std::sin(m_walkPhase * 2 * pi) * 0.03f * m_bob;
+		position.y += std::abs(std::sin(m_walkPhase * 2 * pi)) * 0.03f * m_bob;
+	}
+	states.transform.translate(position.x, position.y, -position.z);
 	if (m_cube) {
-		states.transform.rotateY(-30.f - strike * 20.f);
-		states.transform.rotateX(15.f - swing * 60.f);
-		// block meshes use z up; the wield camera uses y up.
+		states.transform.scale(1, 1, -1);
+		states.transform *= Transform{glm::mat4_cast(rotation)};
 		states.transform.rotateX(-90.f);
-		states.transform.translate(-0.25f,-0.25f,-0.25f);
+		states.transform.translate(-0.15f, -0.15f, -0.15f);
 		target.draw(*m_cube, states);
 	}
 	else if (m_itemVertexCount) {
-		states.transform.rotateY(-30.f - strike * 20.f);
-		states.transform.rotateZ((m_isTool ? 20.f : -15.f) - swing * 25.f);
-		states.transform.rotateX(-swing * 65.f);
-		if (m_isTool) {
-			states.transform.scale(1.8f, 1.8f, 1.f);
-			states.transform.translate(-0.10f, 0.08f, 0);
-		}
+		states.transform.scale(1, 1, -1);
+		states.transform *= Transform{glm::mat4_cast(rotation)};
 		states.texture = &m_atlas.texture();
 		target.draw(m_itemVertices, 0, m_itemVertexCount, states);
 	}
 	else {
+		float swing = std::sin(std::sqrt(progress) * pi);
+		float strike = std::sin(progress * progress * pi);
+		states.transform = Transform::Identity;
+		float x = std::min(aspect, 1.6f) * std::tan(36.f * pi / 180) * 1.15f * 0.58f;
+		states.transform.translate(x - swing * 0.26f, -0.47f - (1 - m_equip) * 0.8f
+			+ std::sin(std::sqrt(progress) * 2 * pi) * 0.1f, -1.15f - strike * 0.15f);
 		states.transform.translate(0.1f, -0.06f, 0);
 		states.transform.rotateZ(-15.f - swing * 25.f);
 		states.transform.rotateY(-20.f + strike * 30.f);

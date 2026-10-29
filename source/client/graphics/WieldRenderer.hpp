@@ -43,7 +43,6 @@ class WieldRenderer : public Drawable {
 		u64 m_swingStart = 0;
 		u64 m_lastUpdate = 0;
 		float m_equip = 1;
-		bool m_isTool = false;
 		bool m_swinging = false;
 		bool m_attacking = false;
 		bool m_using = false;

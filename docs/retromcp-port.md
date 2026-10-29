@@ -45,7 +45,11 @@ the game is local only. serialized messages connect rendering to the simulation 
 
 the first-person hand and selected block/item use a separate 72-degree camera and depth-cleared pass between the scene effect and hud, following the rendering boundaries in `~/lunarchy/src/client/camera.cpp` and `wieldmesh.cpp`. empty slots show the refi player arm; blocks reuse the existing cube mesh and items gain thickness along their opaque pixel edges. plantlike blocks and blocks with an inventory image use that sprite rather than a textured box. partial block offsets scale with the mesh.
 
-mineclonia's `mods/CORE/mcl_init/init.lua`, `mods/ITEMS/mcl_tools/init.lua`, and `mods/PLAYER/mcl_meshhand` provide the tool/ordinary-item/hand distinction. tools use its 1.8:1 width/height scale relative to ordinary item sprites, with unchanged thickness and an upright grip. blocks convert the engine's z-up geometry to the wield camera's y-up coordinates. switching lowers the previous item before replacing it and raising the new one. swing and walking bob remain local adaptations; no mineclonia textures or hand models were imported. placement follows the viewport rather than gui scale and is clamped on wide screens.
+held blocks and sprites now use lunarchy's normal right-hand position `(55, -35, 65)` and rotation `(-100, 120, -100)`, with wield units divided by 100 and forward z reflected for bgfx. block width is 0.3; sprites are 0.4 wide and 0.04 thick, matching lunarchy's 30/40 mesh scales and extrusion ratio. the optional mineclonia tool enlargement and saved left-hand settings are not applied. narrow windows move the pose inward.
+
+the 286ms swing follows lunarchy's position curves and quaternion interpolation toward `(80, 30, 100)`. walking adds its horizontal and vertical bob, while switching lowers and raises items over 125ms each. block meshes retain the z-up conversion and empty slots retain the existing refi-skinned arm. arm inertia, tool recharge recoil, and custom mesh wield models remain absent.
+
+inventory tooltips follow beta `GuiContainer.drawScreen`: only the trimmed item name, white text with a dark shadow, a solid 75-percent-opaque black rectangle, three pixels of padding, and a twelve-pixel offset above/right of the cursor. tooltips hide while carrying a stack and move inward near window edges. dropped plants and seeds use their item sprite instead of a thin crop-shaped box.
 
 ## survival rules
 
