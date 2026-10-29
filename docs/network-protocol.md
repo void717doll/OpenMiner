@@ -332,3 +332,5 @@ _This packet has no field._
 ## protocol compatibility
 
 protocol version 1 appends a `u16` version to both `ClientConnect` (after username) and `ClientOk` (after the singleplayer flag). peers reject missing or different versions. this version requires server-owned item consumption on successful placement; clients must not decrement inventory or send an inventory update for placement.
+
+protocol version 2 adds clientbound `PlayerHealth` (`0x3a`, one `u16` health value) and serverbound `PlayerAttack` (`0x3b`, no payload). attacks use the server's current player position and rotation. mob visuals add drawable type 2 followed by a `u8` model id (1 pig, 2 zombie).

@@ -27,6 +27,7 @@ set(SOURCE_FILES
 	graphics/Image.cpp
 	graphics/IndexBuffer.cpp
 	graphics/PlayerBox.cpp
+	graphics/MobModel.cpp
 	graphics/RectangleShape.cpp
 	graphics/RenderTarget.cpp
 	graphics/Shader.cpp
@@ -130,6 +131,7 @@ set(HEADER_FILES
 	graphics/Image.hpp
 	graphics/IndexBuffer.hpp
 	graphics/PlayerBox.hpp
+	graphics/MobModel.hpp
 	graphics/RectangleShape.hpp
 	graphics/RenderStates.hpp
 	graphics/RenderTarget.hpp

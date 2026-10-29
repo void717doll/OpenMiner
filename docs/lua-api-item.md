@@ -127,3 +127,7 @@ Parameters:
 - `client` (`Client`): client that activated the item
 - `server` (`Server`): current server
 
+
+## food
+
+`heal_amount` restores health on activation and defaults the stack limit to one. `container_item` replaces the consumed item, as with mushroom stew returning `default:bowl`. `max_stack_size` can override the default, as with eight cookies. food is consumed immediately, including at full health.

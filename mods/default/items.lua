@@ -89,6 +89,7 @@ mod:item {
 
 mod:item {
 	id = "bread",
+	heal_amount = 5,
 	name = "Bread",
 	tiles = "bread.png",
 }
@@ -113,12 +114,14 @@ mod:item {
 
 mod:item {
 	id = "apple",
+	heal_amount = 4,
 	name = "Apple",
 	tiles = "apple.png",
 }
 
 mod:item {
 	id = "apple_golden",
+	heal_amount = 42,
 	name = "Golden Apple",
 	tiles = "apple_golden.png",
 }
@@ -215,6 +218,8 @@ mod:item {
 
 mod:item {
 	id = "cookie",
+	max_stack_size = 8,
+	heal_amount = 1,
 	name = "Cookie",
 	tiles = "cookie.png",
 }
@@ -317,12 +322,14 @@ mod:item {
 
 mod:item {
 	id = "porkchop_raw",
+	heal_amount = 3,
 	name = "Porkchop",
 	tiles = "porkchop_raw.png",
 }
 
 mod:item {
 	id = "porkchop_cooked",
+	heal_amount = 8,
 	name = "Cooked Porkchop",
 	tiles  = "porkchop_cooked.png",
 }
@@ -383,12 +390,14 @@ mod:item {
 
 mod:item {
 	id = "fish_cod_raw",
+	heal_amount = 2,
 	name = "Cod",
 	tiles = "fish_cod_raw.png",
 }
 
 mod:item {
 	id = "fish_cod_cooked",
+	heal_amount = 5,
 	name = "Cooked Cod",
 	tiles = "fish_cod_cooked.png",
 }
@@ -485,6 +494,8 @@ mod:item {
 
 mod:item {
 	id = "mushroom_stew",
+	container_item = "default:bowl",
+	heal_amount = 10,
 	name = "Mushroom Stew",
 	tiles = "mushroom_stew.png",
 }

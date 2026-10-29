@@ -33,6 +33,7 @@
 #include "common/core/Registry.hpp"
 #include "common/network/Network.hpp"
 #include "common/scene/component/ComponentType.hpp"
+#include "common/scene/component/MobComponent.hpp"
 #include "common/scene/component/NetworkComponent.hpp"
 #include "server/world/ServerBlock.hpp"
 #include "server/world/ServerWorld.hpp"
@@ -123,6 +124,19 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 		sf::Uint64 ticks;
 		save >> ticks;
 		GameTime::setTicks(ticks);
+		if (!save.endOfPacket()) {
+			u32 marker = 0;
+			u16 count = 0;
+			save >> marker >> count;
+			if (marker == 0x4845414c) {
+				for (u16 i = 0; i < count; ++i) {
+					std::string name;
+					u16 health;
+					if (!(save >> name >> health)) break;
+					if (auto *player = m_playerList.getPlayer(name)) player->setHealth(health);
+				}
+			}
+		}
 	}
 
 	// logInfo() << "Loading done.";
@@ -180,6 +194,9 @@ void WorldSaveBasicBackend::save(const std::string &name) {
 	}
 
 	save << (sf::Uint64)GameTime::getTicks();
+	save << u32(0x4845414c) << u16(m_playerList.size());
+	for (const auto &entry : m_playerList)
+		save << entry.first << entry.second.health();
 
 	file.write((const char *)save.getData(), save.getDataSize());
 
@@ -237,6 +254,9 @@ void WorldSaveBasicBackend::loadEntities(sf::Packet &save, ServerWorld &world) {
 			}
 			else if (type == ComponentType::Hitbox) {
 				save >> registry.emplace<DoubleBox>(entity);
+			}
+			else if (type == ComponentType::Mob) {
+				save >> registry.emplace<MobComponent>(entity);
 			}
 			else if (type == ComponentType::EntityID) {
 				save >> registry.emplace<std::string>(entity);

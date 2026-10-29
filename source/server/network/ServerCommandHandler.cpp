@@ -36,6 +36,7 @@
 #include "server/network/Server.hpp"
 #include "server/network/ServerCommandHandler.hpp"
 #include "common/world/WorldCollision.hpp"
+#include "common/core/GameClock.hpp"
 #include "server/world/ServerBlock.hpp"
 #include "server/world/ServerItem.hpp"
 #include "server/world/WorldController.hpp"
@@ -202,6 +203,38 @@ void ServerCommandHandler::sendEntityDespawn(entt::entity entityID, const Client
 		client->tcpSocket->send(packet);
 }
 
+void ServerCommandHandler::sendPlayerHealth(u16 clientID) const {
+	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
+	if (!player || !player->client()) return;
+	Network::Packet packet;
+	packet << Network::Command::PlayerHealth << player->health();
+	player->client()->tcpSocket->send(packet);
+}
+
+void ServerCommandHandler::damagePlayer(u16 clientID, u16 amount) {
+	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
+	if (!player) return;
+	player->damage(amount);
+	if (player->health() == 0) {
+		ServerWorld &world = getWorldForClient(clientID);
+		setPlayerPosition(clientID, 0, 0, world.heightmap().getHighestBlockAt(0, 0) + 1);
+		player->setHealth(20);
+		sendPlayerPosUpdate(clientID, true);
+	}
+	sendPlayerHealth(clientID);
+}
+
+void ServerCommandHandler::spawnMob(u16 clientID, const std::string &id) {
+	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
+	if (!player || (id != "pig" && id != "zombie")) return;
+	ServerWorld &world = getWorldForClient(clientID);
+	double angle = player->cameraYaw() * math::DEG_TO_RAD;
+	double x = player->x() + std::cos(angle) * 3, y = player->y() + std::sin(angle) * 3;
+	int z = world.heightmap().getHighestBlockAt(int(std::floor(x)), int(std::floor(y))) + 1;
+	bool spawned = world.spawnMob("default:" + id, x, y, z);
+	sendChatMessage(0, spawned ? "spawned " + id : "spawn position is blocked or unloaded", player->client());
+}
+
 void ServerCommandHandler::setupCallbacks() {
 	m_server.setConnectionCallback([this](ClientInfo &client, Network::Packet &connectionPacket) {
 		std::string username;
@@ -279,8 +312,9 @@ void ServerCommandHandler::setupCallbacks() {
 
 		// Send already connected players to the new client
 		for (auto &it : m_players) {
+			if (!it.second.isOnline()) continue;
 			Network::Packet spawnPacket;
-			spawnPacket << Network::Command::PlayerSpawn << it.first;
+			spawnPacket << Network::Command::PlayerSpawn << it.second.clientID();
 			spawnPacket << it.second.x() << it.second.y() << it.second.z() << it.second.dimension() << it.second.name();
 			spawnPacket << it.second.cameraYaw() << it.second.cameraPitch();
 			client.tcpSocket->send(spawnPacket);
@@ -292,6 +326,7 @@ void ServerCommandHandler::setupCallbacks() {
 
 		// Send inventory
 		sendPlayerInvUpdate(client.id, &client);
+			sendPlayerHealth(client.id);
 
 		// Send spawn packet to all clients for this player
 		Network::Packet spawnPacket;
@@ -417,6 +452,12 @@ void ServerCommandHandler::setupCallbacks() {
 			logError() << ("Failed to place block using player " + std::to_string(client.id) + ": Player not found").c_str();
 	});
 
+	m_server.setCommandCallback(Network::Command::PlayerAttack, [this](ClientInfo &client, Network::Packet &) {
+		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
+		if (!player || !player->tryAttack(GameClock::getInstance().getTicks(true))) return;
+		getWorldForClient(client.id).attackMob(*player);
+	});
+
 	m_server.setCommandCallback(Network::Command::PlayerDigBlock, [this](ClientInfo &client, Network::Packet &packet) {
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
 		if (player) {
@@ -528,7 +569,9 @@ void ServerCommandHandler::setupCallbacks() {
 			u16 id = world.getBlock(x, y, z);
 			ServerBlock &block = (ServerBlock &)(m_registry.getBlock(id));
 
-			ServerItem &item = (ServerItem &)player->heldItemStack().item();
+			if (player->heldItemSlot() < 0 || player->heldItemSlot() >= player->inventory().width()
+			 || player->heldItemStack().amount() == 0 || player->heldItemStack().item().isBlock()) return;
+			const ServerItem &item = static_cast<const ServerItem &>(player->heldItemStack().item());
 			if (item.canBeActivated()) {
 				bool hasBeenActivated = item.onItemActivated({x, y, z}, block, *player, world, client, *this);
 
@@ -587,6 +630,7 @@ void ServerCommandHandler::stopServer() const {
 void ServerCommandHandler::initUsertype(sol::state &lua) {
 	lua.new_usertype<ServerCommandHandler>("ServerCommandHandler",
 		"send_player_change_dimension", &ServerCommandHandler::sendPlayerChangeDimension,
-		"send_chat_message", &ServerCommandHandler::sendChatMessage
+		"send_chat_message", &ServerCommandHandler::sendChatMessage,
+		"send_player_health", &ServerCommandHandler::sendPlayerHealth
 	);
 }

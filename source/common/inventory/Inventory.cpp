@@ -40,14 +40,15 @@ ItemStack Inventory::addStack(const std::string &stringID, u16 amount, u16 offse
 		return ItemStack::Empty;
 
 	bool hasChanged = false;
+	const Item &incoming = Registry::getInstance().getItemFromStringID(stringID);
 
 	ItemStack ret{stringID, amount};
 	for (std::size_t i = offset ; ret.amount() && i < (size ? offset + size : m_items.size()) ; ++i) {
 		const Item &item = m_items[i].item();
 		if (item.id() == 0 && !mergeOnly) {
-			if (ret.amount() > item.maxStackSize()) {
-				m_items[i] = ItemStack(stringID, item.maxStackSize());
-				ret.setAmount(ret.amount() - item.maxStackSize());
+			if (ret.amount() > incoming.maxStackSize()) {
+				m_items[i] = ItemStack(stringID, incoming.maxStackSize());
+				ret.setAmount(ret.amount() - incoming.maxStackSize());
 			}
 			else {
 				m_items[i] = ItemStack(stringID, ret.amount());

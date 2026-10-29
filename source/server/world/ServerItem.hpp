@@ -44,10 +44,18 @@ class ServerItem : public Item {
 
 		bool onItemActivated(const glm::ivec3 &pos, Block &block, Player &player, World &world, ClientInfo &client, ServerCommandHandler &server) const;
 
+		void setFood(u16 healAmount, const std::string &container) {
+			m_healAmount = healAmount;
+			m_container = container;
+			m_canBeActivated = m_canBeActivated || healAmount > 0;
+		}
+
 		void setOnItemActivated(const sol::protected_function &function);
 
 	private:
 		sol::unsafe_function m_onItemActivated;
+		u16 m_healAmount = 0;
+		std::string m_container;
 };
 
 #endif // SERVERITEM_HPP_

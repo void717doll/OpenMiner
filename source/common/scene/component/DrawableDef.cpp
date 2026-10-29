@@ -33,14 +33,21 @@ InventoryCubeDef &DrawableDef::addInventoryCube() {
 }
 
 void DrawableDef::serialize(sf::Packet &packet) const {
+	if (m_mobModel) {
+		packet << u8(DrawableType::RetroMob) << m_mobModel;
+		return;
+	}
 	for (auto &it : m_cubes)
 		packet << u8(DrawableType::InventoryCube) << it;
 }
 
 void DrawableDef::deserialize(sf::Packet &packet) {
+	m_cubes.clear();
+	m_mobModel = 0;
 	u8 type;
 	packet >> type;
-	if (type == DrawableType::InventoryCube) {
+	if (type == DrawableType::RetroMob) packet >> m_mobModel;
+	else if (type == DrawableType::InventoryCube) {
 		m_cubes.emplace_back();
 		packet >> m_cubes.back();
 	}

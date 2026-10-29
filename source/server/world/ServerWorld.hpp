@@ -46,6 +46,9 @@ class ServerWorld : public World {
 		ServerWorld(PlayerList &players, const Dimension &dimension, s32 seed);
 
 		void update(bool doTick);
+		void updateMobs();
+		bool spawnMob(const std::string &id, double x, double y, double z);
+		bool attackMob(ServerPlayer &player);
 
 		void updatePlayerChunks(ServerPlayer &player, s32 cx, s32 cy, s32 cz);
 		void createChunkNeighbours(ServerChunk &chunk);
@@ -89,6 +92,7 @@ class ServerWorld : public World {
 		ServerScene m_scene;
 
 		s32 m_seed = 0;
+		u32 m_mobTick = 0;
 
 		struct ChunkSendRequest {
 			ChunkSendRequest(const Vector3i &chunkPos_, ServerPlayer &player_, u64 timestamp_)

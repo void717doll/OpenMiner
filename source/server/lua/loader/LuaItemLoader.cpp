@@ -42,7 +42,9 @@ void LuaItemLoader::loadItem(const sol::table &table) const {
 	item.setHarvestCapability(u8(table["harvest_capability"].get_or(0)));
 	item.setMiningSpeed(table["mining_speed"].get_or(1.f));
 	item.setOnItemActivated(table["on_item_activated"].get<sol::object>());
-	item.setMaxStackSize(table["max_stack_size"].get_or(ServerConfig::maxItemStackSize));
+	u16 healAmount = table["heal_amount"].get_or<u16>(0);
+	item.setFood(healAmount, table["container_item"].get_or<std::string>(""));
+	item.setMaxStackSize(table["max_stack_size"].get_or<u16>(healAmount ? 1 : ServerConfig::maxItemStackSize));
 
 	sol::object groupsObject = table["groups"].get<sol::object>();
 	if (groupsObject.valid()) {

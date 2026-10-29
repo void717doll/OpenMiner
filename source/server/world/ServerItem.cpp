@@ -33,6 +33,27 @@
 #include "server/world/ServerPlayer.hpp"
 
 bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &player, World &world, ClientInfo &client, ServerCommandHandler &server) const {
+	if (m_healAmount > 0) {
+		ItemStack stack = player.heldItemStack();
+		if (stack.amount() == 0) return false;
+		u16 remaining = stack.amount() - 1;
+		std::string result = remaining ? stack.item().stringID() : "";
+		if (!m_container.empty()) {
+			if (remaining) {
+				// preserve oversized food stacks loaded from older saves.
+				if (player.inventory().addStack(m_container, 1).amount()) return false;
+			}
+			else {
+				result = m_container;
+				remaining = 1;
+			}
+		}
+		player.inventory().setStack(player.heldItemSlot(), 0, result, remaining);
+		player.heal(m_healAmount);
+		server.sendPlayerInvUpdate(client.id);
+		server.sendPlayerHealth(client.id);
+		return true;
+	}
 	try {
 		if (m_onItemActivated) {
 			m_onItemActivated(pos, block, player, world, client, server);

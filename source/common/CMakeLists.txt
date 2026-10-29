@@ -110,10 +110,12 @@ set(HEADER_FILES
 
 	scene/EntityCallbackContainer.hpp
 	scene/Scene.hpp
+	scene/RetroMobMesh.hpp
 	scene/component/AnimationComponent.hpp
 	scene/component/ComponentType.hpp
 	scene/component/DrawableDef.hpp
 	scene/component/InventoryCubeDef.hpp
+	scene/component/MobComponent.hpp
 	scene/component/NetworkComponent.hpp
 	scene/component/PositionComponent.hpp
 	scene/component/RotationComponent.hpp

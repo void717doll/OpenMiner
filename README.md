@@ -129,9 +129,11 @@ See also the roadmap for 1.0.0 [here](https://github.com/Unarelith/OpenMiner/wik
 
 ## generation and regression checks
 
-decoration randomness includes the world seed, dimension, and chunk coordinates. loading a seed refreshes biome samplers and cached heightmaps. caves use seeded sphere-carved paths replayed from neighboring regions, preserving their shape across chunk boundaries. saved chunks remain unchanged; newly generated terrain can meet older terrain at visible seams.
+terrain density now uses the beta 1.7.3 octave-noise code from the supplied retromcp checkout, with a 128-block surface region and sea level 64. oldworld biome selection and cave carving remain in use. decoration randomness includes the world seed, dimension, and chunk coordinates. loading a seed refreshes biome samplers and cached heightmaps. caves use seeded sphere-carved paths replayed from neighboring regions, preserving their shape across chunk boundaries. saved chunks remain unchanged; newly generated terrain can meet older terrain at visible seams.
 
-worldgen still needs staged cross-chunk decoration, parallel generation, superchunks, and the terrain-formula api. fluids, clouds, particles, custom meshes, and mobs remain unfinished.
+pig and zombie mobs use beta model geometry, textures, health, drops, and attack values. use `/spawn pig` or `/spawn zombie` to spawn one nearby; left click attacks within three blocks. pigs also spawn on loaded grass during the day, and zombies spawn at night. right click consumes food and restores health; mushroom stew returns a bowl. health appears above the hotbar.
+
+worldgen still needs staged cross-chunk decoration, parallel generation, superchunks, and the terrain-formula api. fluids, clouds, particles, arbitrary custom meshes, and the remaining beta mob roster are unfinished. see [the port notes](docs/retromcp-port.md) for source mappings and limits.
 
 with cxxtest installed, build and run the engine checks:
 

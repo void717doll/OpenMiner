@@ -33,7 +33,7 @@
 namespace Network {
 	using Packet = CompressedPacket;
 
-	constexpr u16 protocolVersion = 1;
+	constexpr u16 protocolVersion = 2;
 
 	enum class Command {
 		// Client commands
@@ -58,6 +58,8 @@ namespace Network {
 		PlayerHeldItemChanged = 0x37,
 		PlayerReady           = 0x38,
 		PlayerChunkPosUpdate  = 0x39,
+		PlayerHealth          = 0x3a,
+		PlayerAttack          = 0x3b,
 
 		BlockUpdate           = 0x40,
 		BlockActivated        = 0x41,

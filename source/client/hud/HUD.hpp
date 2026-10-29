@@ -81,6 +81,7 @@ class HUD : public Transformable, public Drawable {
 		BlockInfoWidget m_blockInfoWidget;
 
 		Text m_fpsText;
+		Text m_healthText;
 
 		Chat m_chat;
 

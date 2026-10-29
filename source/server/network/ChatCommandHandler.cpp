@@ -64,6 +64,14 @@ void ChatCommandHandler::parseCommand(const std::string &str, ClientInfo &client
 	}
 }
 
+void ChatCommandHandler::spawnCommand(const std::vector<std::string> &command, ClientInfo &client) const {
+	if (command.size() != 2 || (command[1] != "pig" && command[1] != "zombie")) {
+		m_server.sendChatMessage(0, "usage: /spawn pig|zombie", &client);
+		return;
+	}
+	m_server.spawnMob(client.id, command[1]);
+}
+
 void ChatCommandHandler::helpCommand(const std::vector<std::string> &command, ClientInfo &client) const {
 	if (command.size() > 1) {
 		m_server.sendChatMessage(0, "Usage: /help", &client);

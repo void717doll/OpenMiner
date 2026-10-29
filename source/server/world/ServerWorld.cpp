@@ -52,6 +52,7 @@ void ServerWorld::update(bool doTick) {
 		for (auto &it : m_chunks) // TODO: Loop on a subset of this hashmap
 			it.second->tick();
 
+		updateMobs();
 		m_scene.update();
 	}
 }

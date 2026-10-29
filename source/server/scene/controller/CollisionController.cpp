@@ -44,7 +44,8 @@ void CollisionController::update(entt::registry &registry) {
 					EntityWrapper entityWrapper{entity, registry};
 
 					auto &entityCallbackContainer = Registry::getInstance().getEntityCallbackContainer(id);
-					entityCallbackContainer.collisionCallback(entityWrapper, it.second, *m_server);
+					if (entityCallbackContainer.collisionCallback.valid())
+						entityCallbackContainer.collisionCallback(entityWrapper, it.second, *m_server);
 				}
 			}
 		}

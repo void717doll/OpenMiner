@@ -45,6 +45,7 @@ class ChatCommandHandler {
 		void parseCommand(const std::string &str, ClientInfo &client) const;
 
 	private:
+		void spawnCommand(const std::vector<std::string> &command, ClientInfo &client) const;
 		void helpCommand(const std::vector<std::string> &command, ClientInfo &client) const;
 		void optionCommand(const std::vector<std::string> &command, ClientInfo &client) const;
 		void stopCommand(const std::vector<std::string> &command, ClientInfo &client) const;
@@ -55,6 +56,7 @@ class ChatCommandHandler {
 		ServerCommandHandler &m_server;
 
 		std::map<std::string, CommandCallback> m_commands = {
+			{"spawn", &ChatCommandHandler::spawnCommand},
 			{"help",   &ChatCommandHandler::helpCommand},
 			{"option", &ChatCommandHandler::optionCommand},
 			{"stop",   &ChatCommandHandler::stopCommand},

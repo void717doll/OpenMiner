@@ -72,6 +72,10 @@ class ServerCommandHandler {
 		void sendEntitySpawn(entt::entity entityID, const ClientInfo *client = nullptr) const;
 		void sendEntityDespawn(entt::entity entityID, const ClientInfo *client = nullptr) const;
 
+		void sendPlayerHealth(u16 clientID) const;
+		void damagePlayer(u16 clientID, u16 amount);
+		void spawnMob(u16 clientID, const std::string &id);
+
 		void setupCallbacks();
 
 		void setPlayerPosition(u16 clientID, s32 x, s32 y, s32 z);

@@ -162,3 +162,9 @@ Example:
 position = {5, 2, 3}
 ```
 
+
+## beta mobs
+
+`properties.visual = {type = "retro_mob", model = "pig"}` selects a ported model; `"zombie"` is also available. set `is_rotatable = true` and a hitbox as in `mods/default/mobs.lua`.
+
+`properties.mob` enables server movement and accepts `hostile`, `health`, `move_speed`, `attack_strength`, and `drop_item`. mob health, timers, and motion survive save/reload. the existing `mod:spawn_entity` api can spawn these definitions.

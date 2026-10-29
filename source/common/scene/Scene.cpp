@@ -114,9 +114,11 @@ void extend_meta_type(const std::string &name, ComponentType type, bool isSerial
 #include "common/scene/component/DrawableDef.hpp"
 #include "common/scene/component/NetworkComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
+#include "common/scene/component/MobComponent.hpp"
 #include "common/scene/component/RotationComponent.hpp"
 
 void Scene::registerComponents() {
+	extend_meta_type<MobComponent>("MobComponent", ComponentType::Mob, false, true);
 	extend_meta_type<DoubleBox>          ("DoubleBox",          ComponentType::Hitbox,    false, true);
 	extend_meta_type<AnimationComponent> ("AnimationComponent", ComponentType::Animation, true,  true);
 	extend_meta_type<DrawableDef>        ("DrawableDef",        ComponentType::Drawable,  true,  true);

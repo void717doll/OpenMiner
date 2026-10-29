@@ -56,6 +56,12 @@ class ServerPlayer : public Player {
 		void clearLoadedChunks() { m_loadedChunks.clear(); }
 		const std::unordered_set<Vector3i> &loadedChunks() const { return m_loadedChunks; }
 
+		bool tryAttack(u64 now) {
+			if (now < m_nextAttack) return false;
+			m_nextAttack = now + 400;
+			return true;
+		}
+
 		static void initUsertype(sol::state &lua);
 
 	public:
@@ -63,6 +69,7 @@ class ServerPlayer : public Player {
 
 	private:
 		ClientInfo *m_client = nullptr;
+		u64 m_nextAttack = 0;
 
 		bool m_isNewPlayer = false;
 		bool m_isReady = false; // Is player ready to receive chunks?

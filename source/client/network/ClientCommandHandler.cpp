@@ -46,6 +46,12 @@
 #include "client/world/ClientPlayer.hpp"
 #include "client/world/ClientWorld.hpp"
 
+void ClientCommandHandler::sendPlayerAttack() {
+	Network::Packet packet;
+	packet << Network::Command::PlayerAttack;
+	m_client.send(packet);
+}
+
 void ClientCommandHandler::sendPlayerInvUpdate() {
 	Network::Packet invPacket;
 	invPacket << Network::Command::PlayerInvUpdate;
@@ -211,6 +217,11 @@ void ClientCommandHandler::setupCallbacks() {
 		s32 chunkX, chunkY, chunkZ;
 		packet >> chunkX >> chunkY >> chunkZ;
 		m_world.removeChunk({chunkX, chunkY, chunkZ});
+	});
+
+	m_client.setCommandCallback(Network::Command::PlayerHealth, [this](Network::Packet &packet) {
+		u16 health;
+		if (packet >> health) m_player.setHealth(health);
 	});
 
 	m_client.setCommandCallback(Network::Command::BlockUpdate, [this](Network::Packet &packet) {

@@ -30,6 +30,7 @@
 #include "common/scene/component/DrawableDef.hpp"
 #include "common/scene/component/NetworkComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
+#include "common/scene/component/MobComponent.hpp"
 #include "common/scene/component/RotationComponent.hpp"
 #include "server/lua/LuaMod.hpp"
 #include "server/lua/loader/LuaEntityLoader.hpp"
@@ -49,6 +50,15 @@ void LuaEntityLoader::loadEntity(const sol::table &table) const {
 		tryLoadRotation(properties.value(), registry, entity);
 		tryLoadAnimation(properties.value(), registry, entity);
 		tryLoadHitbox(properties.value(), registry, entity);
+		sol::optional<sol::table> mob = properties.value()["mob"];
+		if (mob) {
+			auto &component = registry.emplace<MobComponent>(entity);
+			component.hostile = mob.value()["hostile"].get_or(false);
+			component.health = mob.value()["health"].get_or<u16>(component.hostile ? 20 : 10);
+			component.moveSpeed = mob.value()["move_speed"].get_or(0.7f);
+			component.attackStrength = mob.value()["attack_strength"].get_or<u16>(0);
+			component.dropItem = mob.value()["drop_item"].get_or<std::string>("");
+		}
 	}
 }
 
@@ -104,7 +114,12 @@ void LuaEntityLoader::tryLoadVisual(const sol::table &table, entt::registry &reg
 	sol::optional<sol::table> visual = table["visual"];
 	if (visual != sol::nullopt) {
 		std::string type = visual.value()["type"];
-		if (type == "inventorycube") {
+		if (type == "retro_mob") {
+			std::string model = visual.value()["model"].get<std::string>();
+			if (model != "pig" && model != "zombie") throw std::runtime_error("unknown retro mob model");
+			registry.emplace<DrawableDef>(entity).setMobModel(model == "pig" ? 1 : 2);
+		}
+		else if (type == "inventorycube") {
 			auto &drawable = registry.emplace<DrawableDef>(entity);
 			auto &cube = drawable.addInventoryCube();
 

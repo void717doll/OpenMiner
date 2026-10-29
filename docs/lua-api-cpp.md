@@ -169,3 +169,7 @@
 
 `BlockParamType.Custom` accesses the bits allocated by `custom_param_bits`.
 rotation, state, and custom allocations share 16 bits; overflow rejects the block definition.
+
+### player health
+
+`Player:health()` returns health out of 20. `Player:heal(amount)` and `Player:damage(amount)` clamp health to its valid range. after changing health from lua, call `ServerCommandHandler:send_player_health(player:client_id())` to update the hud.

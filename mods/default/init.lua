@@ -43,3 +43,5 @@ dofile("inventory.lua")
 
 dofile("item_drop.lua")
 
+
+dofile("mobs.lua")

@@ -49,6 +49,7 @@ set(SOURCE_FILES
 	world/ServerItem.cpp
 	world/ServerPlayer.cpp
 	world/ServerWorld.cpp
+	world/WorldMobs.cpp
 	world/TerrainBiomeSampler.cpp
 	world/TerrainGenerator.cpp
 	world/WorldController.cpp

@@ -36,12 +36,15 @@ namespace DrawableType {
 	enum : u8 {
 		Undefined     = 0,
 		InventoryCube = 1,
+		RetroMob = 2,
 	};
 }
 
 class DrawableDef : public ISerializable {
 	public:
 		InventoryCubeDef &addInventoryCube();
+		void setMobModel(u8 model) { m_mobModel = model; }
+		u8 mobModel() const { return m_mobModel; }
 
 		// FIXME
 		InventoryCubeDef &getInventoryCubeDef() { return m_cubes.back(); }
@@ -55,6 +58,7 @@ class DrawableDef : public ISerializable {
 
 	protected:
 		std::vector<InventoryCubeDef> m_cubes;
+		u8 m_mobModel = 0;
 };
 
 #endif // DRAWABLEDEF_HPP_

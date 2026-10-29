@@ -61,6 +61,8 @@ void HUD::setup() {
 
 	m_blockInfoWidget.setPosition(Config::screenWidth / getScale().x / 2.f - (float)m_blockInfoWidget.width() / 2.f, 2.f);
 
+	m_healthText.setPosition(m_hotbar.getPosition().x, m_hotbar.getPosition().y - 12.f);
+
 	m_fpsText.setPosition(Config::screenWidth / getScale().x - 36.f, 2.f);
 
 	m_crosshair.setup();
@@ -99,6 +101,7 @@ void HUD::onGuiScaleChanged(const GuiScaleChangedEvent &event) {
 }
 
 void HUD::update() {
+	m_healthText.setString("health " + std::to_string(m_player.health()) + "/20");
 	// FIXME: Shouldn't be called every tick
 	if (Config::isHotbarVisible)
 		m_hotbar.update();
@@ -146,6 +149,9 @@ void HUD::draw(RenderTarget &target, RenderStates states) const {
 
 	if (Config::isHotbarVisible)
 		target.draw(m_hotbar, states);
+
+	if (Config::isHotbarVisible)
+		target.draw(m_healthText, states);
 
 	if (Config::isFpsCounterEnabled)
 		target.draw(m_fpsText, states);

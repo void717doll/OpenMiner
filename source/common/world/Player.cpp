@@ -61,6 +61,9 @@ void Player::deserialize(sf::Packet &packet) {
 void Player::initUsertype(sol::state &lua) {
 	lua.new_usertype<Player>("Player",
 		"name", &Player::name,
+		"health", &Player::health,
+		"heal", &Player::heal,
+		"damage", &Player::damage,
 
 		"x", &Player::x,
 		"y", &Player::y,

@@ -32,11 +32,18 @@
 #include "common/scene/component/RotationComponent.hpp"
 
 #include "client/gui/InventoryCube.hpp"
+#include "client/graphics/MobModel.hpp"
 #include "client/scene/component/DrawableComponent.hpp"
 #include "client/scene/controller/RenderingController.hpp"
 
 void RenderingController::update(entt::registry &registry) {
 	registry.view<DrawableDef>(entt::exclude<DrawableComponent>).each([&](auto entity, auto &drawableDef) {
+		if (drawableDef.mobModel()) {
+			DrawableComponent &drawable = registry.get_or_emplace<DrawableComponent>(entity);
+			drawable.setDrawable<MobModel>(drawableDef.mobModel());
+			registry.remove<DrawableDef>(entity);
+			return;
+		}
 		const InventoryCubeDef &cubeDef = drawableDef.getInventoryCubeDef();
 
 		DrawableComponent &drawable = registry.get_or_emplace<DrawableComponent>(entity);
@@ -51,6 +58,8 @@ void RenderingController::update(entt::registry &registry) {
 
 void RenderingController::draw(entt::registry &registry, RenderTarget &target, RenderStates states) {
 	registry.view<DrawableComponent, PositionComponent, RotationComponent>().each([&](auto, auto &drawable, auto &position, auto &rotation) {
+		if (auto *mob = dynamic_cast<MobModel *>(drawable.drawable()))
+			mob->updateMotion({position.x, position.y, position.z});
 		Transformable transformable;
 		transformable.setPosition((float)position.x, (float)position.y, (float)position.z);
 		transformable.getRotationTransform().getMatrix() = glm::toMat4(rotation.quat);

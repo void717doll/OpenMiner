@@ -63,8 +63,15 @@ BlockCursor::BlockCursor(ClientPlayer &player, ClientWorld &world, ClientCommand
 }
 
 void BlockCursor::onEvent(const SDL_Event &event, const Hotbar &hotbar) {
+	if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+		m_client.sendPlayerAttack();
 	if (hotbar.cursorPos() == -1) return;
 
+	if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT
+	 && m_selectedBlock.w == -1 && hotbar.currentItem().canBeActivated()) {
+		m_client.sendItemActivated({int(std::floor(m_player.x())), int(std::floor(m_player.y())), int(std::floor(m_player.z())), -1});
+		return;
+	}
 	if (event.type == SDL_MOUSEBUTTONDOWN && m_selectedBlock.w != -1) {
 		if (event.button.button == SDL_BUTTON_LEFT) {
 			m_animationStart = GameClock::getInstance().getTicks();
