@@ -1,29 +1,54 @@
 # retromcp port
 
-source: the user-supplied `~/retromcp` checkout, configured for beta 1.7.3. server sources under `minecraft_server/src/net/minecraft/src` supply gameplay behavior; client sources under `minecraft/src/net/minecraft/src` supply model geometry. the implementation remains c++17 and lua.
+source: the supplied `~/retromcp` checkout configured for beta 1.7.3. server java supplies simulation and client java supplies geometry. oldworld retains c++17, lua, bgfx, registries, and separate rendering/simulation threads.
 
 | source | implementation |
 | --- | --- |
-| `NoiseGeneratorPerlin`, `NoiseGeneratorOctaves`, `ChunkProviderGenerate.func_4058_a` | java-compatible random generator, bulk octave sampling, density blending, vertical gradients, and 4×4×8 interpolation in `RetroTerrain.hpp` |
-| `ItemFood`, `ItemSoup`, `ItemCookie`, `Item` | existing item definitions gain healing amounts, beta stack limits, and stew bowl returns |
-| `EntityLiving`, `EntityAnimal`, `EntityPig`, `EntityMob`, `EntityZombie` | pig health 10, zombie health 20, pursuit within 16 blocks, melee range 2, attack cooldown 20 ticks, zombie damage 5, wandering, gravity, collision, and drops |
-| `ModelRenderer`, `TexturedQuad`, `ModelPig`, `ModelQuadruped`, `ModelBiped`, `ModelZombie` | textured cuboids, mirrored limbs, raised zombie arms, and walking animation |
-| `jars/minecraft.jar`: `mob/pig.png`, `mob/zombie.png` | original textures in `mods/default/textures/mobs` |
+| `NoiseGeneratorPerlin`, `NoiseGeneratorOctaves`, `ChunkProviderGenerate` | java random, bulk octave noise, density, interpolation, surface replacement, sand, gravel, soil, sandstone, ice, and bedrock |
+| `NoiseGenerator2`, `NoiseGeneratorOctaves2`, `WorldChunkManager`, `BiomeGenBase` | temperature, humidity, climate adjustment, and all beta overworld biome classifications |
+| `MapGenBase`, `MapGenCaves`, `MapGenCavesHell`, `ChunkProviderHell` | eight-chunk cave replay, rooms, branching, water avoidance, low lava, grass restoration, and nether density/surface/caves |
+| `EntityLiving` and beta mob subclasses | complete registered roster, distinctive simulation, interactions, health, timers, and drops |
+| `ModelRenderer`, `TexturedQuad`, beta mob models | cuboids, source UVs, mirrored limbs, overlays, scaled slimes/giants, and projectile models |
+| supplied refi directory | built-in block, item, mob, sky, breaking, and heart artwork; [asset inventory and license](refi-assets.md) |
 
-## behavior and limits
+## terrain verification and limits
 
-- oldworld maps the source's vertical y coordinate to z and keeps its 16×16×32 chunks. density is sampled over the source's 128-block surface region; terrain continues as solid material below zero and air above 127.
-- density currently uses temperate temperature/humidity constants. oldworld retains its biome selection, material definitions, ore/decorations, and cave-carving code. this is not a block-for-block beta world generator.
-- the source noise initialization order and bulk sampler's vertical caching are retained. 1,350 octave samples from the supplied java implementation matched exactly across positive and negative seeds and coordinates; 3,825 density samples differed by at most 1.14e-13 with the same climate inputs.
-- mobs use direct pursuit and obstacle jumping through the shared collision solver. beta's full pathfinder, riding/saddles, sound, breeding, and additional mob types are not included. motion speed is adapted to oldworld's server ticks.
-- passive natural spawns require loaded grass above sea level; hostile spawns use nighttime. natural spawning is limited to the default dimension and 64 mobs per world. `/spawn pig|zombie` also respects the cap and loaded, empty space.
-- left click uses a server-side three-block ray and attack cooldown. fist damage is one health point. drops go into the attacking player's inventory. zombies take sunlight damage; death respawns the player at the origin's surface with 20 health.
-- foods follow the source's immediate consumption behavior, including consumption at full health. no hunger system is introduced. cookies stack to eight; other ported foods stack to one. oversized stew stacks from older saves retain their unconsumed portions; returning a bowl requires inventory space.
+source vertical y maps to oldworld z. the generator builds canonical 16×16×128 columns before slicing into the engine's 16×16×32 chunks. source initialization order, integer overflow, sine lookup, and noise caching are retained.
 
-## saves and network
+comparisons against java compiled from the supplied checkout passed:
 
-saved chunks are retained. unexplored terrain uses the new density generator and may meet older terrain at seams. old saves without player health default to full health on a fresh load.
+- 2,304 climate/biome samples matched exactly.
+- 294,912 overworld surface bytes matched exactly before caves.
+- 1,966,080 cave output bytes matched across four seeds, three coordinates, and five input patterns.
+- 524,288 nether surface bytes and 524,288 nether carved bytes matched, including a 64-bit seed.
+- the earlier 1,350 octave samples matched exactly; 3,825 density samples differed by at most 1.14e-13.
 
-player health is stored in an optional `HEAL` trailer after the existing save data. mob state uses a new saved entity component, and mob visuals use a new drawable type. oldworld builds predating these additions cannot read the new mob component.
+the parity claim covers base climate, density, surface, and cave generation. tree/flora/ore population, cross-chunk feature scheduling, portals, and nether fire/glowstone/mushroom/spring population still use oldworld behavior or remain absent. below zero terrain continues as solid material; above the source region it is air. existing saved chunks remain unchanged; newly explored terrain can meet older terrain at seams. parallel generation, superchunks, and a public terrain-formula api remain unfinished.
 
-protocol version 2 adds `PlayerHealth` and `PlayerAttack`; incompatible clients are rejected. player health is sent at connection, after food consumption, and after hostile attacks.
+## mobs and controls
+
+the engine registers `pig`, `zombie`, `cow`, `sheep`, `chicken`, `skeleton`, `creeper`, `spider`, `slime`, `ghast`, `pig_zombie`, `wolf`, `squid`, and mod-spawned `giant`. all spawns respect the 64-mob cap and loaded space. skeleton arrows and ghast fireballs are separate visible entities.
+
+left click attacks a visible target within three blocks. right click milks cows with an empty bucket, shears sheep, saddles pigs, and tames/heals/orders wolves. chickens lay eggs, spiders climb and leap, slimes hop and split, pig zombies retaliate together, squid swim, and creepers use a 30-tick fuse. wolves preserve their owner and sitting state. fireballs can be reflected by attacks. food heals immediately, including at full health; stew returns a bowl. old oversized stew stacks retain unconsumed portions.
+
+movement uses direct pursuit, obstacle jumping, and the shared swept collision solver. beta's full pathfinder, sound, equipment durability/armor, riding controls, wolf sheep hunting, and lightning-charged creepers remain absent. natural spawn scheduling uses oldworld's bounded periodic attempts rather than the complete beta spawning algorithm. explosion rays use explicit resistance for common materials and approximate the remainder from hardness. sheep colors are rendered, but wool drops currently use the single white wool item.
+
+model cuboids and UVs follow the supplied client source. limb motion derives from client displacement; separate head rotation, attack swings, wing timing, wolf shaking, slime squishing, ghast charge interpolation, and squid pitch are adapted or absent. refi lacks distinct charging-ghast artwork; that pose uses the normal atlas. these are not claims of identical animation.
+
+## saves and local messages
+
+player health uses the optional `HEAL` save trailer; older saves default to full health. original mob and drawable records retain their byte layouts. new `BetaMob` component 9 stores subtype, size, fuse, anger, egg/jump/attack timers, ownership, color, saddle, and motion state separately. older engines cannot read the new component.
+
+the game is local only. serialized messages connect rendering to the simulation through in-process queues; no socket transport, peer handshake version, or dedicated executable remains. health, attacks, interactions, and entity hitboxes use local messages. drawable type 3 carries scale/appearance while type 2 keeps its existing save layout. gameplay effects remain simulation-owned.
+
+## first-person wield
+
+the first-person hand and selected block/item use a separate 72-degree camera and depth-cleared pass between the scene effect and hud, following the rendering boundaries in `~/lunarchy/src/client/camera.cpp` and `wieldmesh.cpp`. empty slots show the refi player arm; blocks reuse the existing cube mesh and items gain thickness along their opaque pixel edges. attack/use swings, item-change dip, walking bob, and pause reset are handled locally. placement depends on the viewport aspect ratio rather than gui scale.
+
+## survival rules
+
+flight, noclip, sprint, creative inventory, starter gifts, free stack cloning and cheat commands are removed. player movement now follows beta `EntityLiving`, `Entity`, and `MovementInputFromOptions`, including fixed physics ticks, momentum, friction, gravity, swimming, ladders, stepping, and sneaking. server position checks use the same axis ordering. the [survival inventory](beta-survival.md) records equipment durability, mining rules, loot behavior, save compatibility, verification, and remaining differences.
+
+fall, drowning, lava/burn, cactus and suffocation damage retain beta hurt immunity. food heals immediately. death drops inventory with equipment wear preserved and respawns automatically. common block hardness, tool speeds, effective-block lists, harvest tiers and weapon damage follow the supplied beta source. loot falls to the ground and partial pickups retain the remainder. water/lava, mobs, falling blocks and dropped-item movement retain the [lunarchy world physics port](lunarchy-physics.md).
+
+water/lava now use queued propagation and level parameters; unsupported sand/gravel fall as saved entities. these systems follow lunarchy rather than the beta generator reference.

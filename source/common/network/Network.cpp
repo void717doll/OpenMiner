@@ -34,9 +34,7 @@ std::string Network::commandToString(Network::Command command) {
 		{Network::Command::ClientConnect,         "ClientConnect"},
 		{Network::Command::ClientDisconnect,      "ClientDisconnect"},
 		{Network::Command::ClientOk,              "ClientOk"},
-		{Network::Command::ClientRefused,         "ClientRefused"},
 
-		{Network::Command::ServerTick,            "ServerTick"},
 		{Network::Command::ServerClosed,          "ServerClosed"},
 
 		{Network::Command::ChunkData,             "ChunkData"},
@@ -53,6 +51,8 @@ std::string Network::commandToString(Network::Command command) {
 		{Network::Command::PlayerReady,           "PlayerReady"},
 		{Network::Command::PlayerHealth, "PlayerHealth"},
 		{Network::Command::PlayerAttack, "PlayerAttack"},
+		{Network::Command::PlayerInteract, "PlayerInteract"},
+		{Network::Command::EntityHitbox, "EntityHitbox"},
 		{Network::Command::PlayerChunkPosUpdate,  "PlayerChunkPosUpdate"},
 
 		{Network::Command::BlockUpdate,           "BlockUpdate"},
@@ -65,7 +65,6 @@ std::string Network::commandToString(Network::Command command) {
 
 		{Network::Command::RegistryData,          "RegistryData"},
 
-		{Network::Command::ChatMessage,           "ChatMessage"},
 
 		{Network::Command::EntitySpawn,           "EntitySpawn"},
 		{Network::Command::EntityDespawn,         "EntityDespawn"},
@@ -85,7 +84,7 @@ sf::Packet &operator<<(sf::Packet &packet, Network::Command command) {
 }
 
 sf::Packet &operator>>(sf::Packet &packet, Network::Command &command) {
-	u16 tmp;
+	u16 tmp = 0;
 	packet >> tmp;
 	command = static_cast<Network::Command>(tmp);
 	return packet;

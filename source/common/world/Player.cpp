@@ -28,7 +28,7 @@
 #include "common/world/Player.hpp"
 
 Player::Player() {
-	m_hitbox = FloatBox{-0.3125, -0.3125, 0, 0.625, 0.625, 1.75};
+	m_hitbox = FloatBox{-0.3f, -0.3f, 0, 0.6f, 0.6f, 1.8f};
 }
 
 // Note: This function returns an angle4

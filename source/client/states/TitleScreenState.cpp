@@ -27,26 +27,21 @@
 #include "common/core/ApplicationStateStack.hpp"
 #include "common/event/Events.hpp"
 
-#include "server/core/ServerApplication.hpp" // For ServerOnlineEvent
+#include "server/core/ServerApplication.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/core/GameConfig.hpp"
 #include "client/states/GameState.hpp"
-#include "client/states/ServerConnectState.hpp"
 #include "client/states/ServerLoadingState.hpp"
 #include "client/states/SettingsMenuState.hpp"
 #include "client/states/TitleScreenState.hpp"
 #include "client/states/WorldSelectionState.hpp"
 
-TitleScreenState::TitleScreenState(u16 port) : m_port(port) {
+TitleScreenState::TitleScreenState() {
 	m_menuWidget.setScale(Config::guiScale, Config::guiScale);
 
-	m_menuWidget.addButton("Singleplayer", [this] (TextButton &) {
+	m_menuWidget.addButton("play", [this] (TextButton &) {
 		m_stateStack->push<WorldSelectionState>(this);
-	});
-
-	m_menuWidget.addButton("Multiplayer", [this] (TextButton &) {
-		m_stateStack->push<ServerConnectState>(this);
 	});
 
 	m_menuWidget.addButton("Options...", [this] (TextButton &) {
@@ -110,13 +105,15 @@ void TitleScreenState::onEvent(const SDL_Event &event) {
 }
 
 void TitleScreenState::startSingleplayer(bool showLoadingState, const std::string &worldName, s32 seed) {
+	if (worldName.empty()) {
+		m_stateStack->push<WorldSelectionState>(this);
+		return;
+	}
 	GameConfig::worldName = worldName;
 
 	auto &game = m_stateStack->push<GameState>();
-	game.setSingleplayer(true);
 
-	auto &serverLoadingState = m_stateStack->push<ServerLoadingState>(game, showLoadingState, "localhost", sf::Socket::AnyPort, this);
-	serverLoadingState.setUsername(Config::defaultUsername);
+	m_stateStack->push<ServerLoadingState>(game, showLoadingState, this);
 
 	if (m_thread.joinable())
 		m_thread.join();
@@ -129,17 +126,9 @@ void TitleScreenState::startSingleplayer(bool showLoadingState, const std::strin
 			app.setWorldName(worldName);
 
 		app.setLogLevel(logLevel);
-		app.setSingleplayer(true);
-		app.setPort(sf::Socket::AnyPort);
 		app.setSeed(seed);
 		app.run();
 	});
-}
-
-void TitleScreenState::startMultiplayer(const std::string &host) {
-	auto &game = m_stateStack->push<GameState>();
-	auto &serverLoadingState = m_stateStack->push<ServerLoadingState>(game, false, host, m_port, this);
-	serverLoadingState.setUsername(Config::defaultUsername);
 }
 
 void TitleScreenState::onGuiScaleChanged(const GuiScaleChangedEvent &event) {

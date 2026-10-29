@@ -29,6 +29,8 @@
 #include "common/inventory/ItemStack.hpp"
 #include "common/scene/component/NetworkComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
+#include "common/scene/component/PhysicalComponent.hpp"
+#include "common/scene/component/FallingBlockComponent.hpp"
 #include "server/core/PlayerList.hpp"
 #include "server/network/ServerCommandHandler.hpp"
 #include "server/scene/EntityWrapper.hpp"
@@ -36,7 +38,11 @@
 
 void CollisionController::update(entt::registry &registry) {
 	registry.view<PositionComponent, DoubleBox, std::string>().each([&](auto entity, auto &position, auto &box, auto &id) {
+		if (registry.all_of<FallingBlockComponent>(entity)) return;
+		const auto *body = registry.try_get<PhysicalComponent>(entity);
+		if (body && body->pickupDelay) return;
 		for (auto &it : m_players) {
+			if (!it.second.isOnline() || !it.second.isReady()) continue;
 			if (it.second.dimension() == position.dimension) {
 				DoubleBox hitbox = box + Vector3d{position.x, position.y, position.z};
 				DoubleBox playerHitbox = it.second.hitbox() + Vector3d{it.second.x(), it.second.y(), it.second.z()};

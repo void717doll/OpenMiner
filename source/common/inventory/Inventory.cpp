@@ -35,49 +35,34 @@ void Inventory::setStack(u16 x, u16 y, const std::string &stringID, u16 amount) 
 	m_hasChanged = true;
 }
 
+void Inventory::setItemStack(u16 x, u16 y, const ItemStack &stack) {
+	m_items.at(x + y * m_width) = stack;
+	m_hasChanged = true;
+}
+
 ItemStack Inventory::addStack(const std::string &stringID, u16 amount, u16 offset, u16 size, bool mergeOnly, bool retryAfterMerge) {
-	if (stringID.empty() || stringID == BLOCK_AIR || amount == 0)
-		return ItemStack::Empty;
+	return addItemStack(ItemStack{stringID, amount}, offset, size, mergeOnly, retryAfterMerge);
+}
 
-	bool hasChanged = false;
-	const Item &incoming = Registry::getInstance().getItemFromStringID(stringID);
-
-	ItemStack ret{stringID, amount};
-	for (std::size_t i = offset ; ret.amount() && i < (size ? offset + size : m_items.size()) ; ++i) {
-		const Item &item = m_items[i].item();
-		if (item.id() == 0 && !mergeOnly) {
-			if (ret.amount() > incoming.maxStackSize()) {
-				m_items[i] = ItemStack(stringID, incoming.maxStackSize());
-				ret.setAmount(ret.amount() - incoming.maxStackSize());
-			}
-			else {
-				m_items[i] = ItemStack(stringID, ret.amount());
-				ret.setAmount(0);
-			}
-
-			hasChanged = true;
-		}
-		else if (item.stringID() == stringID) {
-			u16 sum = m_items[i].amount() + ret.amount();
-			if (sum > item.maxStackSize()) {
-				m_items[i] = ItemStack(stringID, item.maxStackSize());
-				ret.setAmount(sum - item.maxStackSize());
-			}
-			else {
-				m_items[i] = ItemStack(stringID, sum);
-				ret.setAmount(0);
-			}
-
-			hasChanged = true;
-		}
+ItemStack Inventory::addItemStack(const ItemStack &stack, u16 offset, u16 size, bool mergeOnly, bool retryAfterMerge) {
+	if (stack.item().id() == 0 || stack.amount() == 0) return ItemStack::Empty;
+	ItemStack remaining = stack;
+	std::size_t end = size ? std::min(m_items.size(), std::size_t(offset) + size) : m_items.size();
+	for (std::size_t i = offset; remaining.amount() && i < end; ++i) {
+		ItemStack &target = m_items[i];
+		bool empty = target.amount() == 0 || target.item().id() == 0;
+		if ((empty && mergeOnly) || (!empty && !target.sameItem(stack))) continue;
+		unsigned maximum = stack.item().maxStackSize();
+		unsigned count = empty ? 0 : target.amount();
+		if (count >= maximum) continue;
+		u16 transferred = u16(std::min(unsigned(remaining.amount()), maximum - count));
+		target = ItemStack{stack.item().stringID(), u16(count + transferred), stack.damage()};
+		remaining.setAmount(remaining.amount() - transferred);
+		m_hasChanged = true;
 	}
-
-	if (!hasChanged && mergeOnly && retryAfterMerge && ret.amount())
-		return addStack(ret.item().stringID(), ret.amount(), offset, size);
-	else if (hasChanged)
-		m_hasChanged = hasChanged;
-
-	return ret;
+	if (mergeOnly && retryAfterMerge && remaining.amount())
+		return addItemStack(remaining, offset, size);
+	return remaining;
 }
 
 // NOTE: This fonction is only used by Lua since default parameters don't work properly
@@ -92,13 +77,13 @@ void Inventory::clearStack(u16 x, u16 y) {
 void Inventory::serialize(sf::Packet &packet) const {
 	packet << m_width << m_height << m_name << u8(m_inBlock)
 		<< s32(m_blockPos.x) << s32(m_blockPos.y) << s32(m_blockPos.z)
-		<< m_isUnlimited;
+		<< false;
 
 	packet << u16(m_items.size());
 
 	int i = 0;
 	for (auto &it : m_items) {
-		packet << it.item().stringID() << it.amount()
+		packet << it
 			<< u8(i % m_width) << u8(i / m_width);
 		++i;
 	}
@@ -106,8 +91,9 @@ void Inventory::serialize(sf::Packet &packet) const {
 
 void Inventory::deserialize(sf::Packet &packet) {
 	u8 inBlock;
+	bool legacyUnlimited;
 	s32 bx, by, bz;
-	packet >> m_width >> m_height >> m_name >> inBlock >> bx >> by >> bz >> m_isUnlimited;
+	packet >> m_width >> m_height >> m_name >> inBlock >> bx >> by >> bz >> legacyUnlimited;
 
 	m_inBlock = inBlock;
 	m_blockPos = Vector3i{bx, by, bz};
@@ -118,17 +104,13 @@ void Inventory::deserialize(sf::Packet &packet) {
 	u16 itemListSize, i = 0;
 	packet >> itemListSize;
 
-	std::string name;
-	u16 amount;
-	u8 x, y;
-	while (i < itemListSize) {
-		packet >> name >> amount >> x >> y;
-
-		if (Registry::getInstance().hasItem(name))
-			setStack(x, y, name, amount);
-		else
-			logError() << "Inventory::deserialize: Failed to find item in registry:" << name;
-
+	while (i < itemListSize && packet) {
+		ItemStack stack;
+		u8 x = 0, y = 0;
+		packet >> stack >> x >> y;
+		if (!packet) break;
+		if (x < m_width && y < m_height && Registry::getInstance().hasItem(stack.stringID()))
+			setItemStack(x, y, stack);
 		++i;
 	}
 }

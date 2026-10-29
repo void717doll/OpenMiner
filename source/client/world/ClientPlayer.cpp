@@ -24,6 +24,7 @@
  *
  * =====================================================================================
  */
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/core/GameClock.hpp"
@@ -38,6 +39,7 @@
 #include "client/world/ClientWorld.hpp"
 
 #include "common/world/WorldCollision.hpp"
+#include "common/world/BetaPlayerMovement.hpp"
 
 ClientPlayer *ClientPlayer::s_instance = nullptr;
 
@@ -85,89 +87,69 @@ void ClientPlayer::updateCamera() {
 	m_camera.setUpVector(Vector3f{sh * sr - ch * sv * cr, -ch * sr - sh * sv * cr, cv * cr});
 }
 
-void ClientPlayer::move(float direction) {
-	direction += m_viewAngleH;
-
-	constexpr float playerSpeed = 0.0275f;
-
-	m_velocity.x = playerSpeed * cosf(direction * math::DEG_TO_RADf);
-	m_velocity.y = playerSpeed * sinf(direction * math::DEG_TO_RADf);
+void ClientPlayer::clearInputs() {
+	m_forwardInput = 0;
+	m_strafeInput = 0;
+	m_jumpPressed = false;
+	m_isSneaking = false;
 }
 
 void ClientPlayer::processInputs() {
-	if(GamePad::isKeyPressed(GameKey::Jump) && !m_isJumping) {
-		m_isJumping = true;
-		m_velocity.z = m_jumpSpeed;
+	m_forwardInput = float(GamePad::isKeyPressed(GameKey::Forward)) - float(GamePad::isKeyPressed(GameKey::Back));
+	m_strafeInput = float(GamePad::isKeyPressed(GameKey::Left)) - float(GamePad::isKeyPressed(GameKey::Right));
+	m_jumpPressed = GamePad::isKeyPressed(GameKey::Jump);
+	m_isSneaking = GamePad::isKeyPressed(GameKey::Sneak);
+}
+
+void ClientPlayer::simulateMovement(const ClientWorld &world) {
+	const Chunk *chunk = world.getChunkAtBlockPos(int(std::floor(m_physicsPosition.x)),
+		int(std::floor(m_physicsPosition.y)), int(std::floor(m_physicsPosition.z)));
+	if (!chunk || !chunk->isInitialized()) {
+		m_velocity.reset(0, 0, 0);
+		m_onGround = false;
+		return;
 	}
-
-	if(GamePad::isKeyPressed(GameKey::Fly)) {
-		m_velocity.z = 0.1f;
-	}
-
-	if(GamePad::isKeyPressed(GameKey::Sneak)) {
-		m_velocity.z = -0.1f;
-	}
-
-	if(GamePad::isKeyPressed(GameKey::Forward))    move(0.0f);
-	else if(GamePad::isKeyPressed(GameKey::Back))  move(180.0f);
-
-	if(GamePad::isKeyPressed(GameKey::Left))       move(90.0f);
-	else if(GamePad::isKeyPressed(GameKey::Right)) move(-90.0f);
-
-	if (GamePad::isKeyPressed(GameKey::Left)  && GamePad::isKeyPressed(GameKey::Forward)) move(45.0f);
-	if (GamePad::isKeyPressed(GameKey::Right) && GamePad::isKeyPressed(GameKey::Forward)) move(-45.0f);
-	if (GamePad::isKeyPressed(GameKey::Left)  && GamePad::isKeyPressed(GameKey::Back))    move(135.0f);
-	if (GamePad::isKeyPressed(GameKey::Right) && GamePad::isKeyPressed(GameKey::Back))    move(-135.0f);
-
-	if (GamePad::isKeyPressed(GameKey::Sprint)) {
-		m_velocity.x *= 1.5f;
-		m_velocity.y *= 1.5f;
+	DoubleBox body = m_hitbox;
+	body.move(m_physicsPosition);
+	auto environment = retro::movementEnvironment(world, body);
+	bool wasGrounded = m_onGround;
+	retro::acceleratePlayer(m_velocity, m_forwardInput, m_strafeInput, m_viewAngleH * math::DEG_TO_RAD,
+		m_jumpPressed, m_isSneaking, wasGrounded, environment);
+	Vector3d requested = m_velocity;
+	Vector3d movement = retro::movePlayer(world, body, requested, wasGrounded, m_isSneaking);
+	m_physicsPosition += movement;
+	m_onGround = requested.z < 0 && requested.z != movement.z;
+	bool horizontalCollision = requested.x != movement.x || requested.y != movement.y;
+	if (requested.x != movement.x) m_velocity.x = 0;
+	if (requested.y != movement.y) m_velocity.y = 0;
+	if (requested.z != movement.z) m_velocity.z = 0;
+	retro::dragPlayer(m_velocity, wasGrounded, horizontalCollision, environment);
+	if (horizontalCollision && (environment.water || environment.lava)) {
+		DoubleBox exit = body;
+		exit.move(movement.x + m_velocity.x, movement.y + m_velocity.y, m_velocity.z + 0.6);
+		bool loaded;
+		auto obstacles = collision::collectObstacles(world, exit, {0, 0, 0}, 0, loaded, false);
+		bool clear = loaded;
+		for (const auto &obstacle : obstacles) clear &= !exit.intersects(obstacle.box);
+		auto liquid = retro::movementEnvironment(world, exit);
+		if (clear && !liquid.water && !liquid.lava) m_velocity.z = double(0.3f);
 	}
 }
 
 void ClientPlayer::updatePosition(const ClientWorld &world) {
-	ClientChunk *chunk = (ClientChunk *)world.getChunkAtBlockPos(int(std::floor(m_x)), int(std::floor(m_y)), int(std::floor(m_z)));
-	if (chunk && chunk->isInitialized()) {
-		if (!Config::isFlyModeEnabled) {
-			m_velocity.z -= chunk->dimension().gravity() * 0.001f;
-
-			m_isJumping = true;
-
-			// Limit max vertical speed to jump speed
-			if (m_velocity.z < -m_jumpSpeed)
-				m_velocity.z = -m_jumpSpeed;
-		}
+	u32 now = GameClock::getInstance().getTicks();
+	m_physicsRemainder += std::min(now - m_lastPhysicsTime, u32(500));
+	m_lastPhysicsTime = now;
+	while (m_physicsRemainder >= 50) {
+		m_previousPhysicsPosition = m_physicsPosition;
+		simulateMovement(world);
+		m_physicsRemainder -= 50;
 	}
-	// Block player until the chunk loads, unless "no clip" mode is enabled
-	else if (!Config::isNoClipEnabled) {
-		m_velocity.reset(0, 0, 0);
-	}
-
-	// Increase velocity in fly mode
-	if (Config::isFlyModeEnabled) {
-		m_velocity.x *= 2.f;
-		m_velocity.y *= 2.f;
-	}
-
-	if (!Config::isNoClipEnabled)
-		checkCollisions(world);
-
-	// Reduce velocity while in the air, unless "fly mode" is enabled
-	if (!Config::isFlyModeEnabled && m_velocity.z != 0.f) {
-		m_velocity.x *= 0.65f;
-		m_velocity.y *= 0.65f;
-	}
-
-	if (Config::isViewBobbingEnabled)
-		updateCamera();
-
-	setPosition(m_x + m_velocity.x, m_y + m_velocity.y, m_z + m_velocity.z);
-
-	m_velocity.x = 0.f;
-	m_velocity.y = 0.f;
-
-	if (Config::isFlyModeEnabled)
-		m_velocity.z = 0.f;
+	double fraction = double(m_physicsRemainder) / 50;
+	Vector3d renderPosition = m_previousPhysicsPosition + (m_physicsPosition - m_previousPhysicsPosition) * fraction;
+	Player::setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
+	m_camera.setDPosition(m_x,m_y,m_z + m_cameraLocalPos.z);
+	updateCamera();
 
 	// Checking to block at camera position to enable specific effects
 	const BlockState *blockState = world.getBlockState((int)m_camera.getDPosition().x, (int)m_camera.getDPosition().y, (int)m_camera.getDPosition().z);
@@ -188,23 +170,18 @@ void ClientPlayer::updatePosition(const ClientWorld &world) {
 }
 
 void ClientPlayer::setPosition(double x, double y, double z) {
-	Player::setPosition(x, y, z);
-
-	Vector3f camPos = m_cameraLocalPos;
-	m_camera.setDPosition(m_x + camPos.x, m_y + camPos.y, m_z + camPos.z);
-}
-
-void ClientPlayer::checkCollisions(const ClientWorld &world) {
-	DoubleBox box = m_hitbox;
-	box.move(m_x, m_y, m_z);
-	Vector3d movement = collision::move(world, box, Vector3d(m_velocity));
-	if (m_velocity.z < 0 && movement.z > m_velocity.z)
-		m_isJumping = false;
-	m_velocity = Vector3f(movement);
+	Player::setPosition(x,y,z);
+	m_physicsPosition = {x,y,z};
+	m_velocity.reset(0,0,0);
+	m_lastPhysicsTime = GameClock::getInstance().getTicks();
+	m_onGround = false;
+	m_physicsRemainder = 0;
+	m_previousPhysicsPosition = m_physicsPosition;
+	m_camera.setDPosition(x,y,z + m_cameraLocalPos.z);
 }
 
 void ClientPlayer::applyViewBobbing(float &viewAngleH, float &viewAngleV, float &viewAngleRoll) {
-	if (!m_velocity.isZero() && m_velocity.z == 0 && !Config::isFlyModeEnabled) {
+	if (std::hypot(m_velocity.x, m_velocity.y) > 0.001 && m_onGround) {
 		if (!m_isMoving) {
 			m_movementStartTime = GameClock::getInstance().getTicks();
 			m_isMoving = true;

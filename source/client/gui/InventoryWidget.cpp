@@ -96,8 +96,8 @@ bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractI
 	if (dest->doItemMatchFilter(itemStack->stack().item())) {
 		ItemStack stackRet = dest->receiveItemStack(itemStack, this);
 		if (stackRet.amount() != itemStack->stack().amount()) {
-			if (dest != this && stackRet.amount() == 0)
-				m_inventory->clearStack(itemStack->x(), itemStack->y());
+			if (dest != this)
+				m_inventory->setItemStack(itemStack->x(), itemStack->y(), stackRet.amount() ? stackRet : ItemStack::Empty);
 
 			update();
 			sendUpdatePacket();
@@ -109,11 +109,11 @@ bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractI
 }
 
 ItemStack InventoryWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) {
-	const ItemStack &stack = itemStack->stack();
+	ItemStack stack = itemStack->stack();
 	if (src == this)
 		m_inventory->clearStack(itemStack->x(), itemStack->y());
 
-	ItemStack stackRet = m_inventory->addStack(stack.item().stringID(), stack.amount(), m_offset, m_size);
+	ItemStack stackRet = m_inventory->addItemStack(stack, m_offset, m_size);
 
 	if (stackRet.amount() != stack.amount())
 		sendUpdatePacket();

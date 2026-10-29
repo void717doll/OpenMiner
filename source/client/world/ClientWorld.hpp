@@ -60,6 +60,7 @@ class ClientWorld : public World, public Drawable {
 		void receiveChunkData(Network::Packet &packet);
 		void removeChunk(const Vector3i &chunkPos);
 
+		void appendCollisionBoxes(const DoubleBox &moving, const DoubleBox &broadphase, std::vector<DoubleBox> &boxes) const override;
 		Chunk *getChunk(int cx, int cy, int cz) const override;
 
 		void buildChunk(Chunk &chunk) { m_chunkMeshBuilder.addMeshBuildingJob(chunk, m_textureAtlas); }

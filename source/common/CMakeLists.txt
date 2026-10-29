@@ -30,7 +30,6 @@ set(SOURCE_FILES
 	inventory/ItemStack.cpp
 	inventory/SmeltingRecipe.cpp
 
-	network/CompressedPacket.cpp
 	network/Network.cpp
 	network/NetworkUtils.cpp
 
@@ -102,8 +101,8 @@ set(HEADER_FILES
 
 	math/Math.hpp
 
-	network/CompressedPacket.hpp
 	network/Network.hpp
+	network/LocalSession.hpp
 	network/NetworkUtils.hpp
 
 	resource/IResourceLoader.hpp
@@ -117,6 +116,8 @@ set(HEADER_FILES
 	scene/component/DrawableDef.hpp
 	scene/component/InventoryCubeDef.hpp
 	scene/component/MobComponent.hpp
+	scene/component/PhysicalComponent.hpp
+	scene/component/FallingBlockComponent.hpp
 	scene/component/NetworkComponent.hpp
 	scene/component/PositionComponent.hpp
 	scene/component/RotationComponent.hpp
@@ -140,6 +141,10 @@ set(HEADER_FILES
 	world/RetroClimate.hpp
 	world/RetroCaves.hpp
 	world/RetroNether.hpp
+	world/RetroMobSpawn.hpp
+	world/BetaMining.hpp
+	world/BetaPlayerMovement.hpp
+	world/BetaToolRules.hpp
 	world/Key.hpp
 	world/PlacementEntry.hpp
 	world/Player.hpp
@@ -147,9 +152,17 @@ set(HEADER_FILES
 	world/Tree.hpp
 	world/World.hpp
 	world/WorldCollision.hpp
+	world/LunarchyCollision.hpp
+	world/SurvivalMovement.hpp
+	world/LiquidState.hpp
 )
 
 om_add_library(${PROJECT_NAME} "${SOURCE_FILES}" "${HEADER_FILES}")
+
+# retain the save/message serializer without compiling socket transports.
+target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/SFML/src/SFML/Network/Packet.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/SFML/src)
+
 
 #------------------------------------------------------------------------------
 # Dependencies
@@ -159,7 +172,6 @@ if (UNIX)
 endif ()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	sfml-network
 	sfml-system
 	sol2
 	SDL2_image

@@ -35,14 +35,11 @@
 #include "common/core/IntTypes.hpp"
 
 namespace ServerConfig {
-	// Server
-	extern u8 maxPlayers;
 	extern u16 maxItemStackSize;
 
-	// World
 	extern u8 renderDistance;
 
-	// Mod-defined options
+	// mod-defined options
 	extern std::unordered_map<std::string, sol::object> options;
 
 	void loadConfigFromFile(const char *file);

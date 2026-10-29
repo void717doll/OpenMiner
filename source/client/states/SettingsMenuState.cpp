@@ -156,13 +156,8 @@ void SettingsMenuState::doneButtonAction() {
 void SettingsMenuState::addMainButtons() {
 	m_menuWidget.reset(1, 8);
 
-	m_menuWidget.addButton("Gameplay...", [this] (TextButton &) {
-		m_state = MenuState::Gameplay;
-		addGameplayButtons();
-	});
-
 	m_menuWidget.addButton("Interface...", [this] (TextButton &) {
-		m_state = MenuState::Gameplay;
+		m_state = MenuState::Interface;
 		addInterfaceButtons();
 	});
 
@@ -180,20 +175,6 @@ void SettingsMenuState::addMainButtons() {
 		m_state = MenuState::Debug;
 		addDebugButtons();
 	});
-
-	updateWidgetPosition();
-}
-
-void SettingsMenuState::addGameplayButtons() {
-	m_menuWidget.reset(1, 8);
-
-	addToggleButton("Fly Mode", Config::isFlyModeEnabled, false);
-	addToggleButton("No Clip", Config::isNoClipEnabled, false);
-
-	m_menuWidget.addSlider("Max Block Reach: " + std::to_string(Config::maxBlockReach), [] (SliderWidget &slider, u32) {
-		Config::maxBlockReach = (u16)slider.getCurrentValue();
-		slider.setText("Max Block Reach: " + std::to_string(Config::maxBlockReach));
-	}, 1, 15, Config::maxBlockReach);
 
 	updateWidgetPosition();
 }

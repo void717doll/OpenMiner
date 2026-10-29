@@ -31,12 +31,10 @@
 #include "common/event/Events.hpp"
 
 #include "client/core/Config.hpp"
-#include "client/core/GameConfig.hpp"
 #include "client/core/Mouse.hpp"
 #include "client/network/Client.hpp"
 #include "client/states/PauseMenuState.hpp"
 #include "client/states/SettingsMenuState.hpp"
-#include "client/states/TitleScreenState.hpp"
 #include "client/states/WorldSavingState.hpp"
 
 PauseMenuState::PauseMenuState(Client &client, DrawableState *parent)
@@ -60,26 +58,11 @@ PauseMenuState::PauseMenuState(Client &client, DrawableState *parent)
 	});
 
 	m_menuWidget.addButton("Title Screen", [this] (TextButton &) {
-		if (!m_client.isSingleplayer() || GameConfig::worldName.empty()) {
-			m_client.disconnect();
-
-			GameConfig::isGameRunning = false;
-
-			m_stateStack->clear();
-			m_stateStack->push<TitleScreenState>();
-		}
-		else
-			m_stateStack->push<WorldSavingState>(m_client, false);
+		m_stateStack->push<WorldSavingState>(m_client, false);
 	});
 
 	m_menuWidget.addButton("Exit", [this] (TextButton &) {
-		if (!m_client.isSingleplayer() || GameConfig::worldName.empty()) {
-			m_client.disconnect();
-
-			m_stateStack->clear();
-		}
-		else
-			m_stateStack->push<WorldSavingState>(m_client, true);
+		m_stateStack->push<WorldSavingState>(m_client, true);
 	});
 
 	updateWidgetPosition();

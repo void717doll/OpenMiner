@@ -46,6 +46,12 @@
 #include "client/world/ClientPlayer.hpp"
 #include "client/world/ClientWorld.hpp"
 
+void ClientCommandHandler::sendPlayerInteract() {
+	Network::Packet packet;
+	packet << Network::Command::PlayerInteract;
+	m_client.send(packet);
+}
+
 void ClientCommandHandler::sendPlayerAttack() {
 	Network::Packet packet;
 	packet << Network::Command::PlayerAttack;
@@ -60,11 +66,10 @@ void ClientCommandHandler::sendPlayerInvUpdate() {
 }
 
 void ClientCommandHandler::sendPlayerPosUpdate() {
+	const Vector3d &position = m_player.physicsPosition();
 	Network::Packet packet;
 	packet << Network::Command::PlayerPosUpdate;
-	packet << m_player.x();
-	packet << m_player.y();
-	packet << m_player.z();
+	packet << position.x << position.y << position.z;
 	m_client.send(packet);
 }
 
@@ -140,13 +145,6 @@ void ClientCommandHandler::sendItemActivated(const glm::ivec4 &selectedBlock) {
 	m_client.send(packet);
 }
 
-void ClientCommandHandler::sendChatMessage(const std::string &message) {
-	Network::Packet packet;
-	packet << Network::Command::ChatMessage;
-	packet << message;
-	m_client.send(packet);
-}
-
 void ClientCommandHandler::sendKeyPressed(u16 keyID) {
 	Network::Packet packet;
 	packet << Network::Command::KeyPressed << keyID
@@ -172,25 +170,6 @@ static void addComponentCommandCallback(Network::Command command, Client &client
 }
 
 void ClientCommandHandler::setupCallbacks() {
-	m_client.setCommandCallback(Network::Command::ClientDisconnect, [this](Network::Packet &packet) {
-		u16 clientID;
-		packet >> clientID;
-
-		auto it = m_playerBoxes.find(clientID);
-		if (it != m_playerBoxes.end()) {
-			m_client.addPlayer(m_playerBoxes.at(clientID));
-			m_playerBoxes.erase(it);
-		}
-	});
-
-	m_client.setCommandCallback(Network::Command::ServerTick, [this](Network::Packet &packet) {
-		if (!m_isSingleplayer) { // FIXME
-			sf::Uint64 ticks;
-			packet >> ticks;
-			GameTime::setTicks(ticks);
-		}
-	});
-
 	m_client.setCommandCallback(Network::Command::ServerClosed, [this](Network::Packet &packet) {
 		std::string message;
 		packet >> message;
@@ -198,14 +177,10 @@ void ClientCommandHandler::setupCallbacks() {
 		GameConfig::isGameRunning = false;
 
 		ApplicationStateStack::getInstance().clear();
-		ApplicationStateStack::getInstance().push<ConnectionErrorState>(message, m_client.serverAddress().toString(), m_client.serverPort(), nullptr);
+		ApplicationStateStack::getInstance().push<ConnectionErrorState>(message, nullptr);
 	});
 
-	m_client.setCommandCallback(Network::Command::RegistryData, [this](Network::Packet &packet) {
-		// FIXME: This is a quick fix for concurrency between client and server in singleplayer
-		if (!m_isSingleplayer)
-			Registry::getInstance().deserialize(packet);
-
+	m_client.setCommandCallback(Network::Command::RegistryData, [this](Network::Packet &) {
 		m_isRegistryInitialized = true;
 	});
 
@@ -246,8 +221,7 @@ void ClientCommandHandler::setupCallbacks() {
 				m_player.setHeldItemSlot(heldItemSlot);
 			}
 		}
-		else
-			packet >> m_playerBoxes.at(clientId).inventory();
+
 	});
 
 	m_client.setCommandCallback(Network::Command::PlayerPosUpdate, [this](Network::Packet &packet) {
@@ -258,27 +232,8 @@ void ClientCommandHandler::setupCallbacks() {
 		packet >> x >> y >> z;
 		packet >> isTeleportation;
 
-		if (clientId != m_client.id()) {
-			auto it = m_playerBoxes.find(clientId);
-			if (it != m_playerBoxes.end())
-				it->second.setPosition(x, y, z);
-		}
-		else if (isTeleportation) {
+		if (clientId == m_client.id() && isTeleportation)
 			m_player.setPosition(x, y, z);
-		}
-	});
-
-	m_client.setCommandCallback(Network::Command::PlayerRotUpdate, [this](Network::Packet &packet) {
-		float yaw, pitch;
-		u16 clientId;
-		packet >> clientId;
-		packet >> yaw >> pitch;
-
-		if (clientId != m_client.id()) {
-			auto it = m_playerBoxes.find(clientId);
-			if (it != m_playerBoxes.end())
-				it->second.Player::setRotation(yaw, pitch);
-		}
 	});
 
 	m_client.setCommandCallback(Network::Command::PlayerSpawn, [this](Network::Packet &packet) {
@@ -290,17 +245,7 @@ void ClientCommandHandler::setupCallbacks() {
 		packet >> clientId >> pos.x >> pos.y >> pos.z >> dimension
 			>> username >> cameraYaw >> cameraPitch;
 
-		if (clientId != m_client.id()) {
-			m_playerBoxes.emplace(clientId, PlayerBox{m_player.camera()});
-			Player &player = m_playerBoxes.at(clientId);
-			player.setPosition(pos.x, pos.y, pos.z);
-			player.setRotation(cameraYaw, cameraPitch);
-			player.setDimension(dimension);
-			player.setClientID(clientId);
-			player.setName(username);
-			m_client.addPlayer(player);
-		}
-		else {
+		if (clientId == m_client.id()) {
 			m_player.setPosition(pos.x, pos.y, pos.z);
 			m_player.setRotation(cameraYaw, cameraPitch);
 			m_player.setDimension(dimension);
@@ -384,6 +329,14 @@ void ClientCommandHandler::setupCallbacks() {
 		}
 		else
 			logError() << "EntityDespawn: Entity ID" << std::underlying_type_t<entt::entity>(entityID) << "is invalid";
+	});
+
+	m_client.setCommandCallback(Network::Command::EntityHitbox, [this](Network::Packet &packet) {
+		entt::entity id;
+		packet >> id;
+		auto it = m_entityMap.find(id);
+		if (it != m_entityMap.end())
+			packet >> m_world.scene().registry().get_or_emplace<DoubleBox>(it->second);
 	});
 
 	addComponentCommandCallback<PositionComponent>(Network::Command::EntityPosition, m_client, m_entityMap, m_world);

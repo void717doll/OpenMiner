@@ -1289,3 +1289,17 @@ mod:crafting_recipe {
 	},
 	keys = {["#"] = "default:wheat"}
 }
+
+for _, fuel in ipairs({"coal", "charcoal"}) do
+	mod:crafting_recipe {
+		result = {id = "default:torch", amount = 4},
+		pattern = {"#", "|"},
+		keys = {["#"] = "default:" .. fuel, ["|"] = "default:stick"},
+	}
+end
+
+mod:crafting_recipe {
+	result = {id = "default:shears", amount = 1},
+	pattern = {" #", "# "},
+	keys = {["#"] = "default:iron_ingot"},
+}

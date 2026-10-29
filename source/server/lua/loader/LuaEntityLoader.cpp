@@ -58,6 +58,9 @@ void LuaEntityLoader::loadEntity(const sol::table &table) const {
 			component.moveSpeed = mob.value()["move_speed"].get_or(0.7f);
 			component.attackStrength = mob.value()["attack_strength"].get_or<u16>(0);
 			component.dropItem = mob.value()["drop_item"].get_or<std::string>("");
+			auto &traits = registry.emplace<BetaMobComponent>(entity);
+			traits.kind = betaMobKind(mob.value()["kind"].get_or(m_stringID));
+			traits.size = traits.kind == BetaMobKind::Slime ? 2 : 1;
 		}
 	}
 }
@@ -116,8 +119,9 @@ void LuaEntityLoader::tryLoadVisual(const sol::table &table, entt::registry &reg
 		std::string type = visual.value()["type"];
 		if (type == "retro_mob") {
 			std::string model = visual.value()["model"].get<std::string>();
-			if (model != "pig" && model != "zombie") throw std::runtime_error("unknown retro mob model");
-			registry.emplace<DrawableDef>(entity).setMobModel(model == "pig" ? 1 : 2);
+			BetaMobKind kind = betaMobKind(model);
+			if (kind == BetaMobKind::Unknown) throw std::runtime_error("unknown retro mob model");
+			registry.emplace<DrawableDef>(entity).setMobModel(u8(kind), kind == BetaMobKind::Giant ? 6.f : 1.f);
 		}
 		else if (type == "inventorycube") {
 			auto &drawable = registry.emplace<DrawableDef>(entity);

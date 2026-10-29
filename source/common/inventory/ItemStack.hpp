@@ -35,14 +35,22 @@ namespace sf { class Packet; }
 class ItemStack {
 	public:
 		ItemStack() = default;
-		ItemStack(const std::string &stringID, u16 amount = 1)
-			: m_stringID(stringID), m_amount(amount) {}
+		ItemStack(const std::string &stringID, u16 amount = 1, u16 damage = 0)
+			: m_stringID(stringID), m_amount(amount), m_damage(damage) {}
 
 		const Item &item() const;
-		void setItem(const std::string &stringID) { m_stringID = stringID; }
+		const std::string &stringID() const { return m_stringID; }
+		void setItem(const std::string &stringID) { m_stringID = stringID; m_damage = 0; }
 
 		u16 amount() const { return m_amount; }
 		void setAmount(u16 amount) { m_amount = amount; }
+		u16 damage() const { return m_damage; }
+		void setDamage(u16 damage) { m_damage = damage; }
+		u16 maxDamage() const { return item().getGroupValue("group:om_max_damage"); }
+		bool wear(u16 amount);
+		bool sameItem(const ItemStack &other) const {
+			return m_stringID == other.m_stringID && m_damage == other.m_damage;
+		}
 
 		static void initUsertype(sol::state &lua);
 
@@ -52,6 +60,7 @@ class ItemStack {
 		std::string m_stringID{BLOCK_AIR};
 
 		u16 m_amount = 0;
+		u16 m_damage = 0;
 };
 
 sf::Packet &operator<<(sf::Packet &packet, const ItemStack &itemStack);

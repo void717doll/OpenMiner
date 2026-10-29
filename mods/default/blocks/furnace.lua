@@ -32,7 +32,7 @@ mod:block {
 	tiles = {"furnace_top.png", "furnace_top.png", "furnace_front.png", "furnace_side.png"},
 	is_rotatable = true,
 
-	hardness = 2,
+	hardness = 3.5,
 	harvest_requirements = Capability.Pickaxe,
 
 	states = {

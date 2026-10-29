@@ -36,19 +36,38 @@
 #include "server/network/Server.hpp"
 #include "server/network/ServerCommandHandler.hpp"
 #include "common/world/WorldCollision.hpp"
+#include "common/world/BetaToolRules.hpp"
+#include "common/world/RetroMobSpawn.hpp"
 #include "common/core/GameClock.hpp"
+#include "common/scene/component/MobComponent.hpp"
 #include "server/world/ServerBlock.hpp"
 #include "server/world/ServerItem.hpp"
 #include "server/world/WorldController.hpp"
 
-void ServerCommandHandler::sendServerTick(const ClientInfo *client) const {
-	Network::Packet packet;
-	packet << Network::Command::ServerTick << (sf::Uint64)GameTime::getTicks();
-
-	if (!client)
-		m_server.sendToAllClients(packet);
-	else
-		client->tcpSocket->send(packet);
+namespace {
+bool canReachBlock(const ServerWorld &world, const ServerPlayer &player, int x, int y, int z) {
+	const Chunk *chunk = world.getChunkAtBlockPos(x, y, z);
+	if (!player.isReady() || !chunk || !chunk->isInitialized()) return false;
+	Vector3d eye{player.x(), player.y(), player.z() + 1.625};
+	Vector3d target{std::clamp(eye.x, double(x), double(x + 1)),
+		std::clamp(eye.y, double(y), double(y + 1)), std::clamp(eye.z, double(z), double(z + 1))};
+	Vector3d delta = target - eye;
+	if (delta.length() > 4.001) return false;
+	int steps = std::max(1, int(std::ceil(delta.length() * 16)));
+	for (int step = 1; step < steps; ++step) {
+		Vector3d point = eye + delta * (double(step) / steps);
+		int bx = int(std::floor(point.x)), by = int(std::floor(point.y)), bz = int(std::floor(point.z));
+		if (bx == x && by == y && bz == z) continue;
+		const BlockState *state = world.getBlockState(bx, by, bz);
+		if (!state) return false;
+		if (state->block().id() && state->isCollidable()) {
+			DoubleBox box = collision::blockBox(*state, world.getData(bx, by, bz), bx, by, bz);
+			if (point.x > box.x && point.x < box.x + box.sizeX && point.y > box.y && point.y < box.y + box.sizeY
+			 && point.z > box.z && point.z < box.z + box.sizeZ) return false;
+		}
+	}
+	return true;
+}
 }
 
 void ServerCommandHandler::sendServerClosed(const std::string &message, ClientInfo *client) const {
@@ -60,7 +79,7 @@ void ServerCommandHandler::sendServerClosed(const std::string &message, ClientIn
 		m_server.disconnectAllClients();
 	}
 	else {
-		client->tcpSocket->send(packet);
+		client->send(packet);
 		m_server.disconnectClient(*client);
 	}
 }
@@ -72,7 +91,7 @@ void ServerCommandHandler::sendChunkUnload(s32 chunkX, s32 chunkY, s32 chunkZ, c
 	if (!client)
 		m_server.sendToAllClients(packet);
 	else
-		client->tcpSocket->send(packet);
+		client->send(packet);
 }
 
 void ServerCommandHandler::sendBlockDataUpdate(s32 x, s32 y, s32 z, const BlockData *blockData, const ClientInfo *client) const {
@@ -82,7 +101,7 @@ void ServerCommandHandler::sendBlockDataUpdate(s32 x, s32 y, s32 z, const BlockD
 	if (!client)
 		m_server.sendToAllClients(packet);
 	else
-		client->tcpSocket->send(packet);
+		client->send(packet);
 }
 
 void ServerCommandHandler::sendBlockInvUpdate(s32 x, s32 y, s32 z, const Inventory &inventory, const ClientInfo *client) const {
@@ -92,7 +111,7 @@ void ServerCommandHandler::sendBlockInvUpdate(s32 x, s32 y, s32 z, const Invento
 	if (!client)
 		m_server.sendToAllClients(packet);
 	else
-		client->tcpSocket->send(packet);
+		client->send(packet);
 }
 
 void ServerCommandHandler::sendPlayerPosUpdate(u16 clientID, bool isTeleportation, const ClientInfo *client) const {
@@ -107,27 +126,10 @@ void ServerCommandHandler::sendPlayerPosUpdate(u16 clientID, bool isTeleportatio
 		if (!client)
 			m_server.sendToAllClients(packet);
 		else
-			client->tcpSocket->send(packet);
+			client->send(packet);
 	}
 	else
 		logError() << ("Failed to send position update for player " + std::to_string(clientID) + ": Player not found").c_str();
-}
-
-void ServerCommandHandler::sendPlayerRotUpdate(u16 clientID, const ClientInfo *client) const {
-	const ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
-	if (player) {
-		Network::Packet packet;
-		packet << Network::Command::PlayerRotUpdate;
-		packet << clientID;
-		packet << player->cameraYaw() << player->cameraPitch();
-
-		if (!client)
-			m_server.sendToAllClients(packet);
-		else
-			client->tcpSocket->send(packet);
-	}
-	else
-		logError() << ("Failed to send rotation update for player " + std::to_string(clientID) + ": Player not found").c_str();
 }
 
 void ServerCommandHandler::sendPlayerInvUpdate(u16 clientID, const ClientInfo *client) const {
@@ -140,7 +142,7 @@ void ServerCommandHandler::sendPlayerInvUpdate(u16 clientID, const ClientInfo *c
 		if (!client)
 			m_server.sendToAllClients(packet);
 		else
-			client->tcpSocket->send(packet);
+			client->send(packet);
 	}
 	else
 		logError() << ("Failed to send inventory update for player " + std::to_string(clientID) + ": Player not found").c_str();
@@ -154,7 +156,7 @@ void ServerCommandHandler::sendPlayerChangeDimension(u16 clientID, s32 x, s32 y,
 		packet << clientID << x << y << z << dimension;
 
 		if (client) {
-			client->tcpSocket->send(packet);
+			client->send(packet);
 
 			// FIXME: sendPlayerChangeDimension shouldn't be exposed to Lua
 			//        Instead, there should be a changePlayerDimension function that sends
@@ -164,6 +166,7 @@ void ServerCommandHandler::sendPlayerChangeDimension(u16 clientID, s32 x, s32 y,
 
 			player->setPosition(x + 0.5, y + 0.5, z + 0.5);
 			player->setDimension(dimension);
+			player->resetSurvival();
 			player->clearLoadedChunks();
 		}
 		else
@@ -173,16 +176,6 @@ void ServerCommandHandler::sendPlayerChangeDimension(u16 clientID, s32 x, s32 y,
 		logError() << ("Failed to send dimension change for player " + std::to_string(clientID) + ": Player not found").c_str();
 }
 
-void ServerCommandHandler::sendChatMessage(u16 clientID, const std::string &message, const ClientInfo *client) const {
-	Network::Packet packet;
-	packet << Network::Command::ChatMessage << clientID << message;
-
-	if (!client)
-		m_server.sendToAllClients(packet);
-	else
-		client->tcpSocket->send(packet);
-}
-
 void ServerCommandHandler::sendEntitySpawn(entt::entity entityID, const ClientInfo *client) const {
 	Network::Packet packet;
 	packet << Network::Command::EntitySpawn << entityID;
@@ -190,7 +183,7 @@ void ServerCommandHandler::sendEntitySpawn(entt::entity entityID, const ClientIn
 	if (!client)
 		m_server.sendToAllClients(packet);
 	else
-		client->tcpSocket->send(packet);
+		client->send(packet);
 }
 
 void ServerCommandHandler::sendEntityDespawn(entt::entity entityID, const ClientInfo *client) const {
@@ -200,7 +193,7 @@ void ServerCommandHandler::sendEntityDespawn(entt::entity entityID, const Client
 	if (!client)
 		m_server.sendToAllClients(packet);
 	else
-		client->tcpSocket->send(packet);
+		client->send(packet);
 }
 
 void ServerCommandHandler::sendPlayerHealth(u16 clientID) const {
@@ -208,51 +201,59 @@ void ServerCommandHandler::sendPlayerHealth(u16 clientID) const {
 	if (!player || !player->client()) return;
 	Network::Packet packet;
 	packet << Network::Command::PlayerHealth << player->health();
-	player->client()->tcpSocket->send(packet);
+	player->client()->send(packet);
 }
 
 void ServerCommandHandler::damagePlayer(u16 clientID, u16 amount) {
 	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
 	if (!player) return;
+	amount = player->survival().filterDamage(amount);
+	if (!amount) return;
 	player->damage(amount);
 	if (player->health() == 0) {
 		ServerWorld &world = getWorldForClient(clientID);
-		setPlayerPosition(clientID, 0, 0, world.heightmap().getHighestBlockAt(0, 0) + 1);
+		world.dropPlayerItems(*player);
+		if (player->dimension() == 1) {
+			bool found = false;
+			int originX = int(std::floor(player->x())), originY = int(std::floor(player->y()));
+			for (int radius = 0; radius <= 8 && !found; ++radius)
+				for (int dx = -radius; dx <= radius && !found; ++dx)
+					for (int dy = -radius; dy <= radius && !found; ++dy) {
+						if (std::max(std::abs(dx), std::abs(dy)) != radius) continue;
+						double x = originX + dx + 0.5, y = originY + dy + 0.5;
+						int z = retro::mobCavityFloor(world, player->hitbox(), x, y, int(std::floor(player->z())));
+						if (z < 0) continue;
+						player->setPosition(x, y, z);
+						found = true;
+					}
+			if (!found) {
+				ServerWorld &overworld = m_worldController.getWorld(0);
+				int z = overworld.heightmap().getHighestBlockAt(0, 0) + 1;
+				sendPlayerChangeDimension(clientID, 0, 0, z, 0, player->client());
+				sendPlayerChangeDimension(clientID, 0, 0, z, 0);
+			}
+		} else {
+			setPlayerPosition(clientID, 0, 0, world.heightmap().getHighestBlockAt(0, 0) + 1);
+		}
 		player->setHealth(20);
+		player->resetSurvival();
 		sendPlayerPosUpdate(clientID, true);
 	}
 	sendPlayerHealth(clientID);
 }
 
-void ServerCommandHandler::spawnMob(u16 clientID, const std::string &id) {
-	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
-	if (!player || (id != "pig" && id != "zombie")) return;
-	ServerWorld &world = getWorldForClient(clientID);
-	double angle = player->cameraYaw() * math::DEG_TO_RAD;
-	double x = player->x() + std::cos(angle) * 3, y = player->y() + std::sin(angle) * 3;
-	int z = world.heightmap().getHighestBlockAt(int(std::floor(x)), int(std::floor(y))) + 1;
-	bool spawned = world.spawnMob("default:" + id, x, y, z);
-	sendChatMessage(0, spawned ? "spawned " + id : "spawn position is blocked or unloaded", player->client());
-}
-
 void ServerCommandHandler::setupCallbacks() {
 	m_server.setConnectionCallback([this](ClientInfo &client, Network::Packet &connectionPacket) {
 		std::string username;
-		u16 protocolVersion = 0;
-		connectionPacket >> username >> protocolVersion;
-		if (!connectionPacket || protocolVersion != Network::protocolVersion) {
-			sendServerClosed("incompatible client protocol", &client);
+		connectionPacket >> username;
+		if (!connectionPacket) {
+			sendServerClosed("unable to load the local player", &client);
 			return;
 		}
 
-		if (!utils::regexMatch(username, "^[A-Za-z0-9_]+$")) {
-			sendServerClosed("Invalid username", &client);
-			return;
-		}
-
-		ServerPlayer *player = m_players.connectPlayer(username, client, m_server.isSingleplayer());
+		ServerPlayer *player = m_players.connectPlayer(username, client);
 		if (!player) {
-			sendServerClosed("User is already online", &client);
+			sendServerClosed("unable to load the local player", &client);
 			return;
 		}
 
@@ -307,18 +308,8 @@ void ServerCommandHandler::setupCallbacks() {
 		// Send the registry
 		Network::Packet packet;
 		packet << Network::Command::RegistryData;
-		m_registry.serialize(packet);
-		client.tcpSocket->send(packet);
+		client.send(packet);
 
-		// Send already connected players to the new client
-		for (auto &it : m_players) {
-			if (!it.second.isOnline()) continue;
-			Network::Packet spawnPacket;
-			spawnPacket << Network::Command::PlayerSpawn << it.second.clientID();
-			spawnPacket << it.second.x() << it.second.y() << it.second.z() << it.second.dimension() << it.second.name();
-			spawnPacket << it.second.cameraYaw() << it.second.cameraPitch();
-			client.tcpSocket->send(spawnPacket);
-		}
 
 		// Triggers the 'PlayerConnected' Lua event
 		if (player->isNewPlayer())
@@ -326,14 +317,14 @@ void ServerCommandHandler::setupCallbacks() {
 
 		// Send inventory
 		sendPlayerInvUpdate(client.id, &client);
-			sendPlayerHealth(client.id);
+		sendPlayerHealth(client.id);
 
-		// Send spawn packet to all clients for this player
+		// send the local player after connection callbacks have run.
 		Network::Packet spawnPacket;
 		spawnPacket << Network::Command::PlayerSpawn << client.id;
 		spawnPacket << player->x() << player->y() << player->z() << player->dimension() << player->name();
 		spawnPacket << player->cameraYaw() << player->cameraPitch();
-		m_server.sendToAllClients(spawnPacket);
+		client.send(spawnPacket);
 
 		// Send entities to the client
 		m_worldController.getWorld(player->dimension()).scene().sendEntities(client);
@@ -373,8 +364,9 @@ void ServerCommandHandler::setupCallbacks() {
 		packet >> x >> y >> z;
 
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
-		if (player) {
-			player->setPosition(x, y, z);
+		if (player && packet) {
+			if (!getWorldForClient(client.id).moveSurvivalPlayer(*player, x, y, z))
+				sendPlayerPosUpdate(client.id, true, &client);
 		}
 		else
 			logError() << ("Failed to update position of player " + std::to_string(client.id) + ": Player not found").c_str();
@@ -407,7 +399,7 @@ void ServerCommandHandler::setupCallbacks() {
 			ItemStack stack;
 			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width())
 				stack = player->heldItemStack();
-			bool valid = packet && previous && id > 0 && id < blocks.size()
+			bool valid = packet && previous && canReachBlock(world, *player, x, y, z) && id > 0 && id < blocks.size()
 				&& stack.amount() > 0 && stack.item().isBlock() && stack.item().id() == id;
 			if (valid) {
 				const Block &definition = *blocks[id];
@@ -429,7 +421,7 @@ void ServerCommandHandler::setupCallbacks() {
 				Network::Packet correction;
 				correction << Network::Command::BlockUpdate << x << y << z
 					<< (u32(world.getBlock(x, y, z)) | (u32(world.getData(x, y, z)) << 16));
-				client.tcpSocket->send(correction);
+				client.send(correction);
 				sendPlayerInvUpdate(client.id, &client);
 				return;
 			}
@@ -452,6 +444,11 @@ void ServerCommandHandler::setupCallbacks() {
 			logError() << ("Failed to place block using player " + std::to_string(client.id) + ": Player not found").c_str();
 	});
 
+	m_server.setCommandCallback(Network::Command::PlayerInteract, [this](ClientInfo &client, Network::Packet &) {
+		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
+		if (player && player->isReady()) getWorldForClient(client.id).interactMob(*player);
+	});
+
 	m_server.setCommandCallback(Network::Command::PlayerAttack, [this](ClientInfo &client, Network::Packet &) {
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
 		if (!player || !player->tryAttack(GameClock::getInstance().getTicks(true))) return;
@@ -466,10 +463,16 @@ void ServerCommandHandler::setupCallbacks() {
 
 			ServerWorld &world = getWorldForClient(client.id);
 			const BlockState *blockState = world.getBlockState(x, y, z);
-			if (!blockState) return;
+			if (!packet || !blockState || !canReachBlock(world, *player, x, y, z)
+			 || !blockState->block().id() || blockState->drawType() == BlockDrawType::Liquid
+			 || !std::isfinite(blockState->hardness()) || blockState->hardness() < 0) return;
 			world.setBlock(x, y, z, 0);
 
 			m_scriptEngine.luaCore().onEvent(LuaEventType::BlockDigged, glm::ivec3{x, y, z}, *blockState, *player, world, client, *this);
+			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width()) {
+				auto &tool = player->inventory().getStackRef(player->heldItemSlot(), 0);
+				if (tool.wear(retro::diggingWear(tool.item(), *blockState))) sendPlayerInvUpdate(client.id);
+			}
 
 			Network::Packet answer;
 			answer << Network::Command::BlockUpdate << x << y << z << u32(0);
@@ -485,6 +488,7 @@ void ServerCommandHandler::setupCallbacks() {
 			u8 hotbarSlot;
 			u16 itemID;
 			packet >> hotbarSlot >> itemID;
+			if (!packet || hotbarSlot >= 9 || hotbarSlot >= player->inventory().width()) return;
 			if (player->inventory().getStack(hotbarSlot, 0).item().id() != itemID)
 				logWarning() << "PlayerHeldItemChanged:" << "Desync of item ID between client and server";
 
@@ -523,6 +527,7 @@ void ServerCommandHandler::setupCallbacks() {
 			packet >> x >> y >> z >> client.screenWidth >> client.screenHeight >> client.guiScale;
 
 			ServerWorld &world = getWorldForClient(client.id);
+			if (!packet || !canReachBlock(world, *player, x, y, z)) return;
 
 			u16 id = world.getBlock(x, y, z);
 			ServerBlock &block = (ServerBlock &)(m_registry.getBlock(id));
@@ -565,6 +570,7 @@ void ServerCommandHandler::setupCallbacks() {
 			packet >> x >> y >> z >> client.screenWidth >> client.screenHeight >> client.guiScale;
 
 			ServerWorld &world = getWorldForClient(client.id);
+			if (!packet || !canReachBlock(world, *player, x, y, z)) return;
 
 			u16 id = world.getBlock(x, y, z);
 			ServerBlock &block = (ServerBlock &)(m_registry.getBlock(id));
@@ -583,21 +589,6 @@ void ServerCommandHandler::setupCallbacks() {
 			logError() << ("Failed to activate item using player '" + client.playerName + "': Player not found").c_str();
 	});
 
-	m_server.setCommandCallback(Network::Command::ChatMessage, [this](ClientInfo &client, Network::Packet &packet) {
-		std::string message;
-		packet >> message;
-
-		if (message[0] != '/' || (message.length() > 1 && message[1] == '/')) {
-			if (message[0] == '/' && message.length() > 1 && message[1] == '/')
-				sendChatMessage(client.id, message.substr(1));
-			else
-				sendChatMessage(client.id, message);
-		}
-		else {
-			m_chatCommandHandler.parseCommand(message.substr(1), client);
-		}
-	});
-
 	m_server.setCommandCallback(Network::Command::KeyPressed, [this](ClientInfo &client, Network::Packet &packet) {
 		u16 keyID;
 		packet >> keyID >> client.screenWidth >> client.screenHeight >> client.guiScale;
@@ -608,8 +599,10 @@ void ServerCommandHandler::setupCallbacks() {
 
 void ServerCommandHandler::setPlayerPosition(u16 clientID, s32 x, s32 y, s32 z) {
 	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
-	if (player)
+	if (player) {
 		player->setPosition(x, y, z);
+		player->resetSurvival();
+	}
 	else
 		logError() << ("Failed to set position for player " + std::to_string(clientID) + ": Player not found").c_str();
 }
@@ -622,15 +615,10 @@ inline ServerWorld &ServerCommandHandler::getWorldForClient(u16 clientID) {
 	return m_worldController.getWorld(player->dimension());
 }
 
-void ServerCommandHandler::stopServer() const {
-	m_server.setRunning(false);
-}
-
 // Please update 'docs/lua-api-cpp.md' if you change this
 void ServerCommandHandler::initUsertype(sol::state &lua) {
 	lua.new_usertype<ServerCommandHandler>("ServerCommandHandler",
 		"send_player_change_dimension", &ServerCommandHandler::sendPlayerChangeDimension,
-		"send_chat_message", &ServerCommandHandler::sendChatMessage,
 		"send_player_health", &ServerCommandHandler::sendPlayerHealth
 	);
 }

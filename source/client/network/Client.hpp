@@ -30,21 +30,13 @@
 #include <functional>
 #include <unordered_map>
 
-#include <SFML/Network/IpAddress.hpp>
-#include <SFML/Network/TcpSocket.hpp>
-
-#include "common/core/Timer.hpp"
-#include "common/network/Network.hpp"
+#include "common/network/LocalSession.hpp"
 #include "common/world/Player.hpp"
 
 class ClientConnectException {
 	public:
-		ClientConnectException(const std::string &str)
-			: m_str(str) {}
-
-		const char *what() const noexcept {
-			return m_str.c_str();
-		}
+		ClientConnectException(const std::string &str) : m_str(str) {}
+		const char *what() const noexcept { return m_str.c_str(); }
 
 	private:
 		std::string m_str;
@@ -54,48 +46,23 @@ class Client {
 	using CommandCallback = std::function<void(Network::Packet &packet)>;
 
 	public:
-		void connect(sf::IpAddress serverAddress, u16 serverPort, Player &player);
+		~Client() { disconnect(); }
+
+		void connect(Player &player);
 		void disconnect();
-
 		void send(Network::Packet &packet);
-
 		void update();
 
 		void setCommandCallback(Network::Command command, const CommandCallback &callback) { m_commands[command] = callback; }
 
-		bool isSingleplayer() const { return m_isSingleplayer; }
-		void setSingleplayer(bool isSingleplayer) { m_isSingleplayer = isSingleplayer; }
-
 		bool isConnected() const { return m_isConnected; }
-
 		u16 id() const { return m_id; }
-
-		sf::IpAddress serverAddress() const { return m_serverAddress; }
-		u16 serverPort() const { return m_serverPort; }
-
-		void addPlayer(Player &player) { m_players.emplace(player.clientID(), player); }
-		void removePlayer(u16 clientID) { m_players.erase(clientID); }
-		Player &getPlayer(u16 clientID) { return m_players.at(clientID); }
 
 	private:
 		bool m_isConnected = false;
-		bool m_isSingleplayer = false;
-
-		u16 m_id;
-
-		sf::IpAddress m_serverAddress;
-		u16 m_serverPort;
-
-		std::unique_ptr<sf::TcpSocket> m_tcpSocket;
-
-		Timer m_keyUpdateTimer;
-
+		u16 m_id = 0;
+		std::shared_ptr<Network::LocalSession> m_session;
 		std::unordered_map<Network::Command, CommandCallback> m_commands;
-
-		std::string m_texturePack;
-		std::string m_worldName;
-
-		std::unordered_map<u16, Player &> m_players;
 };
 
 #endif // CLIENT_HPP_

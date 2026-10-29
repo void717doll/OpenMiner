@@ -29,16 +29,11 @@
 #include "client/core/Config.hpp"
 #include "client/core/Mouse.hpp"
 #include "client/states/ConnectionErrorState.hpp"
-#include "client/states/GameState.hpp"
-#include "client/states/ServerLoadingState.hpp"
 #include "client/states/TitleScreenState.hpp"
 
-ConnectionErrorState::ConnectionErrorState(const std::string &error, const std::string &host, u16 port, ApplicationState *parent) : InterfaceState(parent) {
+ConnectionErrorState::ConnectionErrorState(const std::string &error, ApplicationState *parent) : InterfaceState(parent) {
 	Mouse::setCursorGrabbed(false);
 	Mouse::setCursorVisible(true);
-
-	m_host = host;
-	m_port = port;
 
 	m_background.setScale(Config::guiScale * 2.f, Config::guiScale * 2.f);
 
@@ -51,21 +46,13 @@ ConnectionErrorState::ConnectionErrorState(const std::string &error, const std::
 	m_text.setShadowEnabled(false);
 
 	m_menuWidget.setScale(Config::guiScale, Config::guiScale);
-	m_menuWidget.addButton("Reconnect", [this](TextButton &) {
-		m_stateStack->pop();
-
-		auto &game = m_stateStack->push<GameState>();
-		auto &serverLoadingState = m_stateStack->push<ServerLoadingState>(game, true, m_host, m_port, m_parent);
-		serverLoadingState.setUsername(Config::defaultUsername);
-	});
-
-	m_menuWidget.addButton("Cancel", [this](TextButton &) {
+	m_menuWidget.addButton("back", [this](TextButton &) {
 		if (m_stateStack->size() > 1) {
 			m_stateStack->pop();
 		}
 		else {
 			m_stateStack->pop();
-			m_stateStack->push<TitleScreenState>(m_port);
+			m_stateStack->push<TitleScreenState>();
 		}
 	});
 

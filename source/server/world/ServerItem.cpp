@@ -56,7 +56,13 @@ bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &pl
 	}
 	try {
 		if (m_onItemActivated) {
+			u16 previous = world.getBlock(pos.x, pos.y, pos.z);
 			m_onItemActivated(pos, block, player, world, client, server);
+			u16 type = getGroupValue("group:om_tool_type");
+			if (type == 3 && previous != world.getBlock(pos.x, pos.y, pos.z)) {
+				player.inventory().getStackRef(player.heldItemSlot(), 0).wear(1);
+				server.sendPlayerInvUpdate(client.id);
+			}
 			return true;
 		}
 	}

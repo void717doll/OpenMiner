@@ -82,7 +82,6 @@ void LuaGUI::addInventory(const sol::table &table) {
 	m_inventoryList.emplace_back(width, height, name);
 
 	Inventory &inventory = m_inventoryList.back();
-	inventory.setUnlimited(table["is_unlimited"].get_or(false));
 
 	sol::optional<sol::table> itemsTable = table["items"];
 	if (itemsTable != sol::nullopt) {
@@ -107,7 +106,7 @@ void LuaGUI::show(ClientInfo &client) {
 	for (auto &it : m_widgetDefinitions)
 		it->serialize(packet);
 
-	client.tcpSocket->send(packet);
+	client.send(packet);
 }
 
 void LuaGUI::initUsertype(sol::state &lua) {

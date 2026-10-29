@@ -27,15 +27,10 @@
 #ifndef LOGGERHANDLER_HPP_
 #define LOGGERHANDLER_HPP_
 
-#include <thread>
-#include <unordered_map>
-
 #include "common/core/Logger.hpp"
 #include "common/core/LogStream.hpp"
 
 class LoggerHandler {
-	using InstanceMap = std::unordered_map<std::thread::id, LoggerHandler *>;
-
 	public:
 		LoggerHandler() = default;
 
@@ -52,7 +47,7 @@ class LoggerHandler {
 		static void setInstance(LoggerHandler &instance);
 
 	private:
-		static InstanceMap s_instanceMap;
+		static thread_local LoggerHandler *s_instance;
 
 		std::string m_name;
 

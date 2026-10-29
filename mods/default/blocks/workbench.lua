@@ -34,7 +34,7 @@ mod:block {
 		om_material_wood = 1
 	},
 
-	hardness = 1,
+	hardness = 2.5,
 	harvest_requirements = Capability.Axe,
 
 	on_block_placed = function(pos, world)

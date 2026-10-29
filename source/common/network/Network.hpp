@@ -27,22 +27,20 @@
 #ifndef NETWORK_HPP_
 #define NETWORK_HPP_
 
-#include "common/network/CompressedPacket.hpp"
+#include <SFML/Network/Packet.hpp>
+#include "common/core/IntTypes.hpp"
 
-// Please update 'docs/network-protocol.md' if you change this
+// local message ids also appear in saved component data.
 namespace Network {
-	using Packet = CompressedPacket;
+	using Packet = sf::Packet;
 
-	constexpr u16 protocolVersion = 2;
 
 	enum class Command {
 		// Client commands
 		ClientConnect         = 0x00,
 		ClientDisconnect      = 0x01,
 		ClientOk              = 0x02,
-		ClientRefused         = 0x03,
 
-		ServerTick            = 0x10,
 		ServerClosed          = 0x11,
 
 		ChunkData             = 0x20,
@@ -60,6 +58,7 @@ namespace Network {
 		PlayerChunkPosUpdate  = 0x39,
 		PlayerHealth          = 0x3a,
 		PlayerAttack          = 0x3b,
+		PlayerInteract        = 0x3c,
 
 		BlockUpdate           = 0x40,
 		BlockActivated        = 0x41,
@@ -73,12 +72,12 @@ namespace Network {
 		EntityRotation        = 0x53,
 		EntityAnimation       = 0x54,
 		EntityDrawableDef     = 0x55,
+		EntityHitbox          = 0x56,
 
 		ItemActivated         = 0x60,
 
 		RegistryData          = 0x70,
 
-		ChatMessage           = 0x80,
 
 		KeyPressed            = 0x90,
 	};

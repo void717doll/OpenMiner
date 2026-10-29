@@ -24,126 +24,84 @@
  *
  * =====================================================================================
  */
-#include "server/core/ServerConfig.hpp"
 #include "server/network/Server.hpp"
 
-void Server::init(u16 port) {
-	if (m_tcpListener.listen(port) != sf::Socket::Done)
-		throw EXCEPTION("Network error: Listen failed");
+Server::~Server() {
+	if (m_session)
+		m_session->close();
+}
 
-	m_port = m_tcpListener.getLocalPort();
-
-	m_tcpListener.setBlocking(false);
-
-	m_selector.add(m_tcpListener);
+void Server::init() {
+	m_session = Network::LocalSession::create();
 }
 
 void Server::disconnectAllClients() {
-	for (auto &it : m_info.clients())
-		disconnectClient(it);
+	if (!m_info.clients().empty())
+		disconnectClient(m_info.clients().front());
+	if (m_session)
+		m_session->close();
+	m_isRunning = false;
 }
 
 void Server::disconnectClient(ClientInfo &client) {
+	const u16 id = client.id;
 	Network::Packet packet;
-	packet << Network::Command::ClientDisconnect << client.id;
-	sendToAllClients(packet);
+	auto it = m_commands.find(Network::Command::ClientDisconnect);
+	if (it != m_commands.end())
+		it->second(client, packet);
 
-	m_commands[Network::Command::ClientDisconnect](client, packet);
-
-	m_selector.remove(*client.tcpSocket);
-	m_info.removeClient(client.id);
-
-	if (m_isSingleplayer && m_info.clients().size() == 0) {
-		m_tcpListener.close();
-		m_isRunning = false;
-	}
+	m_info.removeClient(id);
+	// saving finishes after the loop exits; its acknowledgement still needs the queue.
+	m_isRunning = false;
 }
 
 void Server::handleGameEvents() {
-	if (m_selector.wait(sf::milliseconds(10))) {
-		if (m_selector.isReady(m_tcpListener)) {
-			handleNewConnections();
-		}
-		else {
-			handleClientMessages();
-		}
-	}
-}
-
-void Server::handleNewConnections() {
-	std::shared_ptr<sf::TcpSocket> clientSocket = std::make_shared<sf::TcpSocket>();
-	if (m_tcpListener.accept(*clientSocket) == sf::Socket::Done) {
-		Network::Packet packet;
-		clientSocket->receive(packet);
-
-		Network::Command command;
-		packet >> command;
-		if (command != Network::Command::ClientConnect)
-			logError() << "Network error: Expected 'ClientConnect' packet for new clients.";
-		else if (m_info.clients().size() < ServerConfig::maxPlayers) {
-			ClientInfo &client = m_info.addClient(clientSocket);
-			m_selector.add(*client.tcpSocket);
-
-			Network::Packet outPacket;
-			outPacket << Network::Command::ClientOk << client.id << m_isSingleplayer << Network::protocolVersion;
-			client.tcpSocket->send(outPacket);
-			client.tcpSocket->setBlocking(false);
-
-			if (m_connectionCallback)
-				m_connectionCallback(client, packet);
-		}
-		else {
-			Network::Packet outPacket;
-			outPacket << Network::Command::ClientRefused;
-			clientSocket->send(outPacket);
-		}
-	}
-	else {
-		logWarning() << "Warning: Connection accept failed.";
-	}
+	m_session->waitOnServer(std::chrono::milliseconds(10));
+	handleClientMessages();
 }
 
 void Server::handleClientMessages() {
-	for (size_t i = 0 ; i < m_info.clients().size() ; ++i) {
-		ClientInfo &client = m_info.clients()[i];
-		if (m_selector.isReady(*client.tcpSocket)) {
-			Network::Packet packet;
-			sf::Socket::Status status;
-			int packetsProcessed = 0;
-			do {
-				status = client.tcpSocket->receive(packet);
-				if (status == sf::Socket::Done) {
-					Network::Command command;
-					packet >> command;
+	Network::Packet packet;
+	int processed = 0;
+	for (; processed < 100 && m_session->receiveOnServer(packet); ++processed) {
+		Network::Command command;
+		packet >> command;
+		if (!packet)
+			continue;
 
-					// logDebug() << "TCP message received:" << Network::commandToString(command);
+		if (m_info.clients().empty()) {
+			if (command != Network::Command::ClientConnect)
+				continue;
 
-					if (m_isRunning) {
-						for (auto &it : m_commands) {
-							if (command == it.first)
-								it.second(client, packet);
-
-							if (command == Network::Command::ClientDisconnect) {
-								disconnectClient(client);
-								--i;
-
-								break;
-							}
-						}
-					}
-				}
-				else if (status == sf::Socket::Disconnected) {
-					disconnectClient(client);
-					--i;
-				}
-			}
-			while ((status == sf::Socket::Done || status == sf::Socket::Disconnected) && packetsProcessed++ < 100);
+			ClientInfo &client = m_info.addClient(m_session);
+			Network::Packet answer;
+			answer << Network::Command::ClientOk << client.id;
+			client.send(answer);
+			if (m_connectionCallback)
+				m_connectionCallback(client, packet);
 		}
+		else if (command == Network::Command::ClientDisconnect) {
+			disconnectClient(m_info.clients().front());
+			return;
+		}
+		else {
+			auto it = m_commands.find(command);
+			if (it != m_commands.end())
+				it->second(m_info.clients().front(), packet);
+		}
+
+		if (!m_isRunning)
+			return;
 	}
+
+	if (processed == 100)
+		return;
+
+	if (m_session->isClosed())
+		disconnectAllClients();
 }
 
 void Server::sendToAllClients(Network::Packet &packet) const {
-	for (const ClientInfo &client : m_info.clients()) {
-		client.tcpSocket->send(packet);
-	}
+	if (m_session)
+		m_session->sendToClient(packet);
 }

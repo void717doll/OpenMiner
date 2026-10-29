@@ -32,7 +32,6 @@
 
 struct ServerOnlineEvent {
 	bool isOnline;
-	u16 port;
 };
 
 // Client-only events

@@ -34,7 +34,6 @@ set(SOURCE_FILES
 	lua/loader/LuaRecipeLoader.cpp
 	lua/loader/LuaSkyLoader.cpp
 
-	network/ChatCommandHandler.cpp
 	network/Server.cpp
 	network/ServerCommandHandler.cpp
 	network/ServerInfo.cpp
@@ -50,6 +49,8 @@ set(SOURCE_FILES
 	world/ServerPlayer.cpp
 	world/ServerWorld.cpp
 	world/WorldMobs.cpp
+	world/WorldItems.cpp
+	world/BlockPhysics.cpp
 	world/TerrainBiomeSampler.cpp
 	world/TerrainGenerator.cpp
 	world/WorldController.cpp
@@ -85,7 +86,6 @@ set(HEADER_FILES
 	lua/loader/LuaRecipeLoader.hpp
 	lua/loader/LuaSkyLoader.hpp
 
-	network/ChatCommandHandler.hpp
 	network/ClientInfo.hpp
 	network/Server.hpp
 	network/ServerCommandHandler.hpp
@@ -100,6 +100,8 @@ set(HEADER_FILES
 	world/ServerChunk.hpp
 	world/ServerItem.hpp
 	world/ServerPlayer.hpp
+	world/PlayerSurvival.hpp
+	world/BlockPhysics.hpp
 	world/ServerWorld.hpp
 	world/TerrainBiomeSampler.hpp
 	world/TerrainGenerator.hpp
@@ -113,7 +115,6 @@ set(HEADER_FILES
 #------------------------------------------------------------------------------
 om_add_library(${PROJECT_NAME}_lib "${HEADER_FILES}" "${SOURCE_FILES}")
 
-add_executable(${PROJECT_NAME} main.cpp)
 
 #------------------------------------------------------------------------------
 # Setup include directories
@@ -126,4 +127,3 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
 # Link options
 #------------------------------------------------------------------------------
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC ${CMAKE_PROJECT_NAME}_common)
-target_link_libraries(${PROJECT_NAME}     PRIVATE ${PROJECT_NAME}_lib)

@@ -45,12 +45,10 @@ class ClientPlayer : public Player {
 
 		void updateCamera();
 
-		void move(float direction);
-
 		void processInputs();
 		void updatePosition(const ClientWorld &world);
 
-		void checkCollisions(const ClientWorld &world);
+		void clearInputs();
 
 		float dirTargetedX() const { return m_forwardDir.x; }
 		float dirTargetedY() const { return m_forwardDir.y; }
@@ -63,8 +61,11 @@ class ClientPlayer : public Player {
 		void setCameraRoll(float angle) { m_viewAngleRoll = angle; updateCamera(); };
 
 		Camera &camera() { return m_camera; }
+		const Vector3d &physicsPosition() const { return m_physicsPosition; }
+		bool onGround() const { return m_onGround; }
 
 	private:
+		void simulateMovement(const ClientWorld &world);
 
 		void applyViewBobbing(float &viewAngleH, float &viewAngleV, float &viewAngleRoll);
 
@@ -76,14 +77,20 @@ class ClientPlayer : public Player {
 
 		Vector3f m_cameraLocalPos;
 
-		Vector3f m_velocity{0, 0, 0};
+		Vector3d m_velocity{0, 0, 0};
+		Vector3d m_physicsPosition{0, 0, 0};
+		u32 m_lastPhysicsTime = 0;
+		float m_forwardInput = 0;
+		float m_strafeInput = 0;
+		bool m_jumpPressed = false;
+		bool m_isSneaking = false;
+		bool m_onGround = false;
+		u32 m_physicsRemainder = 0;
+		Vector3d m_previousPhysicsPosition{0, 0, 0};
 
 		// For view bobbing only
 		bool m_isMoving = false;
 		u64 m_movementStartTime = 0;
-
-		bool m_isJumping = false;
-		const float m_jumpSpeed = 0.06f;
 
 		std::optional<Vector3i> m_lastChunkPos;
 };

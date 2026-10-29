@@ -31,6 +31,7 @@
 
 #include "common/world/World.hpp"
 #include "server/scene/ServerScene.hpp"
+#include "server/world/BlockPhysics.hpp"
 #include "server/world/ServerChunk.hpp"
 #include "server/world/TerrainGenerator.hpp"
 
@@ -46,15 +47,24 @@ class ServerWorld : public World {
 		ServerWorld(PlayerList &players, const Dimension &dimension, s32 seed);
 
 		void update(bool doTick);
+		BlockPhysics &blockPhysics() { return m_blockPhysics; }
 		void updateMobs();
-		bool spawnMob(const std::string &id, double x, double y, double z);
+		void updateItems();
+		bool dropWorldItem(Vector3d position, const std::string &id, u16 count = 1);
+		void updatePlayerSurvival();
+		bool moveSurvivalPlayer(ServerPlayer &player, double x, double y, double z);
+		bool spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize = 0);
 		bool attackMob(ServerPlayer &player);
+		void dropPlayerItems(ServerPlayer &player);
+		bool interactMob(ServerPlayer &player);
+		entt::entity findMobTarget(ServerPlayer &player, double reach);
 
 		void updatePlayerChunks(ServerPlayer &player, s32 cx, s32 cy, s32 cz);
 		void createChunkNeighbours(ServerChunk &chunk);
 
 		ServerChunk &getOrCreateChunk(s32 cx, s32 cy, s32 cz);
 
+		void appendCollisionBoxes(const DoubleBox &moving, const DoubleBox &broadphase, std::vector<DoubleBox> &boxes) const override;
 		Chunk *getChunk(int cx, int cy, int cz) const override;
 
 		bool generateChunk(ServerChunk &chunk);
@@ -90,6 +100,7 @@ class ServerWorld : public World {
 		ServerCommandHandler *m_server = nullptr;
 
 		ServerScene m_scene;
+		BlockPhysics m_blockPhysics{*this};
 
 		s32 m_seed = 0;
 		u32 m_mobTick = 0;

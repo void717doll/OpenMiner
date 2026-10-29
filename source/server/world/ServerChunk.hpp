@@ -46,6 +46,7 @@ class ServerChunk : public Chunk {
 		void update() final;
 		void process() final;
 
+		void onBlockChanged(int x, int y, int z) override;
 		void onBlockPlaced(int x, int y, int z, const Block &block) override;
 		void onBlockDestroyed(int x, int y, int z, const Block &block) override;
 

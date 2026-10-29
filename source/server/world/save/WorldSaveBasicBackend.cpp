@@ -34,6 +34,8 @@
 #include "common/network/Network.hpp"
 #include "common/scene/component/ComponentType.hpp"
 #include "common/scene/component/MobComponent.hpp"
+#include "common/scene/component/PhysicalComponent.hpp"
+#include "common/scene/component/FallingBlockComponent.hpp"
 #include "common/scene/component/NetworkComponent.hpp"
 #include "server/world/ServerBlock.hpp"
 #include "server/world/ServerWorld.hpp"
@@ -106,6 +108,7 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 
 				chunk.setInitialized(true);
 				chunk.setModified(true);
+				world.blockPhysics().seedChunk(chunk);
 			}
 
 			loadEntities(save, world);
@@ -254,6 +257,15 @@ void WorldSaveBasicBackend::loadEntities(sf::Packet &save, ServerWorld &world) {
 			}
 			else if (type == ComponentType::Hitbox) {
 				save >> registry.emplace<DoubleBox>(entity);
+			}
+			else if (type == ComponentType::FallingBlock) {
+				save >> registry.emplace<FallingBlockComponent>(entity);
+			}
+			else if (type == ComponentType::Physical) {
+				save >> registry.emplace<PhysicalComponent>(entity);
+			}
+			else if (type == ComponentType::BetaMob) {
+				save >> registry.emplace<BetaMobComponent>(entity);
 			}
 			else if (type == ComponentType::Mob) {
 				save >> registry.emplace<MobComponent>(entity);

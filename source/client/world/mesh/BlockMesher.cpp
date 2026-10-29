@@ -25,6 +25,7 @@
  * =====================================================================================
  */
 #include "common/core/BlockGeometry.hpp"
+#include "common/world/LiquidState.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/world/mesh/BlockMesher.hpp"
@@ -123,10 +124,17 @@ void BlockMesher::addBlockFace(s8f x, s8f y, s8f z, s8f f, ChunkMeshBuildingJob 
 
 	const BlockState *surroundingBlockState = job.chunkData.getBlockState(sx, sy, sz);
 
+	bool sameLiquid = surroundingBlockState && liquid::kind(blockState.block())
+		&& liquid::kind(blockState.block()) == liquid::kind(surroundingBlockState->block());
+	if (sameLiquid) {
+		float ownHeight = liquid::height(blockState.block(), job.chunkData.getBlockParam(x, y, z));
+		float otherHeight = liquid::height(surroundingBlockState->block(), job.chunkData.getBlockParam(sx, sy, sz));
+		if (normal.z != 0 || otherHeight >= ownHeight) return;
+	}
 	// Skip hidden faces
 	if (surroundingBlockState && surroundingBlockState->block().id()
 	&& ((blockState.drawType() == BlockDrawType::Solid && surroundingBlockState->drawType() == BlockDrawType::Solid && surroundingBlockState->isOpaque())
-	 || (blockState.block().id() == surroundingBlockState->block().id() && (blockState.drawType() == BlockDrawType::Liquid || blockState.drawType() == BlockDrawType::Glass))
+	 || (blockState.block().id() == surroundingBlockState->block().id() && blockState.drawType() == BlockDrawType::Glass)
 	 || (blockState.drawType() == BlockDrawType::Liquid && surroundingBlockState->drawType() == BlockDrawType::Solid)
 	 || (blockState.drawType() == BlockDrawType::Cactus && surroundingBlockState->block().id() == blockState.block().id() && f > 3)))
 		return;
@@ -169,9 +177,10 @@ void BlockMesher::addBlockFace(s8f x, s8f y, s8f z, s8f f, ChunkMeshBuildingJob 
 			float blockHeight = vertexPos[v]->z;
 			if (blockState.drawType() == BlockDrawType::Liquid) {
 				const BlockState *topBlockState = job.chunkData.getBlockState(x, y, z + 1);
-				if (f != BlockFace::Bottom && (!topBlockState || !topBlockState->block().id())) {
-					blockHeight *= 14.f / 16.f;
-				}
+				bool covered = topBlockState && liquid::kind(blockState.block())
+					&& liquid::kind(topBlockState->block()) == liquid::kind(blockState.block());
+				if (f != BlockFace::Bottom)
+					blockHeight *= liquid::height(blockState.block(), job.chunkData.getBlockParam(x, y, z), covered);
 			}
 
 			vertices[v].coord3d[0] = x + vertexPos[v]->x;

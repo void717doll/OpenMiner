@@ -5,6 +5,7 @@
 
 #include "common/core/BlockGeometry.hpp"
 #include "common/world/World.hpp"
+#include "common/world/LunarchyCollision.hpp"
 
 namespace collision {
 
@@ -25,19 +26,12 @@ inline DoubleBox blockBox(const BlockState &state, u16 data, int x, int y, int z
 }
 
 inline double clipAxis(const DoubleBox &box, const DoubleBox &obstacle, int axis, double movement) {
-	double low[3] = {box.x, box.y, box.z};
-	double high[3] = {box.x + box.sizeX, box.y + box.sizeY, box.z + box.sizeZ};
-	double otherLow[3] = {obstacle.x, obstacle.y, obstacle.z};
-	double otherHigh[3] = {obstacle.x + obstacle.sizeX, obstacle.y + obstacle.sizeY, obstacle.z + obstacle.sizeZ};
-	for (int i = 0; i < 3; ++i) {
-		if (i != axis && (high[i] <= otherLow[i] || low[i] >= otherHigh[i]))
-			return movement;
-	}
-	if (movement > 0 && high[axis] <= otherLow[axis])
-		return std::min(movement, otherLow[axis] - high[axis]);
-	if (movement < 0 && low[axis] >= otherHigh[axis])
-		return std::max(movement, otherHigh[axis] - low[axis]);
-	return movement;
+	Vector3d velocity{0, 0, 0};
+	component(velocity, axis) = movement;
+	double time = 1;
+	if (axisAlignedCollision(obstacle, box, velocity, time) < 0)
+		return movement;
+	return movement * std::max(time, 0.0);
 }
 
 inline double rayDistance(const Vector3d &origin, const Vector3d &direction, const DoubleBox &box, double limit) {
@@ -61,31 +55,77 @@ inline double rayDistance(const Vector3d &origin, const Vector3d &direction, con
 	return enter;
 }
 
-inline Vector3d move(const World &world, DoubleBox box, Vector3d movement) {
-	// resolve vertical motion first, then slide along each horizontal axis.
-	for (int axis : {2, 0, 1}) {
-		double amount = axis == 0 ? movement.x : axis == 1 ? movement.y : movement.z;
-		double low[3] = {box.x, box.y, box.z};
-		double high[3] = {box.x + box.sizeX, box.y + box.sizeY, box.z + box.sizeZ};
-		low[axis] += std::min(0.0, amount);
-		high[axis] += std::max(0.0, amount);
-		for (int z = int(std::floor(low[2])); z <= int(std::floor(high[2])); ++z) {
-			for (int y = int(std::floor(low[1])); y <= int(std::floor(high[1])); ++y) {
-				for (int x = int(std::floor(low[0])); x <= int(std::floor(high[0])); ++x) {
-					const BlockState *state = world.getBlockState(x, y, z);
-					if (state && (!state->block().id() || !state->isCollidable()))
-						continue;
-					DoubleBox obstacle = state ? blockBox(*state, world.getData(x, y, z), x, y, z)
-						: DoubleBox{double(x), double(y), double(z), 1, 1, 1};
-					amount = clipAxis(box, obstacle, axis, amount);
+inline std::vector<Obstacle> collectObstacles(const World &world, const DoubleBox &box,
+	const Vector3d &movement, double stepHeight, bool &anyLoaded, bool collideWithObjects = true) {
+	std::vector<Obstacle> obstacles;
+	anyLoaded = false;
+	int minX = int(std::floor(box.x + std::min(0.0, movement.x))) - 1;
+	int minY = int(std::floor(box.y + std::min(0.0, movement.y))) - 1;
+	int minZ = int(std::floor(box.z + std::min(0.0, movement.z))) - 1;
+	int maxX = int(std::floor(box.x + box.sizeX + std::max(0.0, movement.x))) + 1;
+	int maxY = int(std::floor(box.y + box.sizeY + std::max(0.0, movement.y))) + 1;
+	int maxZ = int(std::floor(box.z + box.sizeZ + std::max(0.0, movement.z) + stepHeight)) + 1;
+	for (int z = minZ; z <= maxZ; ++z) {
+		for (int y = minY; y <= maxY; ++y) {
+			for (int x = minX; x <= maxX; ++x) {
+				const Chunk *chunk = world.getChunkAtBlockPos(x, y, z);
+				const BlockState *state = chunk && chunk->isInitialized() ? world.getBlockState(x, y, z) : nullptr;
+				if (!state) {
+					obstacles.push_back({DoubleBox{double(x), double(y), double(z), 1, 1, 1}, 0, 0, true});
+					continue;
 				}
+				anyLoaded = true;
+				if (!state->block().id() || !state->isCollidable())
+					continue;
+				int bouncy = state->block().getGroupValue("group:bouncy");
+				if (bouncy >= 32768)
+					bouncy -= 65536;
+				obstacles.push_back({blockBox(*state, world.getData(x, y, z), x, y, z),
+					bouncy, state->block().getGroupValue("group:slippery"), false, false, {x, y, z}});
 			}
 		}
-		if (axis == 0) { movement.x = amount; box.x += amount; }
-		if (axis == 1) { movement.y = amount; box.y += amount; }
-		if (axis == 2) { movement.z = amount; box.z += amount; }
 	}
-	return movement;
+	if (collideWithObjects && anyLoaded) {
+		DoubleBox broadphase{box.x + std::min(0.0, movement.x) - 1.5,
+			box.y + std::min(0.0, movement.y) - 1.5,
+			box.z + std::min(0.0, movement.z) - 1.5,
+			box.sizeX + std::abs(movement.x) + 3,
+			box.sizeY + std::abs(movement.y) + 3,
+			box.sizeZ + std::abs(movement.z) + 3 + stepHeight};
+		std::vector<DoubleBox> objectBoxes;
+		world.appendCollisionBoxes(box, broadphase, objectBoxes);
+		for (const auto &objectBox : objectBoxes)
+			obstacles.push_back({objectBox, 0, 0, false, false, {0, 0, 0}, true});
+	}
+	return obstacles;
+}
+
+inline Result step(const World &world, const DoubleBox &box, Vector3d velocity,
+	Vector3d acceleration, double seconds, double stepHeight = 0, bool collideWithObjects = true) {
+	seconds = std::clamp(seconds, 0.0, 2.5);
+	Vector3d movement = limitVelocity(velocity + acceleration * (seconds * 0.5)) * seconds;
+	bool anyLoaded;
+	auto obstacles = collectObstacles(world, box, movement, stepHeight, anyLoaded, collideWithObjects);
+	if (!anyLoaded) {
+		Result result;
+		result.unloaded = true;
+		return result;
+	}
+	return sweep(std::move(obstacles), box, velocity, acceleration, seconds, stepHeight);
+}
+
+inline Vector3d move(const World &world, DoubleBox box, Vector3d movement, bool collideWithObjects = true) {
+	bool anyLoaded;
+	auto obstacles = collectObstacles(world, box, movement, 0, anyLoaded, collideWithObjects);
+	if (!anyLoaded)
+		return {0, 0, 0};
+	// the displacement API clips requested movement without material rebound.
+	Vector3d allowed = sweep(std::move(obstacles), box, movement, {0, 0, 0}, 1, 0, false, false).movement;
+	for (int axis = 0; axis < 3; ++axis) {
+		if (std::abs(component(allowed, axis) - component(movement, axis)) < 1e-10)
+			component(allowed, axis) = component(movement, axis);
+	}
+	return allowed;
 }
 
 }

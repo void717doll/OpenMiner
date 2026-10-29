@@ -29,7 +29,6 @@
 
 #include "client/hud/BlockCursor.hpp"
 #include "client/hud/BlockInfoWidget.hpp"
-#include "client/hud/Chat.hpp"
 #include "client/hud/Crosshair.hpp"
 #include "client/hud/DebugLightmapViewer.hpp"
 #include "client/hud/DebugOverlay.hpp"
@@ -58,8 +57,6 @@ class HUD : public Transformable, public Drawable {
 
 		const BlockCursor &blockCursor() const { return m_blockCursor; }
 
-		Chat &chat() { return m_chat; }
-
 		Minimap &minimap() { return m_minimap; }
 
 	private:
@@ -85,8 +82,6 @@ class HUD : public Transformable, public Drawable {
 
 		Text m_fpsText;
 		HeartBar m_hearts;
-
-		Chat m_chat;
 
 		Minimap m_minimap;
 

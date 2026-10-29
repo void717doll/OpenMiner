@@ -136,7 +136,6 @@
 ## ServerCommandHandler
 
 - `void send_player_change_dimension(u16 clientID, int x, int y, int z, u16 dimension, ClientInfo client)`
-- `void send_chat_message(u16 senderID, string message, ClientInfo client)`
 
 ## ServerModLoader
 
@@ -173,3 +172,5 @@ rotation, state, and custom allocations share 16 bits; overflow rejects the bloc
 ### player health
 
 `Player:health()` returns health out of 20. `Player:heal(amount)` and `Player:damage(amount)` clamp health to its valid range. after changing health from lua, call `ServerCommandHandler:send_player_health(player:client_id())` to update the hud.
+
+`BlockState:can_harvest(item)` applies beta tool tiers. `BlockState:block()` returns its block definition. `ItemStack:set_amount(amount)` updates a stack, including partial world-item pickups. `ItemStack:damage()` returns equipment wear. `ItemStack:wear(amount)` applies wear and removes one item when its maximum damage is exceeded; it returns whether wear was applied. item groups `om_max_damage`, `om_tool_type` (sword 1, ordinary tool 2, hoe 3, shears 4), and `om_tool_kind` (axe 1, pickaxe 2, shovel 3) define the default equipment rules.

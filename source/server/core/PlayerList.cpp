@@ -31,54 +31,31 @@ ServerPlayer &PlayerList::addPlayer(const std::string &name, bool isNewPlayer) {
 	return m_players.at(name);
 }
 
-ServerPlayer *PlayerList::connectPlayer(const std::string &name, ClientInfo &client, bool isSingleplayer) {
-	ServerPlayer *player = nullptr;
-
-	static bool isFirstPlayer = true;
-	if (isFirstPlayer && isSingleplayer && !m_players.empty()) {
-		if (m_players.size() == 1) {
-			std::string oldname = m_players.begin()->second.name();
-			if (oldname != name) {
-				m_players.emplace(name, m_players.begin()->second);
-				m_players.erase(oldname);
-			}
-
-			player = &m_players.at(name);
-			player->setName(name);
-
-			logInfo() << name << "is online";
-		}
-		else {
-			logWarning() << "Multiple players in singleplayer mode not handled yet";
-			return nullptr;
-		}
-	}
-	else {
-		auto it = m_players.find(name);
-		if (it != m_players.end()) {
-			if (!it->second.isOnline()) {
-				player = &it->second;
-				logInfo() << name << "is online";
-			}
-			else {
-				logWarning() << name << "failed to connect: already online";
-				return nullptr;
-			}
-		}
-		else {
-			player = &addPlayer(name, true);
-			logInfo() << name << "is online (first connection)";
-		}
+ServerPlayer *PlayerList::connectPlayer(const std::string &name, ClientInfo &client) {
+	for (const auto &entry : m_players) {
+		if (entry.second.isOnline()) return nullptr;
 	}
 
-	player->setClient(&client);
-	player->setClientID(client.id);
+	auto it = m_players.find(name);
+	if (it == m_players.end() && !m_players.empty()) {
+		// older saves may contain several records; reuse one without discarding the rest.
+		auto saved = m_players.find("singleplayer");
+		if (saved == m_players.end()) {
+			saved = m_players.begin();
+			for (auto candidate = m_players.begin(); candidate != m_players.end(); ++candidate) {
+				if (candidate->first < saved->first) saved = candidate;
+			}
+		}
+		m_players.emplace(name, saved->second);
+		it = m_players.find(name);
+		it->second.setName(name);
+	}
 
+	ServerPlayer &player = it == m_players.end() ? addPlayer(name, true) : it->second;
+	player.setClient(&client);
+	player.setClientID(client.id);
 	client.playerName = name;
-
-	isFirstPlayer = false;
-
-	return player;
+	return &player;
 }
 
 void PlayerList::disconnectPlayer(const std::string &name) {
@@ -87,7 +64,6 @@ void PlayerList::disconnectPlayer(const std::string &name) {
 		it->second.setClient(nullptr);
 		it->second.setNewPlayer(false);
 		it->second.clearLoadedChunks();
-		logInfo() << name << "is offline";
 	}
 }
 

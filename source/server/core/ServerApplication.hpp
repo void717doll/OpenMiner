@@ -27,7 +27,6 @@
 #ifndef SERVERAPPLICATION_HPP_
 #define SERVERAPPLICATION_HPP_
 
-#include "common/core/ArgumentParser.hpp"
 #include "common/core/EventHandler.hpp"
 #include "common/core/GameClock.hpp"
 #include "common/core/Registry.hpp"
@@ -42,15 +41,12 @@
 
 class ServerApplication {
 	public:
-		ServerApplication(int argc = 0, char **argv = nullptr);
-		ServerApplication(EventHandler &eventHandler);
+		explicit ServerApplication(EventHandler &eventHandler);
 
 		bool init();
 
-		int run(bool isProtected = true);
+		int run();
 
-		void setSingleplayer(bool isSingleplayer) { m_server.setSingleplayer(isSingleplayer); }
-		void setPort(u16 port) { m_port = port; }
 		void setWorldName(const std::string &worldName) { m_worldName = worldName; }
 		void setLogLevel(LogLevel logLevel) { m_loggerHandler.setMaxLevel(logLevel); }
 		void setSeed(s32 seed) { m_seed = seed; }
@@ -59,14 +55,11 @@ class ServerApplication {
 		void update();
 		void mainLoop();
 
-		ArgumentParser m_argumentParser;
 		GameClock m_clock;
-		EventHandler *m_eventHandler = nullptr;
+		EventHandler &m_eventHandler;
 		LoggerHandler m_loggerHandler;
 
 		Registry m_registry;
-
-		u16 m_port = 4242;
 
 		std::string m_worldName;
 
@@ -79,6 +72,7 @@ class ServerApplication {
 		Server m_server;
 		ServerCommandHandler m_serverCommandHandler{m_scriptEngine, m_server, m_worldController, m_players, m_registry};
 
+		u64 m_lastTick = 0;
 		s32 m_seed = 1337; // FIXME
 };
 

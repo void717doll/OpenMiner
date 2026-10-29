@@ -32,10 +32,6 @@
 #include "common/core/IntTypes.hpp"
 
 namespace Config {
-	// Gameplay
-	extern bool isFlyModeEnabled;
-	extern bool isNoClipEnabled;
-	extern u16 maxBlockReach;
 
 	// Interface
 	extern bool isBlockInfoWidgetEnabled;
@@ -66,11 +62,6 @@ namespace Config {
 	extern bool isProfilerWindowEnabled;
 	extern bool isWireframeModeEnabled;
 	extern bool isBgfxDebugLogEnabled;
-
-	// Other
-	extern std::string defaultUsername;
-	extern std::string defaultServerAddress;
-	extern std::string texturePack;
 
 	void loadConfigFromFile(const char *filename);
 	void saveConfigToFile(const char *filename);

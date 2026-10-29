@@ -37,13 +37,24 @@ namespace DrawableType {
 		Undefined     = 0,
 		InventoryCube = 1,
 		RetroMob = 2,
+		RetroMobState = 3,
 	};
 }
 
 class DrawableDef : public ISerializable {
 	public:
 		InventoryCubeDef &addInventoryCube();
-		void setMobModel(u8 model) { m_mobModel = model; }
+		void setMobModel(u8 model, float scale = 1.f, u8 appearance = 0) {
+			if (m_mobModel != model || m_mobScale != scale || m_mobAppearance != appearance) {
+				m_mobModel = model;
+				m_mobScale = scale;
+				m_mobAppearance = appearance;
+				isUpdated = true;
+			}
+		}
+		void setMobAppearance(u8 appearance) { setMobModel(m_mobModel, m_mobScale, appearance); }
+		float mobScale() const { return m_mobScale; }
+		u8 mobAppearance() const { return m_mobAppearance; }
 		u8 mobModel() const { return m_mobModel; }
 
 		// FIXME
@@ -59,6 +70,8 @@ class DrawableDef : public ISerializable {
 	protected:
 		std::vector<InventoryCubeDef> m_cubes;
 		u8 m_mobModel = 0;
+		float m_mobScale = 1.f;
+		u8 m_mobAppearance = 0;
 };
 
 #endif // DRAWABLEDEF_HPP_

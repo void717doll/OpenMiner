@@ -25,12 +25,30 @@
 -- =====================================================================================
 --
 
-function register_tool(name, material, mining_speed, harvest_capability)
+function register_tool(name, material, mining_speed, harvest_capability, harvest_level, max_damage)
+	local attack_damage = 1
+	if name == "sword" then
+		attack_damage = 4 + harvest_level * 2
+	elseif name == "axe" then
+		attack_damage = 3 + harvest_level
+	elseif name == "pickaxe" then
+		attack_damage = 2 + harvest_level
+	elseif name == "shovel" then
+		attack_damage = 1 + harvest_level
+	end
+
 	local tool_def = {
 		id = material .. "_" .. name,
 		name = material:gsub("^%l", string.upper) .. " " .. name:gsub("^%l", string.upper),
 		tiles = material .. "_" .. name .. ".png",
 		max_stack_size = 1,
+		groups = {
+			om_max_damage = max_damage,
+			om_tool_type = name == "sword" and 1 or name == "hoe" and 3 or 2,
+			om_tool_kind = name == "axe" and 1 or name == "pickaxe" and 2 or name == "shovel" and 3 or 0,
+			om_harvest_level = harvest_level,
+			om_attack_damage = attack_damage,
+		},
 	}
 
 	if name ~= "sword" then
@@ -56,12 +74,6 @@ function register_tool(name, material, mining_speed, harvest_capability)
 			"group:om_material_dirt",
 			"group:om_material_sand"
 		}
-
-		tool_def.on_item_activated = function(pos, block, player, world, client, server)
-			if block:string_id() == "default:grass" then
-				world:set_block_from_str(pos.x, pos.y, pos.z, "default:grass_path")
-			end
-		end
 	elseif name == "axe" then
 		tool_def.effective_on = {
 			"group:om_material_wood"
@@ -76,11 +88,17 @@ function register_tool(name, material, mining_speed, harvest_capability)
 end
 
 local tools = {axe = Capability.Axe, hoe = 0, pickaxe = Capability.Pickaxe, shovel = Capability.Shovel, sword = 0}
-local materials = {"wooden", "stone", "iron", "golden", "diamond"}
+local materials = {
+	{"wooden", 2, 0, 59},
+	{"stone", 4, 1, 131},
+	{"iron", 6, 2, 250},
+	{"golden", 12, 0, 32},
+	{"diamond", 8, 3, 1561},
+}
 
-for i, m in ipairs(materials) do
+for _, material in ipairs(materials) do
 	for k, v in pairs(tools) do
-		register_tool(k, m, i * 2, v)
+		register_tool(k, material[1], material[2], v, material[3], material[4])
 	end
 end
 
@@ -88,18 +106,8 @@ mod:item {
 	id = "shears",
 	name = "Shears",
 	tiles = "shears.png",
+	groups = {om_max_damage = 238, om_tool_type = 4},
 
 	max_stack_size = 1,
 
-	on_item_activated = function(pos, block, player, world, client, server)
-		-- FIXME: It should drop the item if 'default:use_item_drops' is enabled
-		if block:string_id() == "default:tallgrass" then
-			world:set_block(pos.x, pos.y, pos.z, 0)
-			mods["default"]:give_item_stack(player, ItemStack.new("default:tallgrass", 1))
-		elseif block:string_id() == "default:oak_leaves" then
-			world:set_block(pos.x, pos.y, pos.z, 0)
-			mods["default"]:give_item_stack(player, ItemStack.new("default:oak_leaves", 1))
-		end
-	end
 }
-

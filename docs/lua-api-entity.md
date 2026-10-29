@@ -113,7 +113,7 @@ visual = {
 }
 ```
 
-**NB:** Currently, `inventorycube` is the only visual type available.
+`inventorycube` also renders non-block item ids as camera-facing sprites. beta mobs use `retro_mob`, described below.
 
 ## Callbacks
 
@@ -165,6 +165,8 @@ position = {5, 2, 3}
 
 ## beta mobs
 
-`properties.visual = {type = "retro_mob", model = "pig"}` selects a ported model; `"zombie"` is also available. set `is_rotatable = true` and a hitbox as in `mods/default/mobs.lua`.
+`properties.visual = {type = "retro_mob", model = "pig"}` selects a beta model. available names are `pig`, `zombie`, `cow`, `sheep`, `chicken`, `skeleton`, `creeper`, `spider`, `slime`, `ghast`, `pig_zombie`, `wolf`, `squid`, `giant`, `arrow_projectile`, and `fireball_projectile`. set `is_rotatable = true` and a hitbox as in `mods/default/mobs.lua`.
 
-`properties.mob` enables server movement and accepts `hostile`, `health`, `move_speed`, `attack_strength`, and `drop_item`. mob health, timers, and motion survive save/reload. the existing `mod:spawn_entity` api can spawn these definitions.
+`properties.mob` enables server simulation and accepts `hostile`, `health`, `move_speed`, `attack_strength`, `drop_item`, and `kind`. `kind` selects the named beta behavior; the definition id supplies it when omitted. unknown kinds retain generic movement. mob health and the separate beta subtype/timer/ownership component survive save/reload. the existing `mod:spawn_entity` api can spawn these definitions.
+
+see [port notes](retromcp-port.md) for interaction controls and engine adaptations.

@@ -47,9 +47,6 @@ class ClientApplication : public CoreApplication {
 
 		KeyboardHandler m_keyboardHandler;
 
-		std::string m_host = "localhost";
-		u16 m_port = 4242;
-
 #ifdef OM_PROFILER_ENABLED
 		ClientProfiler m_profiler;
 #endif

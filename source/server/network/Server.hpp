@@ -30,9 +30,6 @@
 #include <functional>
 #include <unordered_map>
 
-#include <SFML/Network/SocketSelector.hpp>
-#include <SFML/Network/TcpListener.hpp>
-
 #include "common/network/Network.hpp"
 #include "server/network/ServerInfo.hpp"
 
@@ -41,7 +38,8 @@ class Server {
 	using CommandCallback = std::function<void(ClientInfo &, Network::Packet &packet)>;
 
 	public:
-		void init(u16 port = 4242);
+		~Server();
+		void init();
 
 		void disconnectAllClients();
 		void disconnectClient(ClientInfo &client);
@@ -51,31 +49,22 @@ class Server {
 		void sendToAllClients(Network::Packet &packet) const;
 
 		bool isRunning() const { return m_isRunning; }
-		bool isSingleplayer() const { return m_isSingleplayer; }
-
-		u16 port() const { return m_port; }
 
 		const ServerInfo &info() const { return m_info; }
 
 		void setRunning(bool isRunning) { m_isRunning = isRunning; }
-		void setSingleplayer(bool isSingleplayer) { m_isSingleplayer = isSingleplayer; }
 
 		void setConnectionCallback(const ConnectionCallback &callback) { m_connectionCallback = callback; }
 		void setCommandCallback(Network::Command command, const CommandCallback &callback) { m_commands[command] = callback; }
 
 	private:
-		void handleNewConnections();
 		void handleClientMessages();
 
 		bool m_isRunning = false;
-		bool m_isSingleplayer = false;
-
-		u16 m_port = 0;
 
 		ServerInfo m_info;
 
-		sf::TcpListener m_tcpListener;
-		sf::SocketSelector m_selector;
+		std::shared_ptr<Network::LocalSession> m_session;
 
 		ConnectionCallback m_connectionCallback;
 

@@ -35,13 +35,12 @@ The long-term goal of this project is to provide a viable alternative to Minecra
     - [Mod API](https://openminer.readthedocs.io/en/latest/lua-api-mod/)
     - [GUI API](https://openminer.readthedocs.io/en/latest/lua-api-gui/)
     - [C++ classes in Lua](https://openminer.readthedocs.io/en/latest/lua-api-cpp/)
-- [Network Protocol](https://openminer.readthedocs.io/en/latest/network-protocol/)
+- [local world runtime](docs/local-world.md)
 
 ## Keys
 
 - Movement: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
 - Inventory: <kbd>E</kbd>
-- Creative window: <kbd>H</kbd>
 - Chat: <kbd>T</kbd>
 - Jump: <kbd>Space</kbd>
 - Sprint: <kbd>Ctrl</kbd>
@@ -70,7 +69,7 @@ The long-term goal of this project is to provide a viable alternative to Minecra
     - _Check Homebrew for packages._
 - Run `cmake -B build . && cmake --build build`; if you installed `ninja` above, add `-GNinja` before `-B` in the previous command.
 - Run the client with `./build/openminer`
-- If you want a multiplayer game, run the server with `./build/openminer_server`
+- choose play to create or load a local world. `./build/openminer --world MyWorld` opens a named save directly.
 
 ## Discussion
 
@@ -99,7 +98,7 @@ See also the roadmap for 1.0.0 [here](https://github.com/Unarelith/OpenMiner/wik
 - Player model display (without animation)
 - Dimensions (like the Nether or the Ender in Minecraft) ([#80](https://github.com/Unarelith/OpenMiner/pull/80))
 - World loading/saving (see [#26](https://github.com/Unarelith/OpenMiner/issues/26))
-- Texture pack system (partially implemented, see [#34](https://github.com/Unarelith/OpenMiner/issues/34))
+- Built-in refi block, item, mob, and heart artwork
 - Entities ([#90](https://github.com/Unarelith/OpenMiner/pull/90))
 - Day/night cycle with sun/moon/stars ([#154](https://github.com/Unarelith/OpenMiner/pull/154))
 
@@ -122,25 +121,19 @@ See also the roadmap for 1.0.0 [here](https://github.com/Unarelith/OpenMiner/wik
 
 ## Credits
 
-- xMrVizzy ([Faithful 32x](https://www.curseforge.com/minecraft/texture-packs/faithful-32x) texture pack, will completely replace Vanilla textures)
+- MysticTempest ([REFI_Textures](https://github.com/MysticTempest/REFI_Textures), [asset attribution and license](docs/refi-assets.md))
 - ThePhD ([sol2](https://github.com/ThePhD/sol2))
 - skypjack ([EnTT](https://github.com/skypjack/entt))
 
 
 ## generation and regression checks
 
-terrain density now uses the beta 1.7.3 octave-noise code from the supplied retromcp checkout, with a 128-block surface region and sea level 64. oldworld biome selection and cave carving remain in use. decoration randomness includes the world seed, dimension, and chunk coordinates. loading a seed refreshes biome samplers and cached heightmaps. caves use seeded sphere-carved paths replayed from neighboring regions, preserving their shape across chunk boundaries. saved chunks remain unchanged; newly generated terrain can meet older terrain at visible seams.
+beta 1.7.3 climate, density, surface replacement, overworld caves, and nether terrain/caves now follow the supplied retromcp sources. complete-column java comparisons pass. oldworld keeps its decoration and feature population, so full generated worlds still differ. saved chunks remain unchanged.
 
-pig and zombie mobs use beta model geometry, textures, health, drops, and attack values. use `/spawn pig` or `/spawn zombie` to spawn one nearby; left click attacks within three blocks. pigs also spawn on loaded grass during the day, and zombies spawn at night. right click consumes food and restores health; mushroom stew returns a bowl. health appears above the hotbar.
+the beta mob roster has models and simulation, including ranged projectiles, creeper explosions, aquatic/flying movement, and animal interactions. left click attacks and right click interacts. food restores health, displayed as full, half, and empty refi hearts above the hotbar. the first-person view shows the empty hand or selected block/item with swing animation. refi artwork is built in; the texture-pack selector and overrides have been removed.
 
-worldgen still needs staged cross-chunk decoration, parallel generation, superchunks, and the terrain-formula api. fluids, clouds, particles, arbitrary custom meshes, and the remaining beta mob roster are unfinished. see [the port notes](docs/retromcp-port.md) for source mappings and limits.
+worldgen still needs staged cross-chunk decoration, parallel generation, superchunks, and the terrain-formula api. clouds, particles, and arbitrary custom meshes remain unfinished. water/lava propagation and falling blocks now use the [lunarchy physics port](docs/lunarchy-physics.md). mob pathfinding and several animations also differ from beta. see [the port notes](docs/retromcp-port.md) for source mappings, validation, and remaining gaps.
 
-with cxxtest installed, build and run the engine checks:
+local worlds run entirely in the game process. remote joining, hosting, dedicated-server startup, sockets, remote player rendering, and address/username settings have been removed. the simulation thread exchanges local messages with rendering and preserves existing saves.
 
-```sh
-cmake -S . -B build -DOM_BUILD_TESTS=ON
-cmake --build build --target openminer_tests
-ctest --test-dir build -R '^openminer_tests$' --output-on-failure
-```
-
-use `-DOM_BUILD_TESTS=OFF` for a build without cxxtest. the test filter excludes bundled dependency tests.
+survival uses [beta movement, mining and tool durability](docs/beta-survival.md). worn tools retain their damage through inventory transfers, drops and saves. fly/noclip/sprint, creative inventory, starter gifts and cheat commands are removed. mining uses tool tiers and ground drops; falling, drowning and hazardous blocks cause damage.

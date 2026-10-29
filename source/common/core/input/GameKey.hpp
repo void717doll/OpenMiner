@@ -37,12 +37,8 @@ namespace GameKey {
 		Back,
 
 		Jump,
-		Fly,
 		Sneak,
-		Sprint,
 
-		Chat,
-		Command,
 
 		Shift,
 

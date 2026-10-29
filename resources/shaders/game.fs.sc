@@ -53,8 +53,9 @@ void main() {
 	if (v_texcoord0.x > -0.99 && v_texcoord0.y > -0.99) {
 		color = texture2DLod(u_tex, v_texcoord0, clamp(mix(u_mipLevel.x, u_mipLevel.y, v_dist / u_renderDistance.x), u_mipLevel.x, u_mipLevel.y));
 		if (blockFace > -1 && color.r == color.g && color.g == color.b) {
-			color *= v_color0;
+			color.rgb *= v_color0.rgb;
 		}
+		color.a *= v_color0.a;
 	}
 
 	// Very cheap "transparency": don't draw pixels with a low alpha value

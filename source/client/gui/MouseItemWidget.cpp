@@ -80,12 +80,7 @@ void MouseItemWidget::leftClickBehaviour() {
 		if (m_currentInventoryWidget->doItemMatchFilter(m_inventory.getStack(0, 0).item())) {
 			ItemWidget *currentItemWidget = m_currentInventoryWidget->currentItemWidget();
 			if (currentItemWidget->isEnabled()) {
-				if (!m_currentInventoryWidget->inventory()->isUnlimited())
-					swapItems(*currentItemWidget, m_currentInventoryWidget->isReadOnly());
-				else if (getStack().amount() == 0 && currentItemWidget->stack().amount() != 0)
-					setStack(currentItemWidget->stack().item().stringID(), currentItemWidget->stack().item().maxStackSize());
-				else
-					setStack(BLOCK_AIR, 0);
+				swapItems(*currentItemWidget, m_currentInventoryWidget->isReadOnly());
 
 				m_currentInventoryWidget->sendUpdatePacket();
 			}
@@ -99,10 +94,7 @@ void MouseItemWidget::rightClickBehaviour() {
 			if (m_currentInventoryWidget->doItemMatchFilter(m_inventory.getStack(0, 0).item())) {
 				ItemWidget *currentItemWidget = m_currentInventoryWidget->currentItemWidget();
 				if (currentItemWidget->isEnabled()) {
-					if (!m_currentInventoryWidget->inventory()->isUnlimited())
-						putItem(*currentItemWidget);
-					else if (getStack().amount() == 0 && currentItemWidget->stack().amount() != 0)
-						setStack(currentItemWidget->stack().item().stringID(), 1);
+					putItem(*currentItemWidget);
 				}
 			}
 
@@ -133,6 +125,7 @@ void MouseItemWidget::stopDragging() {
 }
 
 void MouseItemWidget::draggingBehaviour(ItemWidget *newItemWidget) {
+	if (m_draggedStack.item().maxStackSize() == 1) return;
 	if (newItemWidget->stack().amount() == 0 || newItemWidget->stack().item().stringID() == m_draggedStack.item().stringID()) {
 		auto it = m_draggedSlots.find(newItemWidget);
 		if (it == m_draggedSlots.end()) {
@@ -185,7 +178,9 @@ void MouseItemWidget::updateCurrentItem(ItemWidget *currentItemWidget) {
 		m_currentItemWidget = (currentItemWidget->stack().item().id()) ? currentItemWidget : nullptr;
 		m_tooltipText.setString(currentItemWidget->stack().item().label() + " [" + std::to_string(currentItemWidget->stack().item().id()) + "]");
 
-		if (currentItemWidget->stack().item().hasGroup("group:om_fuel"))
+		if (currentItemWidget->stack().maxDamage())
+			m_tooltipInfoText.setString(std::to_string(currentItemWidget->stack().maxDamage() - std::min(currentItemWidget->stack().damage(), currentItemWidget->stack().maxDamage())) + " / " + std::to_string(currentItemWidget->stack().maxDamage()) + " durability");
+		else if (currentItemWidget->stack().item().hasGroup("group:om_fuel"))
 			m_tooltipInfoText.setString("Burn time: " + std::to_string(currentItemWidget->stack().item().getGroupValue("group:om_fuel")) + " ticks");
 		else
 			m_tooltipInfoText.setString("");
@@ -196,49 +191,37 @@ void MouseItemWidget::updateCurrentItem(ItemWidget *currentItemWidget) {
 }
 
 void MouseItemWidget::swapItems(ItemWidget &widget, bool isReadOnly) {
-	std::string widgetItemName = widget.stack().item().stringID();
-	u16 widgetItemAmount = widget.stack().amount();
-
-	if (!isReadOnly || stack().item().id() == 0 || stack().item().stringID() == widgetItemName) {
-		if (stack().item().stringID() != widgetItemName) {
-			widget.setStack(stack().item().stringID(), stack().amount());
-			setStack(widgetItemName, widgetItemAmount);
-		}
-		else if (!isReadOnly) {
-			u16 sum = widgetItemAmount + stack().amount();
-			if (sum > stack().item().maxStackSize()) {
-				widget.setStack(widgetItemName, stack().item().maxStackSize());
-				setStack(widgetItemName, sum - stack().item().maxStackSize());
-			}
-			else {
-				widget.setStack(widgetItemName, sum);
-				setStack(BLOCK_AIR, 0);
-			}
-		}
-		else {
-			setStack(stack().item().stringID(), stack().amount() + widgetItemAmount);
-			widget.setStack(BLOCK_AIR, 0);
-		}
+	ItemStack held = stack();
+	ItemStack target = widget.stack();
+	if (!held.sameItem(target) || held.item().maxStackSize() == 1) {
+		if (isReadOnly && held.amount()) return;
+		widget.setStack(held);
+		setStack(target);
+		return;
 	}
+	unsigned maximum = held.item().maxStackSize();
+	if (target.amount() >= maximum) return;
+	u16 transferred = u16(std::min(unsigned(held.amount()), maximum - target.amount()));
+	target.setAmount(target.amount() + transferred);
+	held.setAmount(held.amount() - transferred);
+	widget.setStack(target);
+	setStack(held.amount() ? held : ItemStack::Empty);
 }
 
 void MouseItemWidget::putItem(ItemWidget &widget) {
-	std::string widgetItemName = widget.stack().item().stringID();
-	u16 widgetItemID = widget.stack().item().id();
-	u16 widgetItemAmount = widget.stack().amount();
-
-	if (!widgetItemID && stack().item().id()) {
-		widget.setStack(stack().item().stringID(), 1);
-		setStack(stack().amount() > 1 ? stack().item().stringID() : "", stack().amount() - 1);
-	}
-	else if (widgetItemID && widgetItemID == stack().item().id()) {
-		widget.setStack(stack().item().stringID(), widgetItemAmount + 1);
-		setStack(stack().amount() > 1 ? stack().item().stringID() : "", stack().amount() - 1);
-	}
-	else if (stack().item().id() == 0) {
-		setStack(widgetItemName, (u16)ceil(widgetItemAmount / 2.0));
-		widget.setStack(widgetItemAmount > 1 ? widgetItemName : "", widgetItemAmount / 2);
-	}
+	ItemStack held = stack();
+	ItemStack target = widget.stack();
+	if (!held.amount()) {
+		held = target;
+		held.setAmount((target.amount() + 1) / 2);
+		target.setAmount(target.amount() / 2);
+	} else if (!target.amount() || (held.sameItem(target) && target.amount() < target.item().maxStackSize())) {
+		if (!target.amount()) { target = held; target.setAmount(0); }
+		target.setAmount(target.amount() + 1);
+		held.setAmount(held.amount() - 1);
+	} else return;
+	widget.setStack(target.amount() ? target : ItemStack::Empty);
+	setStack(held.amount() ? held : ItemStack::Empty);
 }
 
 void MouseItemWidget::draw(RenderTarget &target, RenderStates states) const {

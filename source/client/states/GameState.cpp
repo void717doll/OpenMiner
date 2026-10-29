@@ -41,7 +41,6 @@
 #include "client/graphics/BgfxView.hpp"
 #include "client/graphics/RenderTarget.hpp"
 #include "client/graphics/TextureAtlas.hpp"
-#include "client/states/ChatState.hpp"
 #include "client/states/GameState.hpp"
 #include "client/states/LuaGUIState.hpp"
 #include "client/states/PauseMenuState.hpp"
@@ -69,6 +68,10 @@ GameState::GameState()
 	m_fbo.init(Config::screenWidth, Config::screenHeight);
 }
 
+GameState::~GameState() {
+	m_client.disconnect();
+}
+
 void GameState::init() {
 	m_world.setEventHandler(*m_eventHandler);
 
@@ -79,14 +82,14 @@ void GameState::init() {
 }
 
 void GameState::onStateInactive() {
+	m_player.clearInputs();
 	m_hud.pause();
 }
 
-void GameState::connect(const std::string &host, u16 port, const std::string &username) {
-	m_player.setName(username.empty() ? "Player" : username);
-	m_client.connect(host, port, m_player);
+void GameState::connect() {
+	m_player.setName("Player");
+	m_client.connect(m_player);
 	m_player.setClientID(m_client.id());
-	m_client.addPlayer(m_player);
 
 	Mouse::setCursorVisible(false);
 	Mouse::setCursorGrabbed(true);
@@ -126,11 +129,7 @@ void GameState::onEvent(const SDL_Event &event) {
 			}
 		}
 		else if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Chat)
-			 || event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Command)) {
-				m_stateStack->push<ChatState>(m_clientCommandHandler, m_hud.chat(), event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Command), this);
-			}
-			else if (event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::BlockInfoToggle)) {
+			if (event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::BlockInfoToggle)) {
 				Config::isBlockInfoWidgetEnabled = !Config::isBlockInfoWidgetEnabled;
 			}
 			else if (event.key.keysym.sym == SDLK_F2) {
@@ -140,7 +139,7 @@ void GameState::onEvent(const SDL_Event &event) {
 				std::strftime(filename, sizeof(filename), "Screenshot-%Y-%m-%d-%H-%M-%S", std::localtime(&now));
 
 				Window::saveScreenshot(filename);
-				m_hud.chat().addChatMessage(0, "Screenshot saved: " + std::string(filename) + ".png");
+				logInfo() << "screenshot saved:" << std::string(filename) + ".png";
 			}
 
 			for (auto &key : Registry::getInstance().keys()) {
@@ -250,10 +249,6 @@ void GameState::draw(RenderTarget &target, RenderStates states) const {
 	states.view = BgfxView::World;
 	{
 		target.draw(m_world, states);
-
-		for (auto &it : m_playerBoxes)
-			if (it.second.dimension() == m_player.dimension())
-				target.draw(it.second, states);
 
 		target.draw(m_hud.blockCursor(), states);
 	}

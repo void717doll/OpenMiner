@@ -62,7 +62,7 @@ void NetworkController::sendEntities(entt::registry &registry, const ClientInfo 
 				Network::Packet packet = type.func("serialize"_hs).invoke({}, entity, component, false).template cast<Network::Packet>();
 				if (packet.getDataSize()) {
 					// logDebug() << "sendEntities: Serializing component" << type.prop("name"_hs).value().template cast<std::string>() << "for entity" << std::underlying_type_t<entt::entity>(entity) << "of size" << packet.getDataSize();
-					client.tcpSocket->send(packet);
+					client.send(packet);
 				}
 			}
 		});

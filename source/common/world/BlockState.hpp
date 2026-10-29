@@ -98,6 +98,7 @@ class BlockState : public ISerializable {
 		}
 
 		ItemStack getItemDrop() const { return {itemDrop(), itemDropAmount()}; }
+		bool canHarvest(const Item &item) const;
 
 		void setBlock(const Block *block) { m_block = block; }
 		void setDefaultState(const BlockState *defaultState) { m_defaultState = defaultState; }

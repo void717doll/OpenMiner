@@ -35,6 +35,9 @@
 
 #include "client/core/ClientProfiler.hpp"
 #include "client/graphics/Camera.hpp"
+#include "client/graphics/MobModel.hpp"
+#include "client/scene/component/DrawableComponent.hpp"
+#include "common/scene/component/PositionComponent.hpp"
 #include "client/graphics/TextureAtlas.hpp"
 #include "client/network/ClientCommandHandler.hpp"
 #include "client/world/ClientPlayer.hpp"
@@ -284,3 +287,14 @@ void ClientWorld::draw(RenderTarget &target, RenderStates states) const {
 	OM_PROFILE_END("ClientWorld::draw");
 }
 
+
+void ClientWorld::appendCollisionBoxes(const DoubleBox &, const DoubleBox &broadphase, std::vector<DoubleBox> &boxes) const {
+	m_scene.registry().view<const PositionComponent, const DoubleBox, const DrawableComponent>().each(
+		[&](auto, const auto &position, const auto &localBox, const auto &drawable) {
+			const auto *mob = dynamic_cast<const MobModel *>(drawable.drawable());
+			if (!mob || !mob->hasCollision() || !m_dimension || position.dimension != m_dimension->id()) return;
+			DoubleBox box = localBox;
+			box.move(position.x, position.y, position.z);
+			if (box.intersects(broadphase)) boxes.push_back(box);
+		});
+}

@@ -40,6 +40,7 @@ class DrawableComponent {
 		}
 
 		Drawable *drawable() { return m_drawable.get(); }
+		const Drawable *drawable() const { return m_drawable.get(); }
 
 		void draw(RenderTarget &target, RenderStates states) {
 			if (m_drawable)

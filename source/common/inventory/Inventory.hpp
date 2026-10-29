@@ -42,6 +42,8 @@ class Inventory : public ISerializable {
 		const ItemStack &getStack(u16 x, u16 y) const { return m_items.at(x + y * m_width); }
 		ItemStack &getStackRef(u16 x, u16 y) { return m_items.at(x + y * m_width); }
 		void setStack(u16 x, u16 y, const std::string &stringID, u16 amount = 1);
+		void setItemStack(u16 x, u16 y, const ItemStack &stack);
+		ItemStack addItemStack(const ItemStack &stack, u16 offset = 0, u16 size = 0, bool mergeOnly = false, bool retryAfterMerge = false);
 		ItemStack addStack(const std::string &stringID, u16 amount = 1, u16 offset = 0, u16 size = 0, bool mergeOnly = false, bool retryAfterMerge = false);
 		ItemStack addStack2(const std::string &stringID, u16 amount = 1); // Needed for Lua
 		void clearStack(u16 x, u16 y);
@@ -66,8 +68,6 @@ class Inventory : public ISerializable {
 		bool hasChanged() const { return m_hasChanged; }
 		void setChanged(bool hasChanged) { m_hasChanged = hasChanged; }
 
-		bool isUnlimited() const { return m_isUnlimited; }
-		void setUnlimited(bool isUnlimited) { m_isUnlimited = isUnlimited; }
 
 		static void initUsertype(sol::state &lua);
 
@@ -83,7 +83,6 @@ class Inventory : public ISerializable {
 		Vector3i m_blockPos{0, 0, 0};
 
 		bool m_hasChanged = false; // Used to send inventory update packets
-		bool m_isUnlimited = false;
 };
 
 #endif // INVENTORY_HPP_

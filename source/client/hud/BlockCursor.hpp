@@ -53,6 +53,7 @@ class BlockCursor : public Drawable {
 
 	private:
 		void activateBlock(const Hotbar &hotbar);
+		bool hasSelectedEntity() const;
 
 		void updateVertexBuffer(const BlockState &blockState, const u8f orientation);
 		void updateAnimationVertexBuffer(const BlockState &blockState, const u8f orientation, int animationPos = -1);

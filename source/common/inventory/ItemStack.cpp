@@ -33,25 +33,48 @@ const Item &ItemStack::item() const {
 	return Registry::getInstance().getItemFromStringID(m_stringID);
 }
 
+bool ItemStack::wear(u16 amount) {
+	u16 maximum = maxDamage();
+	if (!m_amount || !maximum || !amount) return false;
+	unsigned damage = unsigned(m_damage) + amount;
+	if (damage > maximum) {
+		--m_amount;
+		m_damage = 0;
+		if (!m_amount) *this = Empty;
+	} else m_damage = u16(damage);
+	return true;
+}
+
 // Please update 'docs/lua-api-cpp.md' if you change this
 void ItemStack::initUsertype(sol::state &lua) {
 	lua.new_usertype<ItemStack>("ItemStack",
 		sol::constructors<ItemStack(const std::string &, u16)>(),
 		"amount", &ItemStack::amount,
+		"set_amount", &ItemStack::setAmount,
+		"damage", &ItemStack::damage,
+		"wear", &ItemStack::wear,
 		"item", &ItemStack::item
 	);
 }
 
 sf::Packet &operator<<(sf::Packet &packet, const ItemStack &itemStack) {
+	// undamaged stacks keep the original save layout.
+	if (itemStack.damage())
+		return packet << std::string("@oldworld:stack_damage") << itemStack.item().stringID()
+			<< itemStack.amount() << itemStack.damage();
 	return packet << itemStack.item().stringID() << itemStack.amount();
 }
 
 sf::Packet &operator>>(sf::Packet &packet, ItemStack &itemStack) {
 	std::string stringID;
-	u16 amount;
-	packet >> stringID >> amount;
+	u16 amount = 0;
+	u16 damage = 0;
+	packet >> stringID;
+	if (stringID == "@oldworld:stack_damage") packet >> stringID >> amount >> damage;
+	else packet >> amount;
 	itemStack.setItem(stringID);
 	itemStack.setAmount(amount);
+	itemStack.setDamage(damage);
 	return packet;
 }
 

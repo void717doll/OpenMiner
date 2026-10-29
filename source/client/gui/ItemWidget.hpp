@@ -30,6 +30,7 @@
 #include "common/inventory/Inventory.hpp"
 
 #include "client/graphics/Image.hpp"
+#include "client/graphics/RectangleShape.hpp"
 #include "client/gui/InventoryCube.hpp"
 #include "client/gui/Text.hpp"
 #include "client/gui/Widget.hpp"
@@ -48,6 +49,7 @@ class ItemWidget : public Widget {
 
 		const ItemStack &stack() const { return m_inventory.getStack(m_x, m_y); }
 		void setStack(const std::string &name, u16 amount = 1);
+		void setStack(const ItemStack &stack);
 
 		u16 x() const { return m_x; }
 		u16 y() const { return m_y; }
@@ -70,6 +72,8 @@ class ItemWidget : public Widget {
 
 		Image m_image;
 		Text m_text;
+		RectangleShape m_durabilityBackground{13, 2, Color::Black};
+		RectangleShape m_durabilityBar{13, 1};
 
 		InventoryCube m_cube{10};
 

@@ -27,67 +27,67 @@
 #include "common/core/Exception.hpp"
 #include "client/network/Client.hpp"
 
-void Client::connect(sf::IpAddress serverAddress, u16 serverPort, Player &player) {
-	m_serverAddress = serverAddress;
-	m_serverPort = serverPort;
-
-	m_tcpSocket.reset(new sf::TcpSocket);
-	if (serverAddress.toInteger() == 0 || m_tcpSocket->connect(serverAddress, serverPort, sf::seconds(5)) != sf::Socket::Done)
-		throw ClientConnectException("Network error: Unable to connect to server " + serverAddress.toString() + ":" + std::to_string(serverPort));
+void Client::connect(Player &player) {
+	disconnect();
+	m_session = Network::LocalSession::connect();
+	if (!m_session)
+		throw ClientConnectException("local world is unavailable");
 
 	Network::Packet packet;
-	packet << Network::Command::ClientConnect << player.name() << Network::protocolVersion;
-	m_tcpSocket->send(packet);
+	packet << Network::Command::ClientConnect << player.name();
+	m_session->sendToServer(packet);
 
 	Network::Packet answer;
-	m_tcpSocket->receive(answer);
+	if (!m_session->waitOnClient(answer, std::chrono::seconds(5))) {
+		m_session->close();
+		throw ClientConnectException("local world did not respond");
+	}
 
 	Network::Command command;
-	answer >> command;
-	if (command == Network::Command::ClientRefused)
-		throw ClientConnectException("Server error: Connection refused. Server probably reached max player amount.");
-
-	bool isSingleplayer;
-	if (command != Network::Command::ClientOk)
-		throw ClientConnectException("Network error: Expected 'ClientOk' packet.");
-
-	u16 protocolVersion = 0;
-	answer >> m_id >> isSingleplayer >> protocolVersion;
-	if (!answer || protocolVersion != Network::protocolVersion)
-		throw ClientConnectException("incompatible server protocol");
-	if (m_isSingleplayer != isSingleplayer)
-		throw ClientConnectException("Client error: The server is not valid");
-
-	m_tcpSocket->setBlocking(false);
+	answer >> command >> m_id;
+	if (!answer || command != Network::Command::ClientOk) {
+		m_session->close();
+		throw ClientConnectException("invalid local world session");
+	}
 
 	m_isConnected = true;
 }
 
 void Client::disconnect() {
+	if (!m_session || !m_isConnected)
+		return;
+
 	Network::Packet packet;
 	packet << Network::Command::ClientDisconnect;
-	m_tcpSocket->send(packet);
-
-	m_tcpSocket->disconnect();
+	m_session->sendToServer(packet);
+	m_isConnected = false;
 }
 
 void Client::send(Network::Packet &packet) {
-	if (m_tcpSocket)
-		m_tcpSocket->send(packet);
-	else
-		throw EXCEPTION("Network error: Trying to send a packet without being connected");
+	if (!m_session || !m_isConnected)
+		throw EXCEPTION("local world is not connected");
+	m_session->sendToServer(packet);
 }
 
 void Client::update() {
+	if (!m_session)
+		return;
+
+	// callbacks may remove the state that owns this client.
+	auto session = m_session;
 	Network::Packet packet;
-	while (m_tcpSocket->receive(packet) == sf::Socket::Done) {
+	while (session->receiveOnClient(packet)) {
 		Network::Command command;
 		packet >> command;
-
-		// logDebug() << "TCP message received:" << Network::commandToString(command);
+		if (!packet)
+			continue;
 
 		auto it = m_commands.find(command);
-		if (it != m_commands.end())
-			it->second(packet);
+		if (it != m_commands.end()) {
+			auto callback = it->second;
+			callback(packet);
+			if (command == Network::Command::ServerClosed)
+				return;
+		}
 	}
 }

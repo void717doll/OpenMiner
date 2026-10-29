@@ -27,6 +27,7 @@
 #include <entt/entt.hpp>
 
 #include "common/core/Debug.hpp"
+#include "common/core/Box.hpp"
 #include "common/core/ISerializable.hpp"
 #include "common/network/Network.hpp"
 #include "common/network/NetworkUtils.hpp"
@@ -78,7 +79,10 @@ T &set(entt::registry &registry, entt::entity entity, const T &instance) {
 template<typename T>
 Network::Packet serialize(entt::entity entity, T &component, bool useUpdateStatus) {
 	Network::Packet packet;
-	if constexpr(std::is_base_of_v<ISerializable, std::decay_t<T>>) {
+	if constexpr(std::is_same_v<T, DoubleBox>) {
+		packet << Network::Command::EntityHitbox << entity << component;
+	}
+	else if constexpr(std::is_base_of_v<ISerializable, std::decay_t<T>>) {
 		if (!useUpdateStatus || component.isUpdated) {
 			packet << component.packetType << entity << component;
 			if (useUpdateStatus)
@@ -115,11 +119,16 @@ void extend_meta_type(const std::string &name, ComponentType type, bool isSerial
 #include "common/scene/component/NetworkComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
 #include "common/scene/component/MobComponent.hpp"
+#include "common/scene/component/PhysicalComponent.hpp"
+#include "common/scene/component/FallingBlockComponent.hpp"
 #include "common/scene/component/RotationComponent.hpp"
 
 void Scene::registerComponents() {
+	extend_meta_type<FallingBlockComponent>("FallingBlockComponent", ComponentType::FallingBlock, false, true);
+	extend_meta_type<PhysicalComponent>("PhysicalComponent", ComponentType::Physical, false, true);
+	extend_meta_type<BetaMobComponent>("BetaMobComponent", ComponentType::BetaMob, false, true);
 	extend_meta_type<MobComponent>("MobComponent", ComponentType::Mob, false, true);
-	extend_meta_type<DoubleBox>          ("DoubleBox",          ComponentType::Hitbox,    false, true);
+	extend_meta_type<DoubleBox>          ("DoubleBox",          ComponentType::Hitbox,    true,  true);
 	extend_meta_type<AnimationComponent> ("AnimationComponent", ComponentType::Animation, true,  true);
 	extend_meta_type<DrawableDef>        ("DrawableDef",        ComponentType::Drawable,  true,  true);
 	extend_meta_type<ItemStack>          ("ItemStack",          ComponentType::ItemStack, false, true);

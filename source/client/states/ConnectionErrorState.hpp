@@ -32,7 +32,7 @@
 
 class ConnectionErrorState : public InterfaceState {
 	public:
-		ConnectionErrorState(const std::string &error, const std::string &host, u16 port, ApplicationState *parent = nullptr);
+		ConnectionErrorState(const std::string &error, ApplicationState *parent = nullptr);
 
 		void onEvent(const SDL_Event &event) override;
 
@@ -41,15 +41,12 @@ class ConnectionErrorState : public InterfaceState {
 
 		void draw(RenderTarget &target, RenderStates states) const override;
 
-		std::string m_host;
-		u16 m_port;
-
 		Image m_background{"texture-menu_background"};
 		RectangleShape m_filter;
 
 		Text m_text;
 
-		MenuWidget m_menuWidget{1, 2};
+		MenuWidget m_menuWidget{1, 1};
 };
 
 #endif // CONNECTIONERRORSTATE_HPP_

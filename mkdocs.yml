@@ -26,7 +26,9 @@ nav:
         - 'Scroll bar': 'lua-api-gui-scroll-bar.md'
         - 'Text input': 'lua-api-gui-text-input.md'
     - 'Misc':
-      - 'Network Protocol': 'network-protocol.md'
+      - 'local world runtime': 'local-world.md'
+      - 'lunarchy physics': 'lunarchy-physics.md'
+      - 'beta survival': 'beta-survival.md'
 
 theme:
     name: readthedocs

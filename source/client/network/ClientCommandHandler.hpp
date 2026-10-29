@@ -31,7 +31,11 @@
 
 #include <entt/entt.hpp>
 
-#include "client/graphics/PlayerBox.hpp"
+#include "common/core/IntTypes.hpp"
+#include "common/network/Network.hpp"
+#include <glm/glm.hpp>
+
+class Inventory;
 
 class Camera;
 class Client;
@@ -40,8 +44,8 @@ class ClientWorld;
 
 class ClientCommandHandler {
 	public:
-		ClientCommandHandler(Client &client, ClientWorld &world, ClientPlayer &player, std::unordered_map<u16, PlayerBox> &playerBoxes)
-			: m_client(client), m_world(world), m_player(player), m_playerBoxes(playerBoxes) {}
+		ClientCommandHandler(Client &client, ClientWorld &world, ClientPlayer &player)
+			: m_client(client), m_world(world), m_player(player) {}
 
 		void sendPlayerInvUpdate();
 		void sendPlayerPosUpdate();
@@ -51,11 +55,11 @@ class ClientCommandHandler {
 		void sendPlayerHeldItemChanged(u8 hotbarSlot, u16 itemID);
 		void sendPlayerReady();
 		void sendPlayerAttack();
+		void sendPlayerInteract();
 		void sendPlayerChunkPosUpdate() const;
 		void sendBlockActivated(const glm::ivec4 &selectedBlock);
 		void sendBlockInvUpdate(Inventory &inventory);
 		void sendItemActivated(const glm::ivec4 &selectedBlock);
-		void sendChatMessage(const std::string &message);
 		void sendKeyPressed(u16 keyID);
 
 		void setupCallbacks();
@@ -64,9 +68,7 @@ class ClientCommandHandler {
 
 		bool isRegistryInitialized() const { return m_isRegistryInitialized; }
 
-		void setSingleplayer(bool isSingleplayer) { m_isSingleplayer = isSingleplayer; }
 
-		using PlayerBoxMap = std::unordered_map<u16, PlayerBox>;
 		using EntityMap = std::unordered_map<entt::entity, entt::entity>;
 
 	private:
@@ -74,12 +76,10 @@ class ClientCommandHandler {
 		ClientWorld &m_world;
 		ClientPlayer &m_player;
 
-		PlayerBoxMap &m_playerBoxes;
 		EntityMap m_entityMap;
 
 		bool m_isRegistryInitialized = false;
 
-		bool m_isSingleplayer = false;
 };
 
 #endif // CLIENTCOMMANDHANDLER_HPP_

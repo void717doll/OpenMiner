@@ -119,6 +119,7 @@ bool Chunk::setData(int x, int y, int z, u16 data) {
 
 	m_hasChanged = true;
 	m_world.addChunkToUpdate(this);
+	onBlockChanged(x, y, z);
 
 	return true;
 }
@@ -144,6 +145,7 @@ bool Chunk::setBlockRaw(int x, int y, int z, u16 type) {
 
 	m_hasChanged = true;
 	m_world.addChunkToUpdate(this);
+	onBlockChanged(x, y, z);
 
 	return true;
 }

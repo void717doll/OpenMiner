@@ -36,13 +36,11 @@ struct ServerOnlineEvent;
 
 class ServerLoadingState : public InterfaceState {
 	public:
-		ServerLoadingState(GameState &game, bool showLoadingState, const std::string &host, u16 port, ApplicationState *parent = nullptr);
+		ServerLoadingState(GameState &game, bool showLoadingState, ApplicationState *parent = nullptr);
 
 		void init() override;
 
 		void update() override;
-
-		void setUsername(const std::string &username) { m_username = username; }
 
 	private:
 		void onServerOnlineEvent(const ServerOnlineEvent &event);
@@ -61,13 +59,8 @@ class ServerLoadingState : public InterfaceState {
 		bool m_showLoadingState;
 		mutable bool m_hasBeenRendered = false;
 
-		std::string m_username;
-
 		bool m_isServerOnline = false;
 		bool m_isConnected = false;
-
-		std::string m_host;
-		u16 m_port = 4242;
 };
 
 #endif // SERVERLOADINGSTATE_HPP_

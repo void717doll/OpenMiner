@@ -32,6 +32,7 @@
 #include "common/core/Debug.hpp"
 #include "common/world/Player.hpp"
 #include "server/network/ClientInfo.hpp"
+#include "server/world/PlayerSurvival.hpp"
 
 class ServerPlayer : public Player {
 	public:
@@ -49,6 +50,9 @@ class ServerPlayer : public Player {
 
 		bool isReady() const { return m_isReady; }
 		void setReady(bool isReady) { m_isReady = isReady; }
+		PlayerSurvivalState &survival() { return m_survival; }
+		const PlayerSurvivalState &survival() const { return m_survival; }
+		void resetSurvival() { m_survival = {}; }
 
 		bool isChunkLoaded(const Vector3i &chunk) const { return m_loadedChunks.find(chunk) != m_loadedChunks.end(); }
 		void addLoadedChunk(const Vector3i &chunk) { m_loadedChunks.emplace(chunk); }
@@ -70,6 +74,7 @@ class ServerPlayer : public Player {
 	private:
 		ClientInfo *m_client = nullptr;
 		u64 m_nextAttack = 0;
+		PlayerSurvivalState m_survival;
 
 		bool m_isNewPlayer = false;
 		bool m_isReady = false; // Is player ready to receive chunks?

@@ -14,7 +14,7 @@ They are located in `mods` folder.
 Here is an example of configuration:
 ```lua
 mod_config = {
-	id = "creative_inventory",
+	id = "example",
 
 	dependencies = {"*default"}
 }

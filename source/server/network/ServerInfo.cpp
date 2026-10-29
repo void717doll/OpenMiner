@@ -26,8 +26,10 @@
  */
 #include "server/network/ServerInfo.hpp"
 
-ClientInfo &ServerInfo::addClient(const std::shared_ptr<sf::TcpSocket> &socket) {
-	m_clients.emplace_back(u16(m_clients.size() + 1), socket);
+ClientInfo &ServerInfo::addClient(const std::shared_ptr<Network::LocalSession> &session) {
+	if (!m_clients.empty())
+		throw EXCEPTION("local world already has a player");
+	m_clients.emplace_back(1, session);
 	return m_clients.back();
 }
 

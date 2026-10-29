@@ -26,6 +26,11 @@
  */
 #include "common/core/Registry.hpp"
 #include "common/world/BlockState.hpp"
+#include "common/world/BetaMining.hpp"
+
+bool BlockState::canHarvest(const Item &item) const {
+	return retro::canHarvest(*this, item);
+}
 
 void BlockState::serialize(sf::Packet &packet) const {
 	packet << m_id << m_label << m_tiles
@@ -60,8 +65,10 @@ bool BlockState::isOpaque() const {
 void BlockState::initUsertype(sol::state &lua) {
 	lua.new_usertype<BlockState>("BlockState",
 		"id", &BlockState::id,
+		"block", &BlockState::block,
 		"label", (const std::string &(BlockState::*)() const)&BlockState::label,
-		"get_item_drop", &BlockState::getItemDrop
+		"get_item_drop", &BlockState::getItemDrop,
+		"can_harvest", &BlockState::canHarvest
 	);
 }
 

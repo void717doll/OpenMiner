@@ -29,6 +29,7 @@
 
 #include <memory>
 #include <set>
+#include <vector>
 
 #include "common/world/Chunk.hpp"
 
@@ -56,6 +57,7 @@ class World {
 		bool addChunkToProcess(Chunk *chunk);
 
 		virtual void onBlockPlaced(int, int, int, const Block &) {}
+		virtual void appendCollisionBoxes(const DoubleBox &, const DoubleBox &, std::vector<DoubleBox> &) const {}
 
 		static void initUsertype(sol::state &lua);
 

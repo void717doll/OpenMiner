@@ -64,6 +64,12 @@ void ServerChunk::process() {
 	}
 }
 
+void ServerChunk::onBlockChanged(int x, int y, int z) {
+	if (!m_isInitialized) return;
+	m_hasBeenModified = true;
+	m_world.blockPhysics().enqueueNeighbors({x + m_x * width, y + m_y * depth, z + m_z * height});
+}
+
 void ServerChunk::onBlockPlaced(int x, int y, int z, const Block &block) {
 	const ServerBlock &serverBlock = (ServerBlock &)block;
 	if (block.canUpdate()) {
@@ -126,7 +132,7 @@ void ServerChunk::sendData(const ClientInfo &client) {
 		}
 	}
 
-	client.tcpSocket->send(packet);
+	client.send(packet);
 
 	// logDebug() << "Chunk at" << chunk.x() << chunk.y() << chunk.z() << "sent to client";
 }

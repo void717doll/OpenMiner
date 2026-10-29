@@ -52,7 +52,6 @@ class SettingsMenuState : public InterfaceState {
 		void doneButtonAction();
 
 		void addMainButtons();
-		void addGameplayButtons();
 		void addInterfaceButtons();
 		void addGraphicsButtons();
 		void addInputButtons();
@@ -77,7 +76,7 @@ class SettingsMenuState : public InterfaceState {
 
 		enum class MenuState {
 			Main,
-			Gameplay,
+			Interface,
 			Graphics,
 			Input,
 			Debug

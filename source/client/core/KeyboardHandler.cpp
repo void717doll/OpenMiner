@@ -43,12 +43,7 @@ KeyboardHandler::KeyboardHandler() {
 	addKey(GameKey::Back,            "Back",              SDLK_s);
 
 	addKey(GameKey::Jump,            "Jump",              SDLK_SPACE);
-	addKey(GameKey::Fly,             "Fly",               SDLK_x);
 	addKey(GameKey::Sneak,           "Sneak",             SDLK_LSHIFT);
-	addKey(GameKey::Sprint,          "Sprint",            SDLK_LCTRL);
-
-	addKey(GameKey::Chat,            "Chat",              SDLK_t);
-	addKey(GameKey::Command,         "Command",           SDLK_KP_DIVIDE);
 
 	addKey(GameKey::Shift,           "Shift",             SDLK_LSHIFT);
 
@@ -66,6 +61,7 @@ void KeyboardHandler::loadKeysFromFile(const std::string &filename) {
 			if (keys != sol::nullopt) {
 				for (auto &it : keys.value()) {
 					const std::string &keyID = it.first.as<std::string>();
+					if (keyID == "_Fly" || keyID == "_Sprint" || keyID == "_Chat" || keyID == "_Command") continue;
 					const std::string &keyName = it.second.as<sol::table>()["name"].get<std::string>();
 					const std::string &keyValue = it.second.as<sol::table>()["value"].get<std::string>();
 

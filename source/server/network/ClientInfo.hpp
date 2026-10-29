@@ -29,21 +29,22 @@
 
 #include <memory>
 
-#include <SFML/Network.hpp>
+#include "common/network/LocalSession.hpp"
 
 #include "server/core/NetworkInputHandler.hpp"
 
 class ClientInfo {
 	public:
-		ClientInfo(u16 _id, const std::shared_ptr<sf::TcpSocket> &socket)
-			: id(_id), tcpSocket(socket) {}
+		ClientInfo(u16 _id, const std::shared_ptr<Network::LocalSession> &session)
+			: id(_id), m_session(session) {}
+
+		void send(const Network::Packet &packet) const { m_session->sendToClient(packet); }
 
 		u16 id;
 		bool isReady = false;
 
 		u32 previousKeyTimestamp = 0;
 
-		std::shared_ptr<sf::TcpSocket> tcpSocket;
 
 		NetworkInputHandler inputHandler;
 
@@ -52,6 +53,8 @@ class ClientInfo {
 		u16 screenWidth = 1;
 		u16 screenHeight = 1;
 		u8 guiScale = 1;
+	private:
+		std::shared_ptr<Network::LocalSession> m_session;
 };
 
 #endif // CLIENTINFO_HPP_

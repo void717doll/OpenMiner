@@ -27,6 +27,7 @@
 #include "common/core/ApplicationStateStack.hpp"
 
 #include "client/core/Config.hpp"
+#include "client/core/GameConfig.hpp"
 #include "client/network/Client.hpp"
 #include "client/states/TitleScreenState.hpp"
 #include "client/states/WorldSavingState.hpp"
@@ -53,18 +54,16 @@ WorldSavingState::WorldSavingState(Client &client, bool closeClient, DrawableSta
 }
 
 void WorldSavingState::update() {
-	if (m_hasBeenRendered || m_isWorldSaved) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
+	if (!m_isSavingStarted && m_hasBeenRendered) {
 		m_client.disconnect();
-
+		m_isSavingStarted = true;
+	}
+	m_client.update();
+	if (m_isWorldSaved) {
+		GameConfig::isGameRunning = false;
 		m_stateStack->clear();
-
 		if (!m_closeClient)
 			m_stateStack->push<TitleScreenState>();
-	}
-	else {
-		m_client.update();
 	}
 }
 

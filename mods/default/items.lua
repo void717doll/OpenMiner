@@ -28,7 +28,8 @@
 mod:item {
 	id = "stick",
 	name = "Stick",
-	tiles = "stick.png"
+	tiles = "stick.png",
+	groups = {om_fuel = 100}
 }
 
 mod:item {
@@ -504,4 +505,23 @@ mod:item {
 	id = "leather",
 	name = "Leather",
 	tiles = "leather.png",
+}
+
+mod:item {
+	id = "gunpowder",
+	name = "Gunpowder",
+	tiles = "gunpowder.png",
+}
+
+mod:item {
+	id = "ink_sac",
+	name = "Ink Sac",
+	tiles = "ink_sac.png",
+}
+
+mod:item {
+	id = "saddle",
+	name = "Saddle",
+	tiles = "saddle.png",
+	max_stack_size = 1,
 }

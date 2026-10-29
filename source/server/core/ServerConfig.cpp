@@ -33,14 +33,11 @@
 
 namespace fs = ghc::filesystem;
 
-// Server
-u8 ServerConfig::maxPlayers = 5;
 u16 ServerConfig::maxItemStackSize = 64;
 
-// World
 u8 ServerConfig::renderDistance = 8;
 
-// Mod-defined options
+// mod-defined options
 std::unordered_map<std::string, sol::object> ServerConfig::options;
 
 static sol::state lua;
@@ -50,7 +47,6 @@ void ServerConfig::loadConfigFromFile(const char *file) {
 		try {
 			lua.safe_script_file(file);
 
-			maxPlayers = lua["max_players"].get_or(maxPlayers);
 			maxItemStackSize = lua["max_item_stack_size"].get_or(maxItemStackSize);
 
 			renderDistance = lua["render_distance"].get_or(renderDistance);
@@ -71,7 +67,6 @@ void ServerConfig::loadConfigFromFile(const char *file) {
 
 void ServerConfig::saveConfigToFile(const char *filename) {
 	std::ofstream file{filename, std::ofstream::out | std::ofstream::trunc};
-	file << "max_players = " << (u16)maxPlayers << std::endl;
 	file << "max_item_stack_size = " << maxItemStackSize << std::endl;
 	file << "render_distance = " << (u16)renderDistance << std::endl;
 	file << "mod_options = {" << std::endl;

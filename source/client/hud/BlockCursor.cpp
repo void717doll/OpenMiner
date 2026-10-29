@@ -27,11 +27,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/core/GameClock.hpp"
+#include "common/scene/component/PositionComponent.hpp"
+#include "common/world/WorldCollision.hpp"
+#include "common/world/BetaMining.hpp"
+#include "common/world/BetaToolRules.hpp"
+#include "common/world/LiquidState.hpp"
 #include "common/core/Registry.hpp"
 #include "common/core/input/GameKey.hpp"
 #include "common/resource/ResourceHandler.hpp"
 
 #include "client/core/Config.hpp"
+#include "client/graphics/Camera.hpp"
+#include "client/graphics/MobModel.hpp"
+#include "client/scene/component/DrawableComponent.hpp"
 #include "client/core/input/GamePad.hpp"
 #include "client/hud/BlockCursor.hpp"
 #include "client/hud/Hotbar.hpp"
@@ -62,9 +70,40 @@ BlockCursor::BlockCursor(ClientPlayer &player, ClientWorld &world, ClientCommand
 	m_ibo.init(indices, sizeof(indices));
 }
 
+bool BlockCursor::hasSelectedEntity() const {
+	Vector3d origin = m_player.camera().getDPosition();
+	Vector3d direction{m_player.dirTargetedX(), m_player.dirTargetedY(), m_player.dirTargetedZ()};
+	double limit = 3;
+	if (m_selectedBlock.w != -1) {
+		const BlockState *state = m_world.getBlockState(m_selectedBlock.x, m_selectedBlock.y, m_selectedBlock.z);
+		if (state) {
+			double blockDistance = collision::rayDistance(origin, direction,
+				collision::blockBox(*state, m_world.getData(m_selectedBlock.x, m_selectedBlock.y, m_selectedBlock.z),
+					m_selectedBlock.x, m_selectedBlock.y, m_selectedBlock.z), limit);
+			if (blockDistance >= 0) limit = blockDistance;
+		}
+	}
+	bool selected = false;
+	m_world.scene().registry().view<PositionComponent, DoubleBox>().each([&](auto entity, const auto &position, const auto &hitbox) {
+		auto *drawable = m_world.scene().registry().try_get<DrawableComponent>(entity);
+		auto *mob = drawable ? dynamic_cast<MobModel *>(drawable->drawable()) : nullptr;
+		if (!mob || !mob->isTargetable()) return;
+		if (position.dimension != m_player.dimension()) return;
+		DoubleBox box = hitbox;
+		box.move(position.x, position.y, position.z);
+		double distance = collision::rayDistance(origin, direction, box, limit);
+		if (distance >= 0 && distance < limit) selected = true;
+	});
+	return selected;
+}
+
 void BlockCursor::onEvent(const SDL_Event &event, const Hotbar &hotbar) {
-	if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
-		m_client.sendPlayerAttack();
+	if (event.type == SDL_MOUSEBUTTONDOWN && hasSelectedEntity()) {
+		if (event.button.button == SDL_BUTTON_LEFT) m_client.sendPlayerAttack();
+		else if (event.button.button == SDL_BUTTON_RIGHT) m_client.sendPlayerInteract();
+		reset();
+		return;
+	}
 	if (hotbar.cursorPos() == -1) return;
 
 	if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT
@@ -123,28 +162,34 @@ void BlockCursor::update(const Hotbar &hotbar) {
 				m_currentTool = &currentStack;
 			}
 			else {
-				bool isEffective = false;
-				for (auto &it : currentStack.item().effectiveOn()) {
-					if (m_currentBlock->block().hasGroup(it)) {
-						isEffective = true;
-						break;
-					}
+				const Vector3d &position = m_player.physicsPosition();
+				int eyeX = int(std::floor(position.x)), eyeY = int(std::floor(position.y));
+				int eyeZ = int(std::floor(position.z + 1.625));
+				const BlockState *eye = m_world.getBlockState(eyeX, eyeY, eyeZ);
+				bool submerged = eye && liquid::kind(eye->block()) == 1;
+				if (submerged) {
+					const BlockState *above = m_world.getBlockState(eyeX, eyeY, eyeZ + 1);
+					bool covered = above && liquid::kind(above->block()) == 1;
+					double height = liquid::height(eye->block(), m_world.getData(eyeX, eyeY, eyeZ), covered);
+					submerged = position.z + 1.625 < eyeZ + height;
 				}
-
-				timeToBreak = m_currentBlock->timeToBreak(currentStack.item().harvestCapability(), currentStack.item().miningSpeed(), isEffective);
+				timeToBreak = retro::survivalBreakTime(*m_currentBlock, currentStack.item(), submerged, m_player.onGround());
 
 				if ((float)ticks > (float)m_animationStart + timeToBreak * 1000.f) {
 					m_world.setBlock(m_selectedBlock.x, m_selectedBlock.y, m_selectedBlock.z, 0);
-					m_animationStart = ticks;
+					m_animationStart = ticks + 250;
 
 					m_client.sendPlayerDigBlock(m_selectedBlock);
 				}
 			}
 		}
 
-		if (m_animationStart && m_currentBlock)
-			updateAnimationVertexBuffer(*m_currentBlock, orientation,
-				u32(float(ticks - m_animationStart) / (timeToBreak * 100.f)));
+		if (m_animationStart && m_currentBlock) {
+			u32 frame = timeToBreak == 0 ? 9 : 0;
+			if (timeToBreak > 0 && std::isfinite(timeToBreak))
+				frame = u32(std::clamp((float(ticks) - float(m_animationStart)) / (timeToBreak * 100.f), 0.f, 9.f));
+			updateAnimationVertexBuffer(*m_currentBlock, orientation, frame);
+		}
 	}
 
 	if (m_selectedBlock.w != -1)
@@ -377,7 +422,7 @@ glm::ivec4 BlockCursor::findSelectedBlock() const {
 	glm::dvec3 lookAt{m_player.dirTargetedX(), m_player.dirTargetedY(), m_player.dirTargetedZ()};
 
 	// Ray casting algorithm to find out which block we are looking at
-	const double maxReach = Config::maxBlockReach;
+	const double maxReach = 4.0;
 	double bestDepth;
 	s8f bestFace = -1;
 

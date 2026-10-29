@@ -94,7 +94,7 @@ bool CraftingWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractIn
 }
 
 ItemStack CraftingWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *) {
-	ItemStack stackRet = m_craftingInventory.addStack(itemStack->stack().item().stringID(), itemStack->stack().amount());
+	ItemStack stackRet = m_craftingInventory.addItemStack(itemStack->stack());
 
 	if (stackRet.amount() != itemStack->stack().amount()) {
 		m_craftingInventoryWidget.update();

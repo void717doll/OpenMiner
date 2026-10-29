@@ -33,7 +33,6 @@
 #include <sol/sol.hpp>
 
 #include "common/core/Vector3.hpp"
-#include "server/network/ChatCommandHandler.hpp"
 
 struct BlockData;
 
@@ -59,28 +58,23 @@ class ServerCommandHandler {
 		ServerCommandHandler(ScriptEngine &scriptEngine, Server &server, WorldController &worldController, PlayerList &players, Registry &registry)
 			: m_scriptEngine(scriptEngine), m_server(server), m_worldController(worldController), m_players(players), m_registry(registry) {}
 
-		void sendServerTick(const ClientInfo *client = nullptr) const;
 		void sendServerClosed(const std::string &message, ClientInfo *client = nullptr) const;
 		void sendChunkUnload(s32 chunkX, s32 chunkY, s32 chunkZ, const ClientInfo *client = nullptr) const;
 		void sendBlockDataUpdate(s32 x, s32 y, s32 z, const BlockData *blockData, const ClientInfo *client = nullptr) const;
 		void sendBlockInvUpdate(s32 x, s32 y, s32 z, const Inventory &inventory, const ClientInfo *client = nullptr) const;
 		void sendPlayerPosUpdate(u16 clientID, bool isTeleportation = false, const ClientInfo *client = nullptr) const;
-		void sendPlayerRotUpdate(u16 clientID, const ClientInfo *client = nullptr) const;
 		void sendPlayerInvUpdate(u16 clientID, const ClientInfo *client = nullptr) const;
 		void sendPlayerChangeDimension(u16 clientID, s32 x, s32 y, s32 z, u16 dimension, const ClientInfo *client = nullptr) const;
-		void sendChatMessage(u16 clientID, const std::string &message, const ClientInfo *client = nullptr) const;
 		void sendEntitySpawn(entt::entity entityID, const ClientInfo *client = nullptr) const;
 		void sendEntityDespawn(entt::entity entityID, const ClientInfo *client = nullptr) const;
 
 		void sendPlayerHealth(u16 clientID) const;
 		void damagePlayer(u16 clientID, u16 amount);
-		void spawnMob(u16 clientID, const std::string &id);
 
 		void setupCallbacks();
 
 		void setPlayerPosition(u16 clientID, s32 x, s32 y, s32 z);
 
-		void stopServer() const;
 
 		const Server &server() const { return m_server; }
 
@@ -97,7 +91,6 @@ class ServerCommandHandler {
 
 		Registry &m_registry;
 
-		ChatCommandHandler m_chatCommandHandler{*this};
 };
 
 #endif // SERVERCOMMANDHANDLER_HPP_

@@ -33,7 +33,6 @@
 
 #include "client/core/KeyboardHandler.hpp"
 #include "client/graphics/Framebuffer.hpp"
-#include "client/graphics/PlayerBox.hpp"
 #include "client/graphics/ShaderUniform.hpp"
 #include "client/graphics/Skybox.hpp"
 #include "client/hud/HUD.hpp"
@@ -50,11 +49,12 @@ class TextureAtlas;
 class GameState : public DrawableState {
 	public:
 		GameState();
+		~GameState() override;
 
 		void init() override;
 		void onStateInactive() override;
 
-		void connect(const std::string &host, u16 port, const std::string &username);
+		void connect();
 
 		void onEvent(const SDL_Event &event) override;
 
@@ -65,11 +65,6 @@ class GameState : public DrawableState {
 		ClientWorld &world() { return m_world; }
 		ClientCommandHandler &clientCommandHandler() { return m_clientCommandHandler; }
 		TextureAtlas &textureAtlas() { return m_textureAtlas; }
-
-		void setSingleplayer(bool isSingleplayer) {
-			m_clientCommandHandler.setSingleplayer(isSingleplayer);
-			m_client.setSingleplayer(isSingleplayer);
-		}
 
 	private:
 		void initShaders();
@@ -87,9 +82,7 @@ class GameState : public DrawableState {
 
 		Client m_client;
 
-		std::unordered_map<u16, PlayerBox> m_playerBoxes;
-
-		ClientCommandHandler m_clientCommandHandler{m_client, m_world, m_player, m_playerBoxes};
+		ClientCommandHandler m_clientCommandHandler{m_client, m_world, m_player};
 
 		HUD m_hud{m_player, m_world, m_clientCommandHandler};
 

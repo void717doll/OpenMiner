@@ -27,6 +27,7 @@
 
 mod:block {
 	id = "dirt",
+	hardness = 0.5,
 	name = "Dirt",
 	tiles = "dirt.png",
 	groups = {
@@ -45,6 +46,7 @@ mod:block {
 
 mod:block {
 	id = "grass",
+	hardness = 0.6,
 	name = "Grass",
 	tiles = {"grass_block_top.png", "dirt.png", "grass_block_side.png"},
 	color_multiplier = {129, 191, 91, 255},
@@ -63,17 +65,19 @@ mod:block {
 	name = "Oak Leaves",
 	tiles = "oak_leaves.png",
 	color_multiplier = {106, 173, 51, 255},
-	hardness = 0,
+	hardness = 0.2,
 	draw_type = "leaves",
 	-- is_opaque = false, -- FIXME
 }
 
 mod:block {
 	id = "oak_wood",
+	hardness = 2,
 	name = "Oak Wood",
 	tiles = {"oak_log_top.png", "oak_log.png"},
 	groups = {
 		om_material_wood = 1,
+		om_fuel = 300,
 	}
 }
 
@@ -91,9 +95,11 @@ mod:block {
 
 mod:block {
 	id = "sand",
+	hardness = 0.5,
 	name = "Sand",
 	tiles = "sand.png",
 	groups = {
+		falling_node = 1,
 		om_material_sand = 1
 	}
 }
@@ -114,6 +120,7 @@ mod:block {
 
 mod:block {
 	id = "glass",
+	hardness = 0.3,
 	name = "Glass",
 	tiles = "glass.png",
 	draw_type = "glass",
@@ -137,16 +144,18 @@ mod:block {
 	name = "Oak Wood Planks",
 	tiles = "oak_planks.png",
 
-	hardness = 1,
+	hardness = 2,
 
 	groups = {
 		om_material_wood = 1,
+		om_fuel = 300,
 		default_planks = 1
 	}
 }
 
 mod:block {
 	id = "glowstone",
+	hardness = 0.3,
 	name = "Glowstone",
 	tiles = "glowstone.png",
 	is_light_source = true,
@@ -165,6 +174,7 @@ mod:block {
 
 mod:block {
 	id = "dandelion",
+	groups = {attached_node = 3},
 	name = "Dandelion",
 	tiles = "dandelion.png",
 	hardness = 0,
@@ -174,6 +184,7 @@ mod:block {
 
 mod:block {
 	id = "tallgrass",
+	groups = {attached_node = 3},
 	name = "Grass",
 	tiles = "grass.png",
 	color_multiplier = {129, 191, 91, 255},
@@ -199,6 +210,7 @@ mod:block {
 
 mod:block {
 	id = "clay",
+	hardness = 0.6,
 	name = "Clay",
 	tiles = "clay.png",
 	item_drop = {
@@ -213,6 +225,7 @@ mod:block {
 	tiles = "oak_planks.png",
 	groups = {
 		om_material_wood = 1,
+		om_fuel = 300,
 	},
 
 	draw_type = "boundingbox",
@@ -243,6 +256,7 @@ mod:block {
 
 mod:block {
 	id = "netherrack",
+	hardness = 0.4,
 	name = "Netherrack",
 	tiles = "netherrack.png",
 	harvest_requirements = Capability.Pickaxe,
@@ -250,6 +264,7 @@ mod:block {
 
 mod:block {
 	id = "soul_sand",
+	hardness = 0.5,
 	name = "Soul Sand",
 	tiles = "soul_sand.png",
 	groups = {
@@ -274,11 +289,11 @@ mod:block {
 	id = "cactus",
 	name = "Cactus",
 	tiles = {"cactus_top.png", "cactus_bottom.png", "cactus_side.png"},
-	hardness = 0,
+	hardness = 0.4,
 	is_opaque = false,
 
 	draw_type = "cactus",
-	bounding_box = {1/16, 1/16, 0, 14/16, 14/16, 1};
+	bounding_box = {1/16, 1/16, 0, 14/16, 14/16, 15/16};
 
 	on_block_destroyed = function(pos, world)
 		if world:get_block(pos.x, pos.y, pos.z + 1) == world:get_block(pos.x, pos.y, pos.z) then
@@ -290,6 +305,7 @@ mod:block {
 
 mod:block {
 	id = "deadbush",
+	groups = {attached_node = 3},
 	name = "Dead Bush",
 	tiles = "deadbush.png",
 	draw_type = "xshape",
@@ -314,7 +330,7 @@ mod:block {
 	name = "Obsidian",
 	tiles = "obsidian.png",
 
-	hardness = 8,
+	hardness = 10,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -486,6 +502,7 @@ mod:block {
 
 mod:block {
 	id = "torch",
+	groups = {attached_node = 3},
 	name = "Torch (WIP)",
 	tiles = "torch_on.png",
 
@@ -528,6 +545,8 @@ mod:block {
 
 mod:block {
 	id = "ice",
+	hardness = 0.5,
+	groups = {slippery = 3},
 	name = "Ice",
 	tiles = "ice.png",
 	draw_type = "glass",
@@ -536,12 +555,14 @@ mod:block {
 
 mod:block {
 	id = "snow",
+	hardness = 0.2,
 	name = "Snow",
 	tiles = "snow.png",
 }
 
 mod:block {
 	id = "bookshelf",
+	hardness = 1.5,
 	name = "Bookshelf",
 	tiles = {"oak_planks.png", "oak_planks.png", "bookshelf.png"},
 }
@@ -590,7 +611,7 @@ mod:block {
 	id = "diamond_block",
 	name = "Diamond Block",
 	tiles = "diamond_block.png",
-	hardness = 2,
+	hardness = 5,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -598,7 +619,7 @@ mod:block {
 	id = "gold_block",
 	name = "Gold Block",
 	tiles = "gold_block.png",
-	hardness = 2,
+	hardness = 3,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -606,7 +627,7 @@ mod:block {
 	id = "lapis_block",
 	name = "Lapis Lazuli Block",
 	tiles = "lapis_block.png",
-	hardness = 2,
+	hardness = 3,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -614,7 +635,7 @@ mod:block {
 	id = "iron_block",
 	name = "Iron Block",
 	tiles = "iron_block.png",
-	hardness = 2,
+	hardness = 5,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -646,7 +667,7 @@ mod:block {
 	id = "gold_ore",
 	name = "Gold Ore",
 	tiles = "gold_ore.png",
-	hardness = 2,
+	hardness = 3,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -654,7 +675,7 @@ mod:block {
 	id = "diamond_ore",
 	name = "Diamond Ore",
 	tiles = "diamond_ore.png",
-	hardness = 2,
+	hardness = 3,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -662,7 +683,7 @@ mod:block {
 	id = "redstone_ore",
 	name = "Redstone Ore",
 	tiles = "redstone_ore.png",
-	hardness = 2,
+	hardness = 3,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -670,7 +691,7 @@ mod:block {
 	id = "lapis_ore",
 	name = "Lapis Lazuli Ore",
 	tiles = "lapis_ore.png",
-	hardness = 2,
+	hardness = 3,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -718,7 +739,7 @@ mod:block {
 	id = "sandstone",
 	name = "Sandstone",
 	tiles = {"sandstone_top.png", "sandstone_bottom.png", "sandstone_normal.png"},
-	hardness = 2,
+	hardness = 0.8,
 	harvest_requirements = Capability.Pickaxe,
 }
 
@@ -788,9 +809,11 @@ mod:block {
 
 mod:block {
 	id = "gravel",
+	hardness = 0.6,
 	name = "Gravel",
 	tiles = "gravel.png",
-	groups = {om_material_dirt = 1},
+	groups = {
+		falling_node = 1,om_material_dirt = 1},
 }
 
 mod:block {
@@ -800,3 +823,21 @@ mod:block {
 	hardness = 0.8,
 	groups = {om_material_wool = 1},
 }
+
+for _, liquid in ipairs({{"water", "Water", {51, 115, 255, 217}, 20, {0, 128, 255}, 1},
+	{"lava", "Lava", {255, 255, 255, 255}, 10, {255, 128, 0}, 3}}) do
+	mod:block {
+		id = liquid[1] .. "_flowing",
+		name = "Flowing " .. liquid[2],
+		tiles = liquid[1] .. ".png",
+		custom_param_bits = 4,
+		draw_type = "liquid",
+		is_opaque = false,
+		is_collidable = false,
+		is_light_source = liquid[1] == "lava",
+		color_multiplier = liquid[3],
+		fog_depth = liquid[4],
+		fog_color = liquid[5],
+		groups = {liquid_range = 8, liquid_viscosity = liquid[6]},
+	}
+end

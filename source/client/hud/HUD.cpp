@@ -41,7 +41,6 @@ HUD::HUD(ClientPlayer &player, ClientWorld &world, ClientCommandHandler &client)
 	m_wield(player),
 	m_blockCursor(player, world, client),
 	m_debugOverlay(player, world),
-	m_chat(client.client()),
 	m_debugLightmapViewer(player)
 {
 	setScale(Config::guiScale, Config::guiScale, 1);
@@ -67,8 +66,6 @@ void HUD::setup() {
 	m_fpsText.setPosition(Config::screenWidth / getScale().x - 36.f, 2.f);
 
 	m_crosshair.setup();
-
-	m_chat.setPosition(2.f, Config::screenHeight / Config::guiScale - 50.f);
 
 	m_minimap.setPosition(float(Config::screenWidth / Config::guiScale - Minimap::minimapSize) - 15.f, 15.f);
 
@@ -103,8 +100,8 @@ void HUD::onGuiScaleChanged(const GuiScaleChangedEvent &event) {
 }
 
 void HUD::update() {
-	m_wield.update();
 	m_hearts.update(m_player.health());
+	m_wield.update();
 	// FIXME: Shouldn't be called every tick
 	if (Config::isHotbarVisible)
 		m_hotbar.update();
@@ -165,8 +162,6 @@ void HUD::draw(RenderTarget &target, RenderStates states) const {
 
 	if (Config::isLightmapViewerEnabled)
 		target.draw(m_debugLightmapViewer, states);
-
-	target.draw(m_chat, states);
 
 	states.transform = Transform::Identity;
 

@@ -37,7 +37,7 @@ struct ServerOnlineEvent;
 
 class TitleScreenState : public InterfaceState {
 	public:
-		TitleScreenState(u16 port = 4242);
+		TitleScreenState();
 		~TitleScreenState();
 
 		void init() override;
@@ -45,7 +45,6 @@ class TitleScreenState : public InterfaceState {
 		void onEvent(const SDL_Event &event) override;
 
 		void startSingleplayer(bool showLoadingState, const std::string &worldName = "", s32 seed = 1337);
-		void startMultiplayer(const std::string &host);
 
 	private:
 		void onGuiScaleChanged(const GuiScaleChangedEvent &event);
@@ -59,8 +58,6 @@ class TitleScreenState : public InterfaceState {
 		Image m_background{"texture-title_screen"};
 
 		std::thread m_thread;
-
-		u16 m_port = 4242;
 
 		Text m_titleText;
 		Text m_versionText;

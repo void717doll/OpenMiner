@@ -53,6 +53,13 @@ void ItemWidget::disable() {
 
 void ItemWidget::update() {
 	if (!m_isEnabled) return;
+	if (stack().damage() && stack().maxDamage()) {
+		float remaining = 1.f - std::min(1.f, float(stack().damage()) / stack().maxDamage());
+		m_durabilityBackground.setPosition(3, 14, 0);
+		m_durabilityBar.setPosition(3, 14, -1);
+		m_durabilityBar.setSize(std::round(13 * remaining), 1);
+		m_durabilityBar.setFillColor(Color::fromRGBA32(u8(255 * (1 - remaining)), u8(255 * remaining), 0));
+	}
 
 	if (m_itemID != stack().item().id()) {
 		if (stack().item().isBlock()) {
@@ -104,6 +111,11 @@ void ItemWidget::setStack(const std::string &name, u16 amount) {
 	update();
 }
 
+void ItemWidget::setStack(const ItemStack &stack) {
+	m_inventory.setItemStack(m_x, m_y, stack);
+	update();
+}
+
 void ItemWidget::draw(RenderTarget &target, RenderStates states) const {
 	if (!m_isEnabled || stack().amount() == 0) return;
 
@@ -118,4 +130,8 @@ void ItemWidget::draw(RenderTarget &target, RenderStates states) const {
 
 	if (stack().amount() != 1)
 		target.draw(m_text, states);
+	if (stack().damage() && stack().maxDamage()) {
+		target.draw(m_durabilityBackground, states);
+		target.draw(m_durabilityBar, states);
+	}
 }

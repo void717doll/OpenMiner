@@ -37,7 +37,7 @@
 #include "client/states/GameState.hpp"
 #include "client/states/ServerLoadingState.hpp"
 
-ServerLoadingState::ServerLoadingState(GameState &game, bool showLoadingState, const std::string &host, u16 port, ApplicationState *parent)
+ServerLoadingState::ServerLoadingState(GameState &game, bool showLoadingState, ApplicationState *parent)
 	: InterfaceState(parent), m_game(game), m_showLoadingState(showLoadingState)
 {
 	m_background.setScale(Config::guiScale * 2.f, Config::guiScale * 2.f);
@@ -51,9 +51,6 @@ ServerLoadingState::ServerLoadingState(GameState &game, bool showLoadingState, c
 
 	updateWidgetPosition();
 
-	m_host = host;
-	m_port = port;
-
 	Mouse::setCursorVisible(true);
 	Mouse::setCursorGrabbed(false);
 
@@ -65,21 +62,24 @@ void ServerLoadingState::init() {
 }
 
 void ServerLoadingState::update() {
-	if (!m_isConnected && (m_isServerOnline || m_port != 0)) {
+	if (!m_isConnected && m_isServerOnline) {
 		try {
-			m_game.connect(m_host, m_port, m_username);
+			m_game.connect();
 			m_isConnected = true;
 		}
 		catch (ClientConnectException &e) {
-			m_stateStack->pop(); // GameState
-			m_stateStack->pop(); // ServerLoadingState
+			m_game.client().disconnect();
+			m_stateStack->pop();
+			m_stateStack->pop();
 
-			m_stateStack->push<ConnectionErrorState>(e.what(), m_host, m_port, m_parent);
+			m_stateStack->push<ConnectionErrorState>(e.what(), m_parent);
+			return;
 		}
 	}
 
 	if (m_isConnected)
 		m_game.client().update();
+	if (m_stateStack->empty() || &m_stateStack->top() != this) return;
 
 	if (m_game.clientCommandHandler().isRegistryInitialized()) {
 		if (m_game.textureAtlas().isReady() && (m_hasBeenRendered || !m_showLoadingState)) {
@@ -110,8 +110,14 @@ void ServerLoadingState::update() {
 }
 
 void ServerLoadingState::onServerOnlineEvent(const ServerOnlineEvent &event) {
+	if (m_stateStack->empty() || &m_stateStack->top() != this) return;
 	m_isServerOnline = event.isOnline;
-	m_port = event.port;
+	if (!event.isOnline) {
+		m_game.client().disconnect();
+		m_stateStack->pop();
+		m_stateStack->pop();
+		m_stateStack->push<ConnectionErrorState>("unable to load local world", m_parent);
+	}
 }
 
 void ServerLoadingState::updateWidgetPosition() {

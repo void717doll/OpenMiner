@@ -26,8 +26,8 @@ set(SOURCE_FILES
 	graphics/Framebuffer.cpp
 	graphics/Image.cpp
 	graphics/IndexBuffer.cpp
-	graphics/PlayerBox.cpp
 	graphics/MobModel.cpp
+	graphics/ItemBillboard.cpp
 	graphics/WieldRenderer.cpp
 	graphics/RectangleShape.cpp
 	graphics/RenderTarget.cpp
@@ -62,8 +62,6 @@ set(SOURCE_FILES
 
 	hud/BlockCursor.cpp
 	hud/BlockInfoWidget.cpp
-	hud/Chat.cpp
-	hud/ChatMessage.cpp
 	hud/Crosshair.cpp
 	hud/DebugLightmapViewer.cpp
 	hud/DebugOverlay.cpp
@@ -86,13 +84,11 @@ set(SOURCE_FILES
 	scene/controller/AnimationController.cpp
 	scene/controller/RenderingController.cpp
 
-	states/ChatState.cpp
 	states/ConnectionErrorState.cpp
 	states/GameState.cpp
 	states/InterfaceState.cpp
 	states/LuaGUIState.cpp
 	states/PauseMenuState.cpp
-	states/ServerConnectState.cpp
 	states/ServerLoadingState.cpp
 	states/SettingsMenuState.cpp
 	states/TitleScreenState.cpp
@@ -131,8 +127,8 @@ set(HEADER_FILES
 	graphics/Framebuffer.hpp
 	graphics/Image.hpp
 	graphics/IndexBuffer.hpp
-	graphics/PlayerBox.hpp
 	graphics/MobModel.hpp
+	graphics/ItemBillboard.hpp
 	graphics/WieldRenderer.hpp
 	graphics/RectangleShape.hpp
 	graphics/RenderStates.hpp
@@ -169,8 +165,6 @@ set(HEADER_FILES
 
 	hud/BlockCursor.hpp
 	hud/BlockInfoWidget.hpp
-	hud/Chat.hpp
-	hud/ChatMessage.hpp
 	hud/Crosshair.hpp
 	hud/DebugLightmapViewer.hpp
 	hud/DebugOverlay.hpp
@@ -193,14 +187,12 @@ set(HEADER_FILES
 	scene/controller/AnimationController.hpp
 	scene/controller/RenderingController.hpp
 
-	states/ChatState.hpp
 	states/ConnectionErrorState.hpp
 	states/DrawableState.hpp
 	states/GameState.hpp
 	states/InterfaceState.hpp
 	states/LuaGUIState.hpp
 	states/PauseMenuState.hpp
-	states/ServerConnectState.hpp
 	states/ServerLoadingState.hpp
 	states/SettingsMenuState.hpp
 	states/TitleScreenState.hpp

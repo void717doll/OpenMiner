@@ -26,24 +26,13 @@
 --
 
 -- openminer:add_listener(Event.BlockPlaced, function(pos, block, player, world, client, server)
--- 	server:send_chat_message(0, "Block placed at " .. pos.x .. ";" .. pos.y .. ";" .. pos.z .. " by Client" .. player:client_id(), client)
 -- end)
 
 -- openminer:add_listener(Event.BlockDigged, function(pos, block, player, world, client, server)
--- 	server:send_chat_message(0, "Block digged at " .. pos.x .. ";" .. pos.y .. ";" .. pos.z .. " by Client" .. player:client_id(), client)
 -- end)
 
 openminer:add_listener(Event.BlockActivated, function(pos, block, player, world, client, server)
 	if block:string_id() == "default:portal" then
-		server:send_chat_message(0, "Swoosh! Changing dimension...", client)
 	end
-end)
-
-openminer:add_listener(Event.PlayerConnected, function(pos, player, client, server)
-	player:inventory():add_stack("default:stone_axe", 1)
-
-	server:send_chat_message(0, "Welcome to OpenMiner!", client)
-	server:send_chat_message(0, "Press E to open inventory", client)
-	server:send_chat_message(0, "Press H to open creative inventory", client)
 end)
 

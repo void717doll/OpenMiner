@@ -35,7 +35,7 @@
 
 class ServerInfo {
 	public:
-		ClientInfo &addClient(const std::shared_ptr<sf::TcpSocket> &socket);
+		ClientInfo &addClient(const std::shared_ptr<Network::LocalSession> &session);
 		ClientInfo *getClient(u16 id);
 		void removeClient(u16 id);
 

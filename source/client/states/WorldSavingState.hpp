@@ -52,6 +52,7 @@ class WorldSavingState : public InterfaceState {
 		bool m_closeClient = false;
 
 		bool m_isWorldSaved = false;
+		bool m_isSavingStarted = false;
 		mutable bool m_hasBeenRendered = false;
 
 		Text m_text;

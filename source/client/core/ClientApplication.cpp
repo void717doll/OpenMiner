@@ -28,6 +28,7 @@
 
 #include "common/core/BlockGeometry.hpp"
 #include "common/core/EngineConfig.hpp"
+#include "common/core/Utils.hpp"
 
 #include "client/core/ClientApplication.hpp"
 #include "client/core/Config.hpp"
@@ -38,6 +39,7 @@
 #include "client/resource/TextureLoader.hpp"
 
 #include "client/states/TitleScreenState.hpp"
+#include "client/states/WorldSelectionState.hpp"
 
 namespace fs = ghc::filesystem;
 
@@ -46,13 +48,9 @@ ClientApplication::ClientApplication(int argc, char **argv) : CoreApplication(ar
 }
 
 bool ClientApplication::init() {
-	m_argumentParser.addArgument("host",         {"-h", "--host",         "Select the host to connect to.", "host"});
-	m_argumentParser.addArgument("port",         {"-p", "--port",         "Select the port to use.", "port"});
-	m_argumentParser.addArgument("singleplayer", {"-s", "--singleplayer", "Start in singleplayer mode."});
-	m_argumentParser.addArgument("multiplayer",  {"-m", "--multiplayer",  "Start in multiplayer mode."});
+	m_argumentParser.addArgument("singleplayer", {"-s", "--singleplayer", "open local world selection."});
+	m_argumentParser.addArgument("world", {"", "--world", "open a named local world.", "name"});
 	m_argumentParser.addArgument("working-dir",  {"-w", "--working-dir",  "Change the working directory to <dir>.", "dir"});
-	m_argumentParser.addArgument("texture-pack", {"-t", "--texture-pack", "Use texture pack <name>.", "name"});
-	m_argumentParser.addArgument("username",     {"-u", "--username",     "Use <username> when using -m or -s", "username"});
 	m_argumentParser.addArgument("log-level",    {"-l", "--log-level",    "Choose the log level (debug, info, warning, error)", "level"});
 
 	m_loggerHandler.setName("client");
@@ -83,18 +81,7 @@ bool ClientApplication::init() {
 	if (m_argumentParser.getArgument("working-dir").isFound)
 		fs::current_path(m_argumentParser.getArgument("working-dir").parameter);
 
-	if (m_argumentParser.getArgument("host").isFound)
-		m_host = m_argumentParser.getArgument("host").parameter;
-	if (m_argumentParser.getArgument("port").isFound)
-		m_port = (u16)std::stoi(m_argumentParser.getArgument("port").parameter);
-
 	Config::loadConfigFromFile("config/client.lua");
-
-	if (m_argumentParser.getArgument("username").isFound)
-		Config::defaultUsername = m_argumentParser.getArgument("username").parameter;
-
-	if (m_argumentParser.getArgument("texture-pack").isFound)
-		Config::texturePack = m_argumentParser.getArgument("texture-pack").parameter;
 
 	m_keyboardHandler.loadKeysFromFile("config/keys.lua");
 	GamePad::init(m_keyboardHandler);
@@ -114,11 +101,12 @@ bool ClientApplication::init() {
 	ClientProfiler::setInstance(&m_profiler);
 #endif
 
-	auto &titleScreen = m_stateStack.push<TitleScreenState>(m_port);
-	if (m_argumentParser.getArgument("singleplayer").isFound)
-		titleScreen.startSingleplayer(false);
-	else if (m_argumentParser.getArgument("multiplayer").isFound)
-		titleScreen.startMultiplayer(m_host);
+	auto &titleScreen = m_stateStack.push<TitleScreenState>();
+	const Argument &world = m_argumentParser.getArgument("world");
+	if (world.isFound && utils::regexMatch(world.parameter, "^[A-Za-z0-9][A-Za-z0-9_]*$"))
+		titleScreen.startSingleplayer(true, world.parameter);
+	else if (world.isFound || m_argumentParser.getArgument("singleplayer").isFound)
+		m_stateStack.push<WorldSelectionState>(&titleScreen);
 
 	return true;
 }

@@ -1,37 +1,101 @@
+#include <glm/gtc/matrix_inverse.hpp>
+
+#include "common/core/Exception.hpp"
 #include "common/core/GameClock.hpp"
+#include "common/core/GameTime.hpp"
 #include "common/scene/RetroMobMesh.hpp"
 #include "client/graphics/MobModel.hpp"
 #include "client/graphics/RenderTarget.hpp"
 #include "client/graphics/Vertex.hpp"
 
-MobModel::MobModel(unsigned model) : m_model(model) {
-	m_texture.loadFromFile(model == 1 ? "mods/default/textures/mobs/pig.png" : "mods/default/textures/mobs/zombie.png");
-	m_vertices.setupDefaultLayout();
+namespace {
+
+void loadTexture(Texture &texture, const std::string &name) {
+	std::string path = "mods/default/textures/mobs/" + name + ".png";
+	if (texture.filename() == path) return;
+	texture.free();
+	texture.loadFromFile(path);
+}
+
+}
+
+MobModel::MobModel(unsigned model, float scale, u8 appearance) {
+	for (auto &vertices : m_vertices) vertices.setupDefaultLayout();
+	configure(model, scale, appearance);
+}
+
+void MobModel::configure(unsigned model, float scale, u8 appearance) {
+	static const char *names[] = {"", "pig", "zombie", "cow", "sheep", "chicken", "skeleton", "creeper",
+		"spider", "slime", "ghast", "pig_zombie", "wolf", "squid", "zombie", "arrow", "fireball"};
+	if (model == 0 || model >= std::size(names)) throw EXCEPTION("unknown mob model", model);
+	m_model = model;
+	m_scale = std::isfinite(scale) && scale > 0 ? scale : 1.f;
+	m_appearance = appearance;
+	std::string name = names[model];
+	if (model == 12) name = appearance & 2 ? "wolf_tame" : appearance & 1 ? "wolf_angry" : "wolf";
+	if (model == 10 && (appearance & 1)) name = "ghast_shooting";
+	loadTexture(m_texture, name);
+	if (model == 1 && (appearance & 1)) loadTexture(m_overlay, "pig_saddle");
+	else if (model == 4) loadTexture(m_overlay, "sheep_fur");
+	else if (model == 8) loadTexture(m_overlay, "spider_eyes");
+	else if (model == 9) loadTexture(m_overlay, "slime");
 }
 
 void MobModel::updateMotion(const Vector3d &position) {
-	if (m_hasPosition && (std::abs(position.x - m_lastPosition.x) > 0.001 || std::abs(position.y - m_lastPosition.y) > 0.001))
-		m_lastMove = GameClock::getInstance().getTicks();
+	if (m_hasPosition) {
+		double dx = position.x - m_lastPosition.x, dy = position.y - m_lastPosition.y;
+		double distance = std::sqrt(dx * dx + dy * dy);
+		if (distance > 0.001) {
+			m_lastMove = GameClock::getInstance().getTicks();
+			m_stride += float(distance) * 4;
+		}
+	}
 	m_lastPosition = position;
 	m_hasPosition = true;
 }
 
 void MobModel::draw(RenderTarget &target, RenderStates states) const {
+	static constexpr float fleece[16][3] = {{1,1,1},{0.95f,0.7f,0.2f},{0.9f,0.5f,0.85f},{0.6f,0.7f,0.95f},
+		{0.9f,0.9f,0.2f},{0.5f,0.8f,0.1f},{0.95f,0.7f,0.8f},{0.3f,0.3f,0.3f},
+		{0.6f,0.6f,0.6f},{0.3f,0.6f,0.7f},{0.7f,0.4f,0.9f},{0.2f,0.4f,0.8f},
+		{0.5f,0.4f,0.3f},{0.4f,0.5f,0.2f},{0.8f,0.3f,0.3f},{0.1f,0.1f,0.1f}};
 	u64 now = GameClock::getInstance().getTicks();
-	auto mesh = retro::mobMesh(m_model, float(now % 100000) * 0.008f, now - m_lastMove < 200 ? 0.6f : 0.f);
-	std::vector<Vertex> vertices;
-	vertices.reserve(mesh.size());
-	for (const auto &point : mesh) {
-		Vertex vertex;
-		vertex.coord3d[0] = point.x; vertex.coord3d[1] = point.y; vertex.coord3d[2] = point.z;
-		vertex.texCoord[0] = point.u; vertex.texCoord[1] = point.v;
-		for (float &color : vertex.color) color = 1;
-		vertex.lightValue[0] = 15; vertex.lightValue[1] = 0;
-		vertices.push_back(vertex);
+	float strength = now - m_lastMove < 200 ? 0.6f : 0.f;
+	float age = float(now % 100000) / 50;
+	for (unsigned layer = 0; layer < 2; ++layer) {
+		auto mesh = retro::mobMesh(m_model, m_stride, strength, age, m_appearance, layer);
+		if (mesh.empty()) continue;
+		std::vector<Vertex> vertices;
+		vertices.reserve(mesh.size());
+		float scale = m_model == 10 ? m_scale * 4.5f : m_scale;
+		glm::vec3 right{1,0,0}, up{0,0,1};
+		if (m_model == 16 && target.getView()) {
+			const auto &view = target.getView()->getViewTransform().getMatrix();
+			glm::mat3 local = glm::inverse(glm::mat3(states.transform.getMatrix()));
+			right = local * glm::vec3(view[0][0],view[1][0],view[2][0]);
+			up = local * glm::vec3(view[0][1],view[1][1],view[2][1]);
+		}
+		for (const auto &point : mesh) {
+			Vertex vertex;
+			glm::vec3 position = m_model == 16 ? right * point.x + up * point.z : glm::vec3(point.x,point.y,point.z);
+			position *= scale;
+			vertex.coord3d[0] = position.x; vertex.coord3d[1] = position.y; vertex.coord3d[2] = position.z;
+			vertex.texCoord[0] = point.u; vertex.texCoord[1] = point.v;
+			for (float &color : vertex.color) color = 1;
+			if (layer == 1 && m_model == 4) {
+				for (int channel = 0; channel < 3; ++channel) vertex.color[channel] = fleece[m_appearance & 15][channel];
+			}
+			if (layer == 1 && m_model == 9) vertex.color[3] = 0.5f;
+			if (layer == 1 && m_model == 8)
+				vertex.color[3] = (1 - GameTime::getSunlightIntensityFromTime(GameTime::getCurrentTime())) * 0.5f;
+			vertex.lightValue[0] = 15;
+			vertex.lightValue[1] = layer == 1 && m_model == 8 ? 15.f : 0.f;
+			vertices.push_back(vertex);
+		}
+		m_vertices[layer].init(vertices.data(), u32(vertices.size() * sizeof(Vertex)), true);
+		states.texture = layer ? &m_overlay : &m_texture;
+		states.isCullFaceEnabled = false;
+		states.isDepthTestEnabled = true;
+		target.draw(m_vertices[layer], 0, u32(vertices.size()), states);
 	}
-	if (m_vertices.isValid()) m_vertices.update(vertices.data(), u32(vertices.size() * sizeof(Vertex)));
-	else m_vertices.init(vertices.data(), u32(vertices.size() * sizeof(Vertex)), true);
-	states.texture = &m_texture;
-	states.isCullFaceEnabled = false;
-	target.draw(m_vertices, 0, u32(vertices.size()), states);
 }

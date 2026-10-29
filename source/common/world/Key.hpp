@@ -47,7 +47,6 @@ class Key : public ISerializable {
 		void deserialize(sf::Packet &packet) override {
 			packet >> m_id >> m_stringID >> m_name >> m_defaultKey;
 
-			// Needed for multiplayer mode
 			if (m_keycode == SDLK_UNKNOWN)
 				m_keycode = SDL_GetKeyFromName(m_defaultKey.c_str());
 		}

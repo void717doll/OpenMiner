@@ -36,11 +36,6 @@
 
 namespace fs = ghc::filesystem;
 
-// Gameplay
-bool Config::isFlyModeEnabled = false;
-bool Config::isNoClipEnabled = false;
-u16 Config::maxBlockReach = 7;
-
 // Interface
 bool Config::isBlockInfoWidgetEnabled = true;
 bool Config::isFpsCounterEnabled = true;
@@ -71,11 +66,6 @@ bool Config::isProfilerWindowEnabled = false;
 bool Config::isWireframeModeEnabled = false;
 bool Config::isBgfxDebugLogEnabled = false;
 
-// Other
-std::string Config::defaultUsername = "";
-std::string Config::defaultServerAddress = "localhost:4242";
-std::string Config::texturePack = "";
-
 void Config::loadConfigFromFile(const char *filename) {
 	if (!fs::exists("config") && !fs::create_directory("config")) {
 		logError() << "Failed to create 'config' folder";
@@ -87,10 +77,6 @@ void Config::loadConfigFromFile(const char *filename) {
 
 		try {
 			lua.safe_script_file(filename);
-
-			isFlyModeEnabled = lua["isFlyModeEnabled"].get_or(isFlyModeEnabled);
-			isNoClipEnabled = lua["isNoClipEnabled"].get_or(isNoClipEnabled);
-			maxBlockReach = lua["maxBlockReach"].get_or(maxBlockReach);
 
 			isBlockInfoWidgetEnabled = lua["isBlockInfoWidgetEnabled"].get_or(isBlockInfoWidgetEnabled);
 			isFpsCounterEnabled = lua["isFpsCounterEnabled"].get_or(isFpsCounterEnabled);
@@ -117,10 +103,6 @@ void Config::loadConfigFromFile(const char *filename) {
 			isLightmapViewerEnabled = lua["isLightmapViewerEnabled"].get_or(isLightmapViewerEnabled);
 			isProfilerWindowEnabled = lua["isProfilerWindowEnabled"].get_or(isProfilerWindowEnabled);
 
-			defaultUsername = lua["defaultUsername"].get_or(defaultUsername);
-			defaultServerAddress = lua["defaultServerAddress"].get_or(defaultServerAddress);
-			texturePack = lua["texturePack"].get_or(texturePack);
-
 			logInfo() << "Config file loaded successfully";
 		}
 		catch (sol::error &e) {
@@ -131,9 +113,6 @@ void Config::loadConfigFromFile(const char *filename) {
 
 void Config::saveConfigToFile(const char *filename) {
 	std::ofstream file{filename, std::ofstream::out | std::ofstream::trunc};
-	file << "isFlyModeEnabled = " << (isFlyModeEnabled ? "true" : "false") << std::endl;
-	file << "isNoClipEnabled = " << (isNoClipEnabled ? "true" : "false") << std::endl;
-	file << "maxBlockReach = " << maxBlockReach << std::endl;
 	file << std::endl;
 	file << "isBlockInfoWidgetEnabled = " << (isBlockInfoWidgetEnabled ? "true" : "false") << std::endl;
 	file << "isFpsCounterEnabled = " << (isFpsCounterEnabled ? "true" : "false") << std::endl;
@@ -160,7 +139,4 @@ void Config::saveConfigToFile(const char *filename) {
 	file << "isLightmapViewerEnabled = " << (isLightmapViewerEnabled ? "true" : "false") << std::endl;
 	file << "isProfilerWindowEnabled = " << (isProfilerWindowEnabled ? "true" : "false") << std::endl;
 	file << std::endl;
-	file << "defaultUsername = \"" << defaultUsername << "\"" << std::endl;
-	file << "defaultServerAddress = \"" << defaultServerAddress << "\"" << std::endl;
-	file << "texturePack = \"" << texturePack  << "\"" << std::endl;
 }
