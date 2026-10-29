@@ -102,9 +102,8 @@ void Hotbar::draw(RenderTarget &target, RenderStates states) const {
 	states.transform *= getTransform();
 
 	target.draw(m_background, states);
+	target.draw(m_cursor, states);
 
 	for (auto &it : m_items)
 		target.draw(it, states);
-
-	target.draw(m_cursor, states);
 }
