@@ -42,6 +42,7 @@ float Config::soundVolume = 0.7f;
 bool Config::isFpsCounterEnabled = true;
 bool Config::isHotbarVisible = true;
 bool Config::isCrosshairVisible = true;
+bool Config::isItemDurabilityVisible = false;
 
 // Graphics
 u16 Config::renderDistance = 8;
@@ -83,6 +84,7 @@ void Config::loadConfigFromFile(const char *filename) {
 			isFpsCounterEnabled = lua["isFpsCounterEnabled"].get_or(isFpsCounterEnabled);
 			isHotbarVisible = lua["isHotbarVisible"].get_or(isHotbarVisible);
 			isCrosshairVisible = lua["isCrosshairVisible"].get_or(isCrosshairVisible);
+			isItemDurabilityVisible = lua["isItemDurabilityVisible"].get_or(isItemDurabilityVisible);
 
 			renderDistance = lua["renderDistance"].get_or(renderDistance);
 			ambientOcclusion = std::clamp<u8>(lua["ambientOcclusion"].get_or(ambientOcclusion), 0, 2);
@@ -119,6 +121,7 @@ void Config::saveConfigToFile(const char *filename) {
 	file << "isFpsCounterEnabled = " << (isFpsCounterEnabled ? "true" : "false") << std::endl;
 	file << "isHotbarVisible = " << (isHotbarVisible ? "true" : "false") << std::endl;
 	file << "isCrosshairVisible = " << (isCrosshairVisible ? "true" : "false") << std::endl;
+	file << "isItemDurabilityVisible = " << (isItemDurabilityVisible ? "true" : "false") << std::endl;
 	file << std::endl;
 	file << "renderDistance = " << renderDistance << std::endl;
 	file << "ambientOcclusion = " << (u16)ambientOcclusion << std::endl;

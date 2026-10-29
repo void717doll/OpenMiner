@@ -68,3 +68,7 @@ creative grants instant block breaking, unlimited placement and item use, no too
 stone pickaxes mine copper ore, found in newly generated overworld stone from height 4 through 64. smelt the ore into copper ingots and use the usual tool patterns to make a pickaxe, axe, shovel, hoe or sword. copper tools have 190 durability and mining speed 5, between stone and iron.
 
 iron ore and iron blocks require a copper, iron or diamond pickaxe. stone and golden pickaxes cannot harvest iron. copper cannot harvest gold, redstone, diamond or obsidian. copper is an explicit addition to the beta item set; iron tool recipes continue to use iron ingots.
+
+## hotbar item labels
+
+selecting an item shows its name above the hotbar for three seconds, fading during the last second. enable `show durability` under options > interface to keep the held tool or armor's remaining and maximum durability visible. the setting is saved; food, blocks and empty slots have no durability label.

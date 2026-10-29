@@ -38,6 +38,7 @@ namespace Config {
 	extern bool isFpsCounterEnabled;
 	extern bool isHotbarVisible;
 	extern bool isCrosshairVisible;
+	extern bool isItemDurabilityVisible;
 
 	// Graphics
 	extern u16 renderDistance;

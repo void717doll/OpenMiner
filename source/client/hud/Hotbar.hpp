@@ -31,6 +31,7 @@
 
 #include "common/inventory/Inventory.hpp"
 #include "client/gui/ItemWidget.hpp"
+#include "client/gui/Text.hpp"
 
 class ClientCommandHandler;
 class ClientPlayer;
@@ -47,6 +48,7 @@ class Hotbar : public Widget {
 		const Item &currentItem() const;
 
 	private:
+		void updateItemName();
 		void draw(RenderTarget &target, RenderStates states) const override;
 
 		Image m_background;
@@ -59,6 +61,14 @@ class Hotbar : public Widget {
 		ClientCommandHandler &m_client;
 
 		std::vector<ItemWidget> m_items;
+
+		Text m_itemName;
+		Text m_durability;
+		std::string m_namedItem;
+		int m_namedSlot = -1;
+		u64 m_itemNameUntil = 0;
+		bool m_itemNameVisible = false;
+		bool m_durabilityVisible = false;
 };
 
 #endif // HOTBAR_HPP_

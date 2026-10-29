@@ -28,6 +28,8 @@
 #include "client/core/KeyboardHandler.hpp"
 #include "client/core/input/GamePad.hpp"
 #include "common/core/input/GameKey.hpp"
+#include "common/core/GameClock.hpp"
+#include "client/core/Config.hpp"
 #include "client/hud/Hotbar.hpp"
 #include "client/network/ClientCommandHandler.hpp"
 #include "client/world/ClientPlayer.hpp"
@@ -92,6 +94,40 @@ void Hotbar::update() {
 
 		m_items[i].update();
 	}
+
+	updateItemName();
+}
+
+void Hotbar::updateItemName() {
+	const ItemStack &stack = m_player.heldItemStack();
+	u64 now = GameClock::getInstance().getTicks();
+	std::string id = stack.amount() ? stack.stringID() : "";
+	if (m_namedSlot != m_player.heldItemSlot() || m_namedItem != id) {
+		m_namedSlot = m_player.heldItemSlot();
+		m_namedItem = id;
+		m_itemNameUntil = now + 3000;
+		const std::string &label = stack.item().label();
+		auto start = label.find_first_not_of(" \t\r\n");
+		m_itemName.setString(start == std::string::npos ? "" : label.substr(start, label.find_last_not_of(" \t\r\n") - start + 1));
+	}
+
+	m_durabilityVisible = Config::isItemDurabilityVisible && stack.amount() && stack.maxDamage();
+	if (m_durabilityVisible) {
+		u16 maximum = stack.maxDamage();
+		u16 remaining = maximum - std::min(stack.damage(), maximum);
+		m_durability.setString(std::to_string(remaining) + " / " + std::to_string(maximum));
+		m_durability.updateVertexBuffer();
+		m_durability.setPosition(std::floor((width() - m_durability.getSize().x) / 2.f), -22.f);
+	}
+
+	m_itemNameVisible = !id.empty() && now < m_itemNameUntil;
+	if (m_itemNameVisible) {
+		float alpha = std::min(1.f, float(m_itemNameUntil - now) / 1000.f);
+		m_itemName.setShadowColor(Color(0.25f, 0.25f, 0.25f, alpha));
+		m_itemName.setColor(Color(1, 1, 1, alpha));
+		m_itemName.updateVertexBuffer();
+		m_itemName.setPosition(std::floor((width() - m_itemName.getSize().x) / 2.f), m_durabilityVisible ? -33.f : -22.f);
+	}
 }
 
 const Item &Hotbar::currentItem() const {
@@ -106,4 +142,8 @@ void Hotbar::draw(RenderTarget &target, RenderStates states) const {
 
 	for (auto &it : m_items)
 		target.draw(it, states);
+	if (m_itemNameVisible)
+		target.draw(m_itemName, states);
+	if (m_durabilityVisible)
+		target.draw(m_durability, states);
 }

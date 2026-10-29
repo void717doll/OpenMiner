@@ -190,6 +190,7 @@ void SettingsMenuState::addInterfaceButtons() {
 	addToggleButton("Show FPS counter", Config::isFpsCounterEnabled, false);
 	addToggleButton("Show hotbar", Config::isHotbarVisible, false);
 	addToggleButton("Show crosshair", Config::isCrosshairVisible, false);
+	addToggleButton("show durability", Config::isItemDurabilityVisible, false);
 
 	updateWidgetPosition();
 }
