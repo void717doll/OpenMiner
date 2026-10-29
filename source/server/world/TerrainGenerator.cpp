@@ -51,6 +51,11 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 	std::array<u32, 1> chunkSeed;
 	seed.generate(chunkSeed.begin(), chunkSeed.end());
 	rand.seed(chunkSeed[0]);
+	Random_t copperRandom;
+	copperRandom.seed(chunkSeed[0] ^ 0x43555052u);
+	auto &definitions = Registry::getInstance();
+	u16 copper = m_dimensionID == 0 && definitions.hasBlock("default:copper_ore")
+		? definitions.getBlockFromStringID("default:copper_ore").id() : 0;
 
 	Chunk *topChunk = chunk.getSurroundingChunk(Chunk::Top);
 	for(s8 y = 0 ; y < CHUNK_DEPTH ; y++) {
@@ -101,6 +106,9 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 					else chunk.setBlockRaw(x, y, z, biome.getDeepBlockID());
 				}
 				if (chunk.getBlock(x, y, z) == biome.getDeepBlockID()) generateOres(chunk, x, y, z, biome, rand);
+				if (copper && worldZ >= 4 && worldZ <= 64 && chunk.getBlock(x, y, z) == biome.getDeepBlockID()
+				 && copperRandom.get<bool>(0.004f))
+					randomWalkOrePlace(chunk, x, y, z, copperRandom, copper, biome.getDeepBlockID(), 8);
 				if (isGeneratingTopBlock && chunk.getBlock(x, y, z) == biome.getTopBlockID()) {
 					bool placedTree = tryPlaceTree(chunk, x, y, z + 1, biome, rand);
 					bool placedFlora = !placedTree && tryPlaceFlora(chunk, x, y, z + 1, biome, rand);

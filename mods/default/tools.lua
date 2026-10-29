@@ -47,6 +47,7 @@ function register_tool(name, material, mining_speed, harvest_capability, harvest
 			om_tool_type = name == "sword" and 1 or name == "hoe" and 3 or 2,
 			om_tool_kind = name == "axe" and 1 or name == "pickaxe" and 2 or name == "shovel" and 3 or 0,
 			om_harvest_level = harvest_level,
+			om_copper_tool = material == "copper" and 1 or 0,
 			om_attack_damage = attack_damage,
 		},
 	}

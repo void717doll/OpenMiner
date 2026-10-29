@@ -53,10 +53,12 @@ inventory tooltips follow beta `GuiContainer.drawScreen`: only the trimmed item 
 
 ## survival rules
 
-flight, noclip, sprint, creative inventory, starter gifts, free stack cloning and cheat commands are removed. player movement now follows beta `EntityLiving`, `Entity`, and `MovementInputFromOptions`, including fixed physics ticks, momentum, friction, gravity, swimming, ladders, stepping, and sneaking. server position checks use the same axis ordering. the [survival inventory](beta-survival.md) records equipment durability, mining rules, loot behavior, save compatibility, verification, and remaining differences.
+survival disables flight, noclip, sprint, starter gifts and cheat commands. creative mode restores the item catalog, unlimited placement and flight. player movement now follows beta `EntityLiving`, `Entity`, and `MovementInputFromOptions`, including fixed physics ticks, momentum, friction, gravity, swimming, ladders, stepping, and sneaking. server position checks use the same axis ordering. the [survival inventory](beta-survival.md) records equipment durability, mining rules, loot behavior, save compatibility, verification, and remaining differences.
 
 fall, drowning, lava/burn, cactus and suffocation damage retain beta hurt immunity. food heals immediately. death drops inventory with equipment wear preserved and respawns automatically. common block hardness, tool speeds, effective-block lists, harvest tiers and weapon damage follow the supplied beta source. loot falls to the ground and partial pickups retain the remainder. water/lava, mobs, falling blocks and dropped-item movement retain the [lunarchy world physics port](lunarchy-physics.md).
 
 water/lava now use queued propagation and level parameters; unsupported sand/gravel fall as saved entities. these systems follow lunarchy rather than the beta generator reference.
 
 armor protection, wear and model layers follow the supplied beta `ItemArmor`, `InventoryPlayer` and `RenderPlayer`. tnt uses the beta fuse and motion with the shared blast propagation. 99-item stacks and unstackable cookies are requested deviations.
+
+copper tools and ore add a required mining step before iron. copper and creative mode are requested additions to the beta rules.

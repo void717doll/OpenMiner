@@ -4582,6 +4582,111 @@
         64,
         32
       ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/copper_ore.png",
+      "source": "alternate_textures/texture_alts/high_vis_ores/mcl_copper_ore_highvis_alt.png",
+      "operation": "copy",
+      "source_sha256": "ed32d30130feabdaf4f5a7b050b1002eb342ef09df105c9dfa5bd484734788e5",
+      "output_sha256": "ed32d30130feabdaf4f5a7b050b1002eb342ef09df105c9dfa5bd484734788e5",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/copper_ingot.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_copper_ingot.png",
+      "operation": "copy",
+      "source_sha256": "bf37ae06eee3d8be4a9cfc77397b17efda2226e31bab9ebb67718f536e2c53b7",
+      "output_sha256": "bf37ae06eee3d8be4a9cfc77397b17efda2226e31bab9ebb67718f536e2c53b7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/copper_axe.png",
+      "source": "textures/default_mcl_core/tools/mcl_copper_tool_axe.png",
+      "operation": "copy",
+      "source_sha256": "b4c2111a20e87bef665ea89db49d6527a41d237a5da71b224bcd7ed65a7a0d8c",
+      "output_sha256": "b4c2111a20e87bef665ea89db49d6527a41d237a5da71b224bcd7ed65a7a0d8c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/copper_pickaxe.png",
+      "source": "textures/default_mcl_core/tools/mcl_copper_tool_pick.png",
+      "operation": "copy",
+      "source_sha256": "0d56a2b1babccd77736eb8ae46be23c8572096f8f351b849927f7d25bff3bebf",
+      "output_sha256": "0d56a2b1babccd77736eb8ae46be23c8572096f8f351b849927f7d25bff3bebf",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/copper_shovel.png",
+      "source": "textures/default_mcl_core/tools/mcl_copper_tool_shovel.png",
+      "operation": "copy",
+      "source_sha256": "3e74a13b7f74ef740851a0e9260645591fb4664528fe2a6da293c7bf1aa81ac8",
+      "output_sha256": "3e74a13b7f74ef740851a0e9260645591fb4664528fe2a6da293c7bf1aa81ac8",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/copper_hoe.png",
+      "source": "textures/default_mcl_core/tools/mcl_copper_tool_hoe.png",
+      "operation": "copy",
+      "source_sha256": "1ac674e263a5555fd428c0d0aff7d303d2a6828db80de4e96851b480d13610ec",
+      "output_sha256": "1ac674e263a5555fd428c0d0aff7d303d2a6828db80de4e96851b480d13610ec",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/copper_sword.png",
+      "source": "textures/default_mcl_core/tools/mcl_copper_tool_sword.png",
+      "operation": "copy",
+      "source_sha256": "5d60f967baf2aa2e67627b89b85ae0c69c3279d09e02aff54e42c77a905f421d",
+      "output_sha256": "5d60f967baf2aa2e67627b89b85ae0c69c3279d09e02aff54e42c77a905f421d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
     }
   ],
   "unchanged_engine_ui": [

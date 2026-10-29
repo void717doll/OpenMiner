@@ -26,8 +26,9 @@ inline bool canHarvest(const BlockState &state, const Item &item) {
 	if (id == "default:diamond_ore" || id == "default:diamond_block"
 	 || id == "default:gold_ore" || id == "default:gold_block"
 	 || id == "default:redstone_ore" || id == "default:redstone_block") return level >= 2;
-	if (id == "default:iron_ore" || id == "default:iron_block"
-	 || id == "default:lapis_ore" || id == "default:lapis_block") return level >= 1;
+	if (id == "default:iron_ore" || id == "default:iron_block")
+		return level >= 2 || item.getGroupValue("group:om_copper_tool") != 0;
+	if (id == "default:copper_ore" || id == "default:lapis_ore" || id == "default:lapis_block") return level >= 1;
 	return true;
 }
 

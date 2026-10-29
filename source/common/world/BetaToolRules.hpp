@@ -31,7 +31,7 @@ inline float survivalBreakTime(const BlockState &state, const Item &item, bool s
 			|| id == "default:bookshelf" || id == "default:chest";
 		if (kind == 2) {
 			for (const char *block : {"cobblestone", "cobblestone_mossy", "stone", "sandstone", "iron_ore",
-				"iron_block", "coal_ore", "gold_block", "gold_ore", "diamond_ore", "diamond_block", "ice",
+				"iron_block", "copper_ore", "coal_ore", "gold_block", "gold_ore", "diamond_ore", "diamond_block", "ice",
 				"netherrack", "lapis_ore", "lapis_block", "stone_slab", "double_stone_slab"})
 				if (id == std::string("default:") + block) { effective = true; break; }
 		}

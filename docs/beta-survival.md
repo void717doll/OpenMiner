@@ -62,3 +62,9 @@ tnt is crafted from five gunpowder and four sand. right click it with flint and 
 blank world names use the next available `World 1`, `World 2`, and so on. new worlds default to survival. the mode button on world creation switches to creative. the choice is saved in the world file and survives renaming and reloading; existing worlds stay survival.
 
 creative grants instant block breaking, unlimited placement and item use, no tool wear, and no health damage. open the inventory to search or scroll all available items; click to copy a stack or shift-click to fill the hotbar. armor slots remain available. double-tap jump to toggle flight, hold jump to rise, and hold sneak to descend. flight still collides with terrain.
+
+## copper progression
+
+stone pickaxes mine copper ore, found in newly generated overworld stone from height 4 through 64. smelt the ore into copper ingots and use the usual tool patterns to make a pickaxe, axe, shovel, hoe or sword. copper tools have 190 durability and mining speed 5, between stone and iron.
+
+iron ore and iron blocks require a copper, iron or diamond pickaxe. stone and golden pickaxes cannot harvest iron. copper cannot harvest gold, redstone, diamond or obsidian. copper is an explicit addition to the beta item set; iron tool recipes continue to use iron ingots.
