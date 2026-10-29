@@ -64,7 +64,6 @@ set(SOURCE_FILES
 	gui/Widget.cpp
 
 	hud/BlockCursor.cpp
-	hud/BlockInfoWidget.cpp
 	hud/Crosshair.cpp
 	hud/DebugLightmapViewer.cpp
 	hud/DebugOverlay.cpp
@@ -168,7 +167,6 @@ set(HEADER_FILES
 	gui/Widget.hpp
 
 	hud/BlockCursor.hpp
-	hud/BlockInfoWidget.hpp
 	hud/Crosshair.hpp
 	hud/DebugLightmapViewer.hpp
 	hud/DebugOverlay.hpp

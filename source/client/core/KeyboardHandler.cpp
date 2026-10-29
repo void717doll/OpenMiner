@@ -47,7 +47,6 @@ KeyboardHandler::KeyboardHandler() {
 
 	addKey(GameKey::Shift,           "Shift",             SDLK_LSHIFT);
 
-	addKey(GameKey::BlockInfoToggle, "Block info toggle", SDLK_p);
 	addKey(GameKey::Drop, "drop item", SDLK_q, "_Drop");
 	for (int i = 0; i < 9; ++i) {
 		std::string number = std::to_string(i + 1);
@@ -66,6 +65,7 @@ void KeyboardHandler::loadKeysFromFile(const std::string &filename) {
 			if (keys != sol::nullopt) {
 				for (auto &it : keys.value()) {
 					const std::string &keyID = it.first.as<std::string>();
+					if (keyID == "_Block info toggle") continue;
 					if (keyID == "_Fly" || keyID == "_Sprint" || keyID == "_Chat" || keyID == "_Command") continue;
 					const std::string &keyName = it.second.as<sol::table>()["name"].get<std::string>();
 					const std::string &keyValue = it.second.as<sol::table>()["value"].get<std::string>();

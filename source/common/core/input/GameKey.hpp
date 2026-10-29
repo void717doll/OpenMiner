@@ -42,7 +42,6 @@ namespace GameKey {
 
 		Shift,
 
-		BlockInfoToggle,
 		Drop,
 		Hotbar1,
 		Hotbar2,

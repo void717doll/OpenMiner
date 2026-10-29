@@ -135,9 +135,6 @@ void GameState::onEvent(const SDL_Event &event) {
 			if (!event.key.repeat && event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Drop)) {
 				m_clientCommandHandler.sendPlayerDropItem();
 			}
-			else if (event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::BlockInfoToggle)) {
-				Config::isBlockInfoWidgetEnabled = !Config::isBlockInfoWidgetEnabled;
-			}
 			else if (event.key.keysym.sym == SDLK_F2) {
 				std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 

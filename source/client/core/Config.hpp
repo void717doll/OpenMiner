@@ -35,7 +35,6 @@ namespace Config {
 	extern float soundVolume;
 
 	// Interface
-	extern bool isBlockInfoWidgetEnabled;
 	extern bool isFpsCounterEnabled;
 	extern bool isHotbarVisible;
 	extern bool isCrosshairVisible;

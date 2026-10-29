@@ -187,7 +187,6 @@ void SettingsMenuState::addMainButtons() {
 void SettingsMenuState::addInterfaceButtons() {
 	m_menuWidget.reset(1, 8);
 
-	addToggleButton("Show block info", Config::isBlockInfoWidgetEnabled, false);
 	addToggleButton("Show FPS counter", Config::isFpsCounterEnabled, false);
 	addToggleButton("Show hotbar", Config::isHotbarVisible, false);
 	addToggleButton("Show crosshair", Config::isCrosshairVisible, false);

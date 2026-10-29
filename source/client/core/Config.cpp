@@ -39,7 +39,6 @@ namespace fs = ghc::filesystem;
 float Config::soundVolume = 0.7f;
 
 // Interface
-bool Config::isBlockInfoWidgetEnabled = true;
 bool Config::isFpsCounterEnabled = true;
 bool Config::isHotbarVisible = true;
 bool Config::isCrosshairVisible = true;
@@ -81,7 +80,6 @@ void Config::loadConfigFromFile(const char *filename) {
 			lua.safe_script_file(filename);
 			soundVolume = std::clamp(lua["soundVolume"].get_or(soundVolume), 0.f, 1.f);
 
-			isBlockInfoWidgetEnabled = lua["isBlockInfoWidgetEnabled"].get_or(isBlockInfoWidgetEnabled);
 			isFpsCounterEnabled = lua["isFpsCounterEnabled"].get_or(isFpsCounterEnabled);
 			isHotbarVisible = lua["isHotbarVisible"].get_or(isHotbarVisible);
 			isCrosshairVisible = lua["isCrosshairVisible"].get_or(isCrosshairVisible);
@@ -118,7 +116,6 @@ void Config::saveConfigToFile(const char *filename) {
 	std::ofstream file{filename, std::ofstream::out | std::ofstream::trunc};
 	file << "soundVolume = " << soundVolume << std::endl;
 	file << std::endl;
-	file << "isBlockInfoWidgetEnabled = " << (isBlockInfoWidgetEnabled ? "true" : "false") << std::endl;
 	file << "isFpsCounterEnabled = " << (isFpsCounterEnabled ? "true" : "false") << std::endl;
 	file << "isHotbarVisible = " << (isHotbarVisible ? "true" : "false") << std::endl;
 	file << "isCrosshairVisible = " << (isCrosshairVisible ? "true" : "false") << std::endl;

@@ -59,8 +59,6 @@ void HUD::setup() {
 		Config::screenHeight / getScale().y - (float)m_hotbar.height() - 4.f
 	);
 
-	m_blockInfoWidget.setPosition(Config::screenWidth / getScale().x / 2.f - (float)m_blockInfoWidget.width() / 2.f, 2.f);
-
 	m_hearts.setPosition(m_hotbar.getPosition().x, m_hotbar.getPosition().y - hearts::hotbarOffset);
 
 	m_fpsText.setPosition(Config::screenWidth / getScale().x - 36.f, 2.f);
@@ -116,13 +114,6 @@ void HUD::update() {
 	else if (Config::isProfilerWindowEnabled)
 		m_debugProfilerWindow.update();
 
-	if (Config::isBlockInfoWidgetEnabled) {
-		m_blockInfoWidget.update();
-
-		if (m_blockCursor.currentBlock() != m_blockInfoWidget.currentBlock())
-			m_blockInfoWidget.setCurrentBlock(m_blockCursor.currentBlock());
-	}
-
 	if (Config::isChunkMinimapEnabled)
 		m_minimap.update(m_player, m_world);
 
@@ -144,9 +135,6 @@ void HUD::draw(RenderTarget &target, RenderStates states) const {
 		target.draw(m_debugOverlay, states);
 	else if (Config::isProfilerWindowEnabled)
 		target.draw(m_debugProfilerWindow, states);
-
-	if (Config::isBlockInfoWidgetEnabled)
-		target.draw(m_blockInfoWidget, states);
 
 	if (Config::isHotbarVisible)
 		target.draw(m_hotbar, states);

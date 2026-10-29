@@ -28,7 +28,6 @@
 #define HUD_HPP_
 
 #include "client/hud/BlockCursor.hpp"
-#include "client/hud/BlockInfoWidget.hpp"
 #include "client/hud/Crosshair.hpp"
 #include "client/hud/DebugLightmapViewer.hpp"
 #include "client/hud/DebugOverlay.hpp"
@@ -78,7 +77,6 @@ class HUD : public Transformable, public Drawable {
 		bool m_isDebugOverlayVisible = false;
 		bool m_printRendererInfo = false;
 
-		BlockInfoWidget m_blockInfoWidget;
 
 		Text m_fpsText;
 		HeartBar m_hearts;
