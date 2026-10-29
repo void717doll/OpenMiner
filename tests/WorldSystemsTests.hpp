@@ -8,6 +8,7 @@
 #include "common/core/Registry.hpp"
 #include "common/world/WorldCollision.hpp"
 #include "common/world/Heightmap.hpp"
+#include "common/world/Player.hpp"
 #include "server/world/CaveTunnels.hpp"
 
 class WorldSystemsTests : public CxxTest::TestSuite {
@@ -52,6 +53,36 @@ class WorldSystemsTests : public CxxTest::TestSuite {
 			TS_ASSERT_EQUALS(collision::clipAxis(player, wall, 1, 10), 10);
 			DoubleBox floor{-1, -1, -1, 3, 3, 1};
 			TS_ASSERT_EQUALS(collision::clipAxis(player, floor, 2, -10), 0);
+		}
+
+		void testWorldCollisionAndRotation() {
+			Registry registry;
+			Registry::setInstance(registry);
+			registry.registerBlock<Block>("air");
+			Block &wall = registry.registerBlock<Block>("default:wall");
+			wall.setRotatable(true);
+			wall.param().allocateBits(BlockParam::Rotation, 5);
+			wall.getState(0).boundingBox({0, 0, 0, 0.25f, 1, 1});
+			DoubleBox rotated = collision::blockBox(wall.getState(0), 1, 0, 0, 0);
+			TS_ASSERT_DELTA(rotated.sizeX, 1, 0.0001);
+			TS_ASSERT_DELTA(rotated.sizeY, 0.25, 0.0001);
+			TestWorld world;
+			world.chunk.setBlockRaw(2, 1, 1, wall.id());
+			DoubleBox player{1, 1, 1, 0.5, 0.5, 1};
+			Vector3d result = collision::move(world, player, {10, 0, 0});
+			TS_ASSERT_DELTA(result.x, 0.5, 0.0001);
+			wall.getState(0).isCollidable(false);
+			result = collision::move(world, player, {10, 0, 0});
+			TS_ASSERT_EQUALS(result.x, 10);
+		}
+
+		void testNegativePlayerChunk() {
+			Player player;
+			player.setPosition(-0.1, -16.1, -32.1);
+			Vector3i chunk = player.getCurrentChunk();
+			TS_ASSERT_EQUALS(chunk.x, -1);
+			TS_ASSERT_EQUALS(chunk.y, -2);
+			TS_ASSERT_EQUALS(chunk.z, -2);
 		}
 
 		void testReseedClearsHeightmap() {
