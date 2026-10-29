@@ -27,7 +27,7 @@ class WieldRenderer : public Drawable {
 
 	private:
 		void setItem(const Item *item);
-		void buildItem(const Item &item);
+		void buildItem(const Item &item, const std::string &filename, bool blockTexture);
 		void draw(RenderTarget &target, RenderStates states) const override;
 
 		ClientPlayer &m_player;
@@ -41,7 +41,9 @@ class WieldRenderer : public Drawable {
 		std::unique_ptr<InventoryCube> m_cube;
 		std::string m_itemID;
 		u64 m_swingStart = 0;
-		u64 m_changeStart = 0;
+		u64 m_lastUpdate = 0;
+		float m_equip = 1;
+		bool m_isTool = false;
 		bool m_swinging = false;
 		bool m_attacking = false;
 		bool m_using = false;

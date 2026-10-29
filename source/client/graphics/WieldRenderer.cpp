@@ -9,6 +9,7 @@
 #include "common/resource/ResourceHandler.hpp"
 #include "common/scene/RetroMobMesh.hpp"
 #include "client/graphics/BgfxView.hpp"
+#include "client/core/Config.hpp"
 #include "client/graphics/RenderTarget.hpp"
 #include "client/graphics/TextureAtlas.hpp"
 #include "client/graphics/Vertex.hpp"
@@ -85,28 +86,35 @@ void WieldRenderer::setItem(const Item *item) {
 	std::string id = item ? item->stringID() : "";
 	if (m_itemID == id) return;
 	m_itemID = id;
-	m_changeStart = GameClock::getInstance().getTicks();
 	m_cube.reset();
 	m_itemVertexCount = 0;
+	m_isTool = item && item->getGroupValue("group:om_tool_type");
 	if (!item) return;
 	if (item->isBlock() && Registry::getInstance().hasBlock(id)) {
-		m_cube = std::make_unique<InventoryCube>(0.5f, true);
-		m_cube->updateVertexBuffer(Registry::getInstance().getBlockFromStringID(id));
+		const Block &block = Registry::getInstance().getBlockFromStringID(id);
+		const BlockState &state = block.getState(0);
+		if (state.drawType() == BlockDrawType::XShape || !state.inventoryImage().empty()) {
+			bool blockTexture = state.inventoryImage().empty();
+			const std::string &filename = blockTexture ? state.tiles().getTextureForFace(0) : state.inventoryImage();
+			buildItem(*item, filename, blockTexture);
+		} else {
+			m_cube = std::make_unique<InventoryCube>(0.5f, true);
+			m_cube->updateVertexBuffer(block);
+		}
 	}
-	else buildItem(*item);
+	else buildItem(*item, item->tiles().getTextureForFace(0), false);
 }
 
-void WieldRenderer::buildItem(const Item &item) {
-	const std::string &filename = item.tiles().getTextureForFace(0);
+void WieldRenderer::buildItem(const Item &item, const std::string &filename, bool blockTexture) {
 	const FloatRect uv = m_atlas.getTexCoords(filename);
 	std::vector<Vertex> vertices;
-	constexpr float half = 0.35f, depth = 0.025f;
+	constexpr float half = 0.28f, depth = 0.0175f;
 	glm::vec3 front[4] = {{-half,half,depth},{half,half,depth},{half,-half,depth},{-half,-half,depth}};
 	glm::vec3 back[4] = {{-half,half,-depth},{half,half,-depth},{half,-half,-depth},{-half,-half,-depth}};
 	appendQuad(vertices, front, uv);
 	appendQuad(vertices, back, uv);
 
-	std::string path = "mods/" + item.modName() + "/textures/items/" + filename;
+	std::string path = "mods/" + item.modName() + (blockTexture ? "/textures/blocks/" : "/textures/items/") + filename;
 	SDL_Surface *original = IMG_Load(path.c_str());
 	SDL_Surface *surface = original ? SDL_ConvertSurfaceFormat(original, SDL_PIXELFORMAT_RGBA32, 0) : nullptr;
 	if (original) SDL_FreeSurface(original);
@@ -146,6 +154,15 @@ void WieldRenderer::buildItem(const Item &item) {
 		}
 		SDL_FreeSurface(surface);
 	}
+	if (item.isBlock()) {
+		const Color &color = Registry::getInstance().getBlockFromStringID(item.stringID()).getState(0).colorMultiplier();
+		for (auto &vertex : vertices) {
+			vertex.color[0] = color.r;
+			vertex.color[1] = color.g;
+			vertex.color[2] = color.b;
+			vertex.color[3] = color.a;
+		}
+	}
 	m_itemVertexCount = u32(vertices.size());
 	m_itemVertices.init(vertices.data(), u32(vertices.size() * sizeof(Vertex)), true);
 }
@@ -156,8 +173,14 @@ void WieldRenderer::update() {
 		const ItemStack &stack = m_player.heldItemStack();
 		if (stack.amount() && stack.item().id()) item = &stack.item();
 	}
-	setItem(item);
 	u64 now = GameClock::getInstance().getTicks();
+	float elapsed = m_lastUpdate ? std::min(float(now - m_lastUpdate) / 1000.f, 0.05f) : 0;
+	m_lastUpdate = now;
+	std::string selected = item ? item->stringID() : "";
+	if (selected != m_itemID) {
+		m_equip = std::max(0.f, m_equip - elapsed * 8);
+		if (m_equip == 0) setItem(item);
+	} else m_equip = std::min(1.f, m_equip + elapsed * 8);
 	if (m_swinging && now - m_swingStart >= swingDuration) {
 		m_swinging = m_attacking || m_using;
 		m_swingStart = now;
@@ -165,7 +188,7 @@ void WieldRenderer::update() {
 	double distance = std::hypot(m_player.x() - m_lastX, m_player.y() - m_lastY);
 	m_lastX = m_player.x();
 	m_lastY = m_player.y();
-	if (distance > 0.0001 && distance < 1) {
+	if (Config::isViewBobbingEnabled && m_player.onGround() && distance > 0.0001 && distance < 1) {
 		m_walkPhase += float(distance) * 8;
 		m_bob = std::sin(m_walkPhase) * 0.012f;
 	}
@@ -188,25 +211,37 @@ void WieldRenderer::draw(RenderTarget &target, RenderStates states) const {
 
 	u64 now = GameClock::getInstance().getTicks();
 	float progress = m_swinging ? std::min(float(now - m_swingStart) / swingDuration, 1.f) : 0;
-	float swing = std::sin(progress * pi);
-	float change = std::min(float(now - m_changeStart) / 160.f, 1.f);
-	float dip = std::sin(change * pi) * 0.2f;
-	float x = aspect * std::tan(36.f * pi / 180) * 1.35f * 0.65f;
-	states.transform.translate(x - swing * 0.32f, -0.58f + m_bob - dip + swing * 0.12f, -1.35f - swing * 0.15f);
-	states.transform.rotateZ(-20.f - swing * 55.f);
-	states.transform.rotateY(-25.f + swing * 35.f);
+	float swing = std::sin(std::sqrt(progress) * pi);
+	float strike = std::sin(progress * progress * pi);
+	float x = std::min(aspect, 1.6f) * std::tan(36.f * pi / 180) * 1.15f * 0.58f;
+	states.transform.translate(x - swing * 0.26f, -0.47f + m_bob - (1 - m_equip) * 0.8f
+		+ std::sin(std::sqrt(progress) * 2 * pi) * 0.1f, -1.15f - strike * 0.15f);
+	float widthScale = std::min(1.f, aspect / 1.3f);
+	states.transform.scale(widthScale, widthScale, widthScale);
 	if (m_cube) {
-		states.transform.rotateX(-65.f);
-		states.transform.rotateZ(25.f);
+		states.transform.rotateY(-30.f - strike * 20.f);
+		states.transform.rotateX(15.f - swing * 60.f);
+		// block meshes use z up; the wield camera uses y up.
+		states.transform.rotateX(-90.f);
 		states.transform.translate(-0.25f,-0.25f,-0.25f);
 		target.draw(*m_cube, states);
 	}
 	else if (m_itemVertexCount) {
+		states.transform.rotateY(-30.f - strike * 20.f);
+		states.transform.rotateZ((m_isTool ? 20.f : -15.f) - swing * 25.f);
+		states.transform.rotateX(-swing * 65.f);
+		if (m_isTool) {
+			states.transform.scale(1.8f, 1.8f, 1.f);
+			states.transform.translate(-0.10f, 0.08f, 0);
+		}
 		states.texture = &m_atlas.texture();
 		target.draw(m_itemVertices, 0, m_itemVertexCount, states);
 	}
 	else {
-		states.transform.rotateX(-35.f);
+		states.transform.translate(0.1f, -0.06f, 0);
+		states.transform.rotateZ(-15.f - swing * 25.f);
+		states.transform.rotateY(-20.f + strike * 30.f);
+		states.transform.rotateX(-35.f - swing * 45.f);
 		states.texture = &m_skin;
 		target.draw(m_armVertices, 0, 36, states);
 	}

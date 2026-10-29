@@ -31,7 +31,7 @@ the engine registers `pig`, `zombie`, `cow`, `sheep`, `chicken`, `skeleton`, `cr
 
 left click attacks a visible target within three blocks. right click milks cows with an empty bucket, shears sheep, saddles pigs, and tames/heals/orders wolves. chickens lay eggs, spiders climb and leap, slimes hop and split, pig zombies retaliate together, squid swim, and creepers use a 30-tick fuse. wolves preserve their owner and sitting state. fireballs can be reflected by attacks. food heals immediately, including at full health; stew returns a bowl. old oversized stew stacks retain unconsumed portions.
 
-movement uses direct pursuit, obstacle jumping, and the shared swept collision solver. beta's full pathfinder, sound, equipment durability/armor, riding controls, wolf sheep hunting, and lightning-charged creepers remain absent. natural spawn scheduling uses oldworld's bounded periodic attempts rather than the complete beta spawning algorithm. explosion rays use explicit resistance for common materials and approximate the remainder from hardness. sheep colors are rendered, but wool drops currently use the single white wool item.
+movement uses direct pursuit, obstacle jumping, and the shared swept collision solver. beta's full pathfinder, mob vocalizations, armor, riding controls, wolf sheep hunting, and lightning-charged creepers remain absent. natural spawn scheduling uses oldworld's bounded periodic attempts rather than the complete beta spawning algorithm. explosion rays use explicit resistance for common materials and approximate the remainder from hardness. sheep colors are rendered, but wool drops currently use the single white wool item.
 
 model cuboids and UVs follow the supplied client source. limb motion derives from client displacement; separate head rotation, attack swings, wing timing, wolf shaking, slime squishing, ghast charge interpolation, and squid pitch are adapted or absent. refi lacks distinct charging-ghast artwork; that pose uses the normal atlas. these are not claims of identical animation.
 
@@ -43,7 +43,9 @@ the game is local only. serialized messages connect rendering to the simulation 
 
 ## first-person wield
 
-the first-person hand and selected block/item use a separate 72-degree camera and depth-cleared pass between the scene effect and hud, following the rendering boundaries in `~/lunarchy/src/client/camera.cpp` and `wieldmesh.cpp`. empty slots show the refi player arm; blocks reuse the existing cube mesh and items gain thickness along their opaque pixel edges. attack/use swings, item-change dip, walking bob, and pause reset are handled locally. placement depends on the viewport aspect ratio rather than gui scale.
+the first-person hand and selected block/item use a separate 72-degree camera and depth-cleared pass between the scene effect and hud, following the rendering boundaries in `~/lunarchy/src/client/camera.cpp` and `wieldmesh.cpp`. empty slots show the refi player arm; blocks reuse the existing cube mesh and items gain thickness along their opaque pixel edges. plantlike blocks and blocks with an inventory image use that sprite rather than a textured box. partial block offsets scale with the mesh.
+
+mineclonia's `mods/CORE/mcl_init/init.lua`, `mods/ITEMS/mcl_tools/init.lua`, and `mods/PLAYER/mcl_meshhand` provide the tool/ordinary-item/hand distinction. tools use its 1.8:1 width/height scale relative to ordinary item sprites, with unchanged thickness and an upright grip. blocks convert the engine's z-up geometry to the wield camera's y-up coordinates. switching lowers the previous item before replacing it and raising the new one. swing and walking bob remain local adaptations; no mineclonia textures or hand models were imported. placement follows the viewport rather than gui scale and is clamped on wide screens.
 
 ## survival rules
 

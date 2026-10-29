@@ -116,9 +116,9 @@ void InventoryCube::updateVertexBuffer(const Block &block, u8 state) {
 				vertices[f][v].coord3d[2] = vertexPos[cubeVerts[f][v]].z - boundingBox.z * faceNormals[f][2] * m_size;
 			}
 			else {
-				vertices[f][v].coord3d[0] = vertexPos[cubeVerts[f][v]].x * boundingBox.sizeX + boundingBox.x;
-				vertices[f][v].coord3d[1] = vertexPos[cubeVerts[f][v]].y * boundingBox.sizeY + boundingBox.y;
-				vertices[f][v].coord3d[2] = vertexPos[cubeVerts[f][v]].z * boundingBox.sizeZ + boundingBox.z;
+				vertices[f][v].coord3d[0] = vertexPos[cubeVerts[f][v]].x * boundingBox.sizeX + boundingBox.x * m_size;
+				vertices[f][v].coord3d[1] = vertexPos[cubeVerts[f][v]].y * boundingBox.sizeY + boundingBox.y * m_size;
+				vertices[f][v].coord3d[2] = vertexPos[cubeVerts[f][v]].z * boundingBox.sizeZ + boundingBox.z * m_size;
 			}
 			vertices[f][v].coord3d[3] = faceValue[f];
 
