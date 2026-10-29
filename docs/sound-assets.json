@@ -1,6 +1,6 @@
 [
   {
-    "source": "minetest_game/mods/default/sounds/default_hard_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_hard_footstep.1.ogg",
     "destination": "resources/sounds/default_hard_footstep.1.wav",
     "author": "Erdie",
     "license": "CC BY 3.0",
@@ -8,7 +8,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_hard_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_hard_footstep.2.ogg",
     "destination": "resources/sounds/default_hard_footstep.2.wav",
     "author": "Erdie",
     "license": "CC BY 3.0",
@@ -16,7 +16,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_hard_footstep.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_hard_footstep.3.ogg",
     "destination": "resources/sounds/default_hard_footstep.3.wav",
     "author": "Erdie",
     "license": "CC BY 3.0",
@@ -24,7 +24,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_grass_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_grass_footstep.1.ogg",
     "destination": "resources/sounds/default_grass_footstep.1.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -32,7 +32,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_grass_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_grass_footstep.2.ogg",
     "destination": "resources/sounds/default_grass_footstep.2.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -40,7 +40,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_grass_footstep.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_grass_footstep.3.ogg",
     "destination": "resources/sounds/default_grass_footstep.3.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -48,7 +48,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dirt_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dirt_footstep.1.ogg",
     "destination": "resources/sounds/default_dirt_footstep.1.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -56,7 +56,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dirt_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dirt_footstep.2.ogg",
     "destination": "resources/sounds/default_dirt_footstep.2.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -64,7 +64,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_wood_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_wood_footstep.1.ogg",
     "destination": "resources/sounds/default_wood_footstep.1.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -72,7 +72,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_wood_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_wood_footstep.2.ogg",
     "destination": "resources/sounds/default_wood_footstep.2.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -80,7 +80,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_footstep.1.ogg",
     "destination": "resources/sounds/default_gravel_footstep.1.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -88,7 +88,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_footstep.2.ogg",
     "destination": "resources/sounds/default_gravel_footstep.2.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -96,7 +96,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_footstep.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_footstep.3.ogg",
     "destination": "resources/sounds/default_gravel_footstep.3.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -104,7 +104,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_footstep.4.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_footstep.4.ogg",
     "destination": "resources/sounds/default_gravel_footstep.4.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -112,7 +112,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_glass_footstep.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_glass_footstep.ogg",
     "destination": "resources/sounds/default_glass_footstep.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -120,7 +120,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_sand_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_sand_footstep.1.ogg",
     "destination": "resources/sounds/default_sand_footstep.1.wav",
     "author": "worthahep88",
     "license": "CC0 1.0",
@@ -128,7 +128,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_sand_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_sand_footstep.2.ogg",
     "destination": "resources/sounds/default_sand_footstep.2.wav",
     "author": "worthahep88",
     "license": "CC0 1.0",
@@ -136,7 +136,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_sand_footstep.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_sand_footstep.3.ogg",
     "destination": "resources/sounds/default_sand_footstep.3.wav",
     "author": "worthahep88",
     "license": "CC0 1.0",
@@ -184,7 +184,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_water_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_water_footstep.1.ogg",
     "destination": "resources/sounds/default_water_footstep.1.wav",
     "author": "AGFX",
     "license": "CC BY 3.0",
@@ -192,7 +192,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_water_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_water_footstep.2.ogg",
     "destination": "resources/sounds/default_water_footstep.2.wav",
     "author": "AGFX",
     "license": "CC BY 3.0",
@@ -200,7 +200,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_water_footstep.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_water_footstep.3.ogg",
     "destination": "resources/sounds/default_water_footstep.3.wav",
     "author": "AGFX",
     "license": "CC BY 3.0",
@@ -208,7 +208,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_cracky.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_cracky.1.ogg",
     "destination": "resources/sounds/default_dig_cracky.1.wav",
     "author": "Benboncan",
     "license": "CC BY 3.0",
@@ -216,7 +216,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_cracky.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_cracky.2.ogg",
     "destination": "resources/sounds/default_dig_cracky.2.wav",
     "author": "Benboncan",
     "license": "CC BY 3.0",
@@ -224,7 +224,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_cracky.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_cracky.3.ogg",
     "destination": "resources/sounds/default_dig_cracky.3.wav",
     "author": "Benboncan",
     "license": "CC BY 3.0",
@@ -232,7 +232,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_choppy.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_choppy.1.ogg",
     "destination": "resources/sounds/default_dig_choppy.1.wav",
     "author": "Sheyvan",
     "license": "CC0 1.0",
@@ -240,7 +240,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_choppy.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_choppy.2.ogg",
     "destination": "resources/sounds/default_dig_choppy.2.wav",
     "author": "Sheyvan",
     "license": "CC0 1.0",
@@ -248,7 +248,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_choppy.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_choppy.3.ogg",
     "destination": "resources/sounds/default_dig_choppy.3.wav",
     "author": "Sheyvan",
     "license": "CC0 1.0",
@@ -256,7 +256,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_crumbly.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_crumbly.ogg",
     "destination": "resources/sounds/default_dig_crumbly.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -264,7 +264,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dig_snappy.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dig_snappy.ogg",
     "destination": "resources/sounds/default_dig_snappy.wav",
     "author": "blukotek",
     "license": "CC0 1.0",
@@ -272,7 +272,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_dig.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_dig.1.ogg",
     "destination": "resources/sounds/default_gravel_dig.1.wav",
     "author": "lolamadeus",
     "license": "CC0 1.0",
@@ -280,7 +280,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_dig.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_dig.2.ogg",
     "destination": "resources/sounds/default_gravel_dig.2.wav",
     "author": "lolamadeus",
     "license": "CC0 1.0",
@@ -288,7 +288,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_dug.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_dug.1.ogg",
     "destination": "resources/sounds/default_gravel_dug.1.wav",
     "author": "lolamadeus",
     "license": "CC0 1.0",
@@ -296,7 +296,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_dug.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_dug.2.ogg",
     "destination": "resources/sounds/default_gravel_dug.2.wav",
     "author": "lolamadeus",
     "license": "CC0 1.0",
@@ -304,7 +304,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_gravel_dug.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_gravel_dug.3.ogg",
     "destination": "resources/sounds/default_gravel_dug.3.wav",
     "author": "lolamadeus",
     "license": "CC0 1.0",
@@ -312,7 +312,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_place_node.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_place_node.1.ogg",
     "destination": "resources/sounds/default_place_node.1.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -320,7 +320,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_place_node.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_place_node.2.ogg",
     "destination": "resources/sounds/default_place_node.2.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -328,7 +328,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_place_node.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_place_node.3.ogg",
     "destination": "resources/sounds/default_place_node.3.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -336,7 +336,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_place_node_hard.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_place_node_hard.1.ogg",
     "destination": "resources/sounds/default_place_node_hard.1.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -344,7 +344,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_place_node_hard.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_place_node_hard.2.ogg",
     "destination": "resources/sounds/default_place_node_hard.2.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -376,7 +376,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/player_damage.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/player_damage.ogg",
     "destination": "resources/sounds/player_damage.wav",
     "author": "sonictechtonic",
     "license": "CC BY 3.0",
@@ -384,7 +384,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dug_node.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dug_node.1.ogg",
     "destination": "resources/sounds/default_dug_node.1.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -392,7 +392,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_dug_node.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_dug_node.2.ogg",
     "destination": "resources/sounds/default_dug_node.2.wav",
     "author": "Mito551",
     "license": "CC BY-SA 3.0",
@@ -400,7 +400,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_ice_footstep.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_ice_footstep.1.ogg",
     "destination": "resources/sounds/default_ice_footstep.1.wav",
     "author": "InspectorJ",
     "license": "CC BY 3.0",
@@ -408,7 +408,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_ice_footstep.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_ice_footstep.2.ogg",
     "destination": "resources/sounds/default_ice_footstep.2.wav",
     "author": "InspectorJ",
     "license": "CC BY 3.0",
@@ -416,7 +416,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_ice_footstep.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_ice_footstep.3.ogg",
     "destination": "resources/sounds/default_ice_footstep.3.wav",
     "author": "InspectorJ",
     "license": "CC BY 3.0",
@@ -424,7 +424,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_ice_dig.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_ice_dig.1.ogg",
     "destination": "resources/sounds/default_ice_dig.1.wav",
     "author": "dheming",
     "license": "CC BY 3.0",
@@ -432,7 +432,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_ice_dig.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_ice_dig.2.ogg",
     "destination": "resources/sounds/default_ice_dig.2.wav",
     "author": "dheming",
     "license": "CC BY 3.0",
@@ -440,7 +440,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_ice_dig.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_ice_dig.3.ogg",
     "destination": "resources/sounds/default_ice_dig.3.wav",
     "author": "dheming",
     "license": "CC BY 3.0",
@@ -448,7 +448,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_ice_dug.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_ice_dug.ogg",
     "destination": "resources/sounds/default_ice_dug.wav",
     "author": "Angel_Perez_Grandi",
     "license": "CC BY 3.0",
@@ -456,7 +456,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_break_glass.1.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_break_glass.1.ogg",
     "destination": "resources/sounds/default_break_glass.1.wav",
     "author": "cmusounddesign",
     "license": "CC BY 3.0",
@@ -464,7 +464,7 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_break_glass.2.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_break_glass.2.ogg",
     "destination": "resources/sounds/default_break_glass.2.wav",
     "author": "Tomlija",
     "license": "CC BY 3.0",
@@ -472,11 +472,107 @@
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   },
   {
-    "source": "minetest_game/mods/default/sounds/default_break_glass.3.ogg",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_break_glass.3.ogg",
     "destination": "resources/sounds/default_break_glass.3.wav",
     "author": "lsprice",
     "license": "CC BY 3.0",
     "source_url": "http://www.freesound.org/people/lsprice/sounds/88808/",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
+  },
+  {
+    "destination": "resources/sounds/default_tool_breaks.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "EdgardEdition",
+    "license": "CC BY 3.0",
+    "source_url": "http://www.freesound.org/people/EdgardEdition",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/default_tool_breaks.ogg"
+  },
+  {
+    "destination": "resources/sounds/mcl_sounds_cloth.1.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "Alecia Shepherd",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://opengameart.org/content/snowsong-sound-and-music-pack",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/mcl_sounds_cloth.1.ogg"
+  },
+  {
+    "destination": "resources/sounds/mcl_sounds_cloth.2.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "Alecia Shepherd",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://opengameart.org/content/snowsong-sound-and-music-pack",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/mcl_sounds_cloth.2.ogg"
+  },
+  {
+    "destination": "resources/sounds/mcl_sounds_cloth.3.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "Alecia Shepherd",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://opengameart.org/content/snowsong-sound-and-music-pack",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/mcl_sounds_cloth.3.ogg"
+  },
+  {
+    "destination": "resources/sounds/mcl_sounds_cloth.4.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "Alecia Shepherd",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://opengameart.org/content/snowsong-sound-and-music-pack",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/mcl_sounds_cloth.4.ogg"
+  },
+  {
+    "destination": "resources/sounds/pedology_snow_soft_footstep.1.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "unknown authors",
+    "license": "WTFPL",
+    "source_url": "mineclonia/mods/CORE/mcl_sounds/README.txt",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/pedology_snow_soft_footstep.1.ogg"
+  },
+  {
+    "destination": "resources/sounds/pedology_snow_soft_footstep.2.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "unknown authors",
+    "license": "WTFPL",
+    "source_url": "mineclonia/mods/CORE/mcl_sounds/README.txt",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/pedology_snow_soft_footstep.2.ogg"
+  },
+  {
+    "destination": "resources/sounds/pedology_snow_soft_footstep.3.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "unknown authors",
+    "license": "WTFPL",
+    "source_url": "mineclonia/mods/CORE/mcl_sounds/README.txt",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/pedology_snow_soft_footstep.3.ogg"
+  },
+  {
+    "destination": "resources/sounds/pedology_snow_soft_footstep.4.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "unknown authors",
+    "license": "WTFPL",
+    "source_url": "mineclonia/mods/CORE/mcl_sounds/README.txt",
+    "source": "mineclonia/mods/CORE/mcl_sounds/sounds/pedology_snow_soft_footstep.4.ogg"
+  },
+  {
+    "destination": "resources/sounds/item_drop_pickup.wav",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV",
+    "author": "benniknop",
+    "license": "CC0",
+    "source_url": "https://freesound.org/people/benniknop/sounds/317848/",
+    "source": "mineclonia/mods/ENTITIES/mcl_item_entity/sounds/item_drop_pickup.ogg"
+  },
+  {
+    "source": "mineclonia/mods/ITEMS/mcl_tnt/sounds/tnt_explode.ogg",
+    "destination": "resources/sounds/tnt_explode.wav",
+    "author": "Jose Ortiz MindChamber",
+    "license": "CC0",
+    "source_url": "mineclonia/mods/ITEMS/mcl_tnt",
+    "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
+  },
+  {
+    "source": "mineclonia/mods/ITEMS/mcl_tnt/sounds/tnt_ignite.ogg",
+    "destination": "resources/sounds/tnt_ignite.wav",
+    "author": "Ned Bouhalassa, derivative by mineclonia contributors",
+    "license": "CC0",
+    "source_url": "mineclonia/mods/ITEMS/mcl_tnt",
     "changes": "decoded and resampled to mono 22050 Hz signed 16-bit PCM WAV"
   }
 ]

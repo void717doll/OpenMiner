@@ -78,6 +78,7 @@ namespace Network {
 		EntityHitbox          = 0x56,
 
 		ItemActivated         = 0x60,
+		WorldSound            = 0x61,
 
 		RegistryData          = 0x70,
 

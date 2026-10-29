@@ -25,6 +25,7 @@
  * =====================================================================================
  */
 #include "common/core/Registry.hpp"
+#include "common/core/GameTime.hpp"
 #include "common/world/Biome.hpp"
 #include "common/world/PlacementEntry.hpp"
 #include "common/world/Tree.hpp"
@@ -113,8 +114,11 @@ ItemStack LuaMod::giveItemStack(ServerPlayer &player, ItemStack *itemStack) {
 	}
 
 	ItemStack stackRet = player.inventory().addItemStack(*itemStack, 0, 0, true, true);
-	if (stackRet.amount() != itemStack->amount())
+	if (stackRet.amount() != itemStack->amount()) {
 		m_worldController.server()->sendPlayerInvUpdate(player.clientID(), player.client());
+		float pitch = 0.7f + float(GameTime::getTicks() % 41) / 100.f;
+		m_worldController.server()->sendSound("item_drop_pickup", {player.x(), player.y(), player.z()}, player.dimension(), 0.3f, pitch, player.client());
+	}
 
 	return stackRet;
 }

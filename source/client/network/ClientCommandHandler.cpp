@@ -220,6 +220,16 @@ void ClientCommandHandler::setupCallbacks() {
 		if (auto *sound = SoundManager::instance()) sound->play("default_tool_breaks", 0.5f);
 	});
 
+	m_client.setCommandCallback(Network::Command::WorldSound, [this](Network::Packet &packet) {
+		std::string name;
+		Vector3d position;
+		u16 dimension;
+		float gain, pitch;
+		if (!(packet >> name >> position.x >> position.y >> position.z >> dimension >> gain >> pitch)
+		 || dimension != m_player.dimension()) return;
+		if (auto *sound = SoundManager::instance()) sound->playAt(name, position, gain, pitch);
+	});
+
 	m_client.setCommandCallback(Network::Command::BlockUpdate, [this](Network::Packet &packet) {
 		s32 x, y, z;
 		u32 block;

@@ -118,6 +118,13 @@ void ServerCommandHandler::sendBlockDataUpdate(s32 x, s32 y, s32 z, const BlockD
 		client->send(packet);
 }
 
+void ServerCommandHandler::sendSound(const std::string &name, const Vector3d &position, u16 dimension, float gain, float pitch, const ClientInfo *client) const {
+	Network::Packet packet;
+	packet << Network::Command::WorldSound << name << position.x << position.y << position.z << dimension << gain << pitch;
+	if (client) client->send(packet);
+	else m_server.sendToAllClients(packet);
+}
+
 void ServerCommandHandler::sendBlockInvUpdate(s32 x, s32 y, s32 z, const Inventory &inventory, const ClientInfo *client) const {
 	Network::Packet packet;
 	packet << Network::Command::BlockInvUpdate << x << y << z << inventory;

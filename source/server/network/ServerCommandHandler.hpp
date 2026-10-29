@@ -62,6 +62,7 @@ class ServerCommandHandler {
 		void sendServerClosed(const std::string &message, ClientInfo *client = nullptr) const;
 		void sendChunkUnload(s32 chunkX, s32 chunkY, s32 chunkZ, const ClientInfo *client = nullptr) const;
 		void sendBlockDataUpdate(s32 x, s32 y, s32 z, const BlockData *blockData, const ClientInfo *client = nullptr) const;
+		void sendSound(const std::string &name, const Vector3d &position, u16 dimension, float gain = 1, float pitch = 1, const ClientInfo *client = nullptr) const;
 		void sendBlockInvUpdate(s32 x, s32 y, s32 z, const Inventory &inventory, const ClientInfo *client = nullptr) const;
 		void sendPlayerPosUpdate(u16 clientID, bool isTeleportation = false, const ClientInfo *client = nullptr) const;
 		void sendPlayerInvUpdate(u16 clientID, const ClientInfo *client = nullptr) const;

@@ -109,7 +109,9 @@ bool SoundManager::play(const std::string &group, float gain, float pitch) {
 bool SoundManager::playAt(const std::string &group, const Vector3d &position, float gain, float pitch) {
 	Vector3d delta = position - m_listener;
 	double distance = delta.length();
-	if (distance > 32) return false;
+	double range = group == "item_drop_pickup" ? 16 :
+		group == "tnt_explode" ? 64 : 32;
+	if (distance > range) return false;
 	float pan = distance > 0.01 ? float(std::clamp((delta.x * m_right.x + delta.y * m_right.y) / distance, -1.0, 1.0)) : 0;
 	return startVoice(group, gain / float(1 + distance * distance / 64), pitch, pan);
 }
@@ -167,7 +169,7 @@ void SoundManager::playBlock(const BlockState &state, BlockSound action, const V
 	if (!block.id()) return;
 	const auto &id = block.stringID();
 	std::string material = "hard";
-	if (id == "default:grass" || id == "default:tallgrass" || state.drawType() == BlockDrawType::Leaves) material = "grass";
+	if (id == "default:grass" || state.drawType() == BlockDrawType::XShape || state.drawType() == BlockDrawType::Leaves) material = "grass";
 	else if (id == "default:gravel") material = "gravel";
 	else if (id == "default:snow") material = "snow";
 	else if (id == "default:ice") material = "ice";
@@ -175,25 +177,32 @@ void SoundManager::playBlock(const BlockState &state, BlockSound action, const V
 	else if (block.hasGroup("group:om_material_wood") || id == "default:bookshelf") material = "wood";
 	else if (block.hasGroup("group:om_material_dirt") || id == "default:clay" || id == "default:farmland") material = "dirt";
 	else if (block.hasGroup("group:om_material_sand")) material = "sand";
+	else if (id == "default:wool") material = "cloth";
 	std::string group = "default_" + material + "_footstep";
-	float gain = action == BlockSound::Step ? 0.2f : 0.7f;
+	float gain = action == BlockSound::Step ? 0.2f : 1.f;
 	if (action == BlockSound::Dig) {
 		if (material == "ice") group = "default_ice_dig";
-		else if (material == "hard") group = "default_dig_cracky";
+		else if (material == "hard" || material == "glass") group = "default_dig_cracky";
 		else if (material == "wood") group = "default_dig_choppy";
 		else if (material == "grass") group = "default_dig_snappy";
 		else if (material == "gravel") group = "default_gravel_dig";
 		else if (material == "dirt" || material == "sand") group = "default_dig_crumbly";
-		gain = 0.35f;
-	} else if (action == BlockSound::Dug && material == "ice") group = "default_ice_dug";
-	else if (action == BlockSound::Dug && material == "glass") group = "default_break_glass";
-	else if (action == BlockSound::Dug && material == "gravel") group = "default_gravel_dug";
+		gain = material == "hard" || material == "glass" ? 0.5f : 0.4f;
+		if (material == "ice" || material == "gravel") gain = 0.35f;
+	} else if (action == BlockSound::Dug && material == "ice") { group = "default_ice_dug"; gain = 0.35f; }
+	else if (action == BlockSound::Dug && material == "glass") { group = "default_break_glass"; gain = 0.5f; }
+	else if (action == BlockSound::Dug && material == "gravel") { group = "default_gravel_dug"; gain = 0.75f; }
+	else if (action == BlockSound::Dug && material == "grass") gain = 0.425f;
+	else if (action == BlockSound::Dug && material == "sand") gain = 0.15f;
 	else if (action == BlockSound::Place) group = material == "hard" ? "default_place_node_hard" : "default_place_node";
 	if (action == BlockSound::Step && material == "sand") gain = 0.05f;
-	if (id == "default:wool") {
-		if (action == BlockSound::Step) return;
-		if (action == BlockSound::Dig) group = "default_dig_snappy";
-		if (action == BlockSound::Dug) group = "default_dug_node";
+	if (material == "cloth") {
+		group = "mcl_sounds_cloth";
+		gain = action == BlockSound::Step ? 0.2f : 0.8f;
+	}
+	if (material == "snow" && action != BlockSound::Place) {
+		group = "pedology_snow_soft_footstep";
+		gain = action == BlockSound::Step ? 0.4f : 1.f;
 	}
 	float pitch = 0.95f + float(random() % 101) / 1000.f;
 	playAt(group, position, gain, pitch);

@@ -79,9 +79,7 @@
     <clip path="resources/sounds/default_place_node_hard.2.wav" />
   </group>
   <group name="default_tool_breaks">
-    <clip path="resources/sounds/default_tool_breaks.1.wav" />
-    <clip path="resources/sounds/default_tool_breaks.2.wav" />
-    <clip path="resources/sounds/default_tool_breaks.3.wav" />
+    <clip path="resources/sounds/default_tool_breaks.wav" />
   </group>
   <group name="player_damage">
     <clip path="resources/sounds/player_damage.wav" />
@@ -107,5 +105,26 @@
     <clip path="resources/sounds/default_break_glass.1.wav" />
     <clip path="resources/sounds/default_break_glass.2.wav" />
     <clip path="resources/sounds/default_break_glass.3.wav" />
+  </group>
+  <group name="mcl_sounds_cloth">
+    <clip path="resources/sounds/mcl_sounds_cloth.1.wav" />
+    <clip path="resources/sounds/mcl_sounds_cloth.2.wav" />
+    <clip path="resources/sounds/mcl_sounds_cloth.3.wav" />
+    <clip path="resources/sounds/mcl_sounds_cloth.4.wav" />
+  </group>
+  <group name="pedology_snow_soft_footstep">
+    <clip path="resources/sounds/pedology_snow_soft_footstep.1.wav" />
+    <clip path="resources/sounds/pedology_snow_soft_footstep.2.wav" />
+    <clip path="resources/sounds/pedology_snow_soft_footstep.3.wav" />
+    <clip path="resources/sounds/pedology_snow_soft_footstep.4.wav" />
+  </group>
+  <group name="item_drop_pickup">
+    <clip path="resources/sounds/item_drop_pickup.wav" />
+  </group>
+  <group name="tnt_explode">
+    <clip path="resources/sounds/tnt_explode.wav" />
+  </group>
+  <group name="tnt_ignite">
+    <clip path="resources/sounds/tnt_ignite.wav" />
   </group>
 </sounds>

@@ -65,6 +65,7 @@ std::string Network::commandToString(Network::Command command) {
 		{Network::Command::BlockDataUpdate,       "BlockDataUpdate"},
 
 		{Network::Command::ItemActivated,         "ItemActivated"},
+		{Network::Command::WorldSound,            "WorldSound"},
 
 		{Network::Command::RegistryData,          "RegistryData"},
 
