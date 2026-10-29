@@ -123,7 +123,9 @@ namespace std {
 			auto h2 = hash(vector3.y);
 			auto h3 = hash(vector3.z);
 
-			return std::hash<T>{}(static_cast<T>(h1 ^ (h2 << h3) ^ h3));
+			h1 ^= h2 + 0x9e3779b9u + (h1 << 6) + (h1 >> 2);
+			h1 ^= h3 + 0x9e3779b9u + (h1 << 6) + (h1 >> 2);
+			return h1;
 		}
 	};
 }
