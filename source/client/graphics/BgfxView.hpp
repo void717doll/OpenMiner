@@ -32,8 +32,9 @@ namespace BgfxView {
 		Sky    = 0,
 		World  = 1,
 		Effect = 2,
-		HUD    = 3,
-		UI     = 4,
+		Wield  = 3,
+		HUD    = 4,
+		UI     = 5,
 
 		Count
 	};

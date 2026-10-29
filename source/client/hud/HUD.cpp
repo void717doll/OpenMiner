@@ -38,6 +38,7 @@
 HUD::HUD(ClientPlayer &player, ClientWorld &world, ClientCommandHandler &client)
 	: m_player(player), m_world(world),
 	m_hotbar(player, client),
+	m_wield(player),
 	m_blockCursor(player, world, client),
 	m_debugOverlay(player, world),
 	m_chat(client.client()),
@@ -84,6 +85,7 @@ void HUD::onEvent(const SDL_Event &event) {
 
 	if (Config::isHotbarVisible)
 		m_hotbar.onEvent(event);
+	m_wield.onEvent(event);
 
 	m_blockCursor.onEvent(event, m_hotbar);
 
@@ -101,6 +103,7 @@ void HUD::onGuiScaleChanged(const GuiScaleChangedEvent &event) {
 }
 
 void HUD::update() {
+	m_wield.update();
 	m_hearts.update(m_player.health());
 	// FIXME: Shouldn't be called every tick
 	if (Config::isHotbarVisible)
@@ -132,6 +135,7 @@ void HUD::update() {
 
 void HUD::draw(RenderTarget &target, RenderStates states) const {
 	OM_PROFILE_START("HUD::draw");
+	target.draw(m_wield, states);
 
 	target.setView(m_view);
 

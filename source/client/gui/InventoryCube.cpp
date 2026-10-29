@@ -153,11 +153,11 @@ void InventoryCube::draw(RenderTarget &target, RenderStates states) const {
 	// NOTE: This matrix has Y inverted as well as Z. This means that
 	// negative Z is closer to the user, and that the bottom side is visible
 	// at start.
-	target.setView(m_view);
+	if (!m_isEntity) target.setView(m_view);
 
 	states.texture = &m_textureAtlas->texture();
 
-	states.isDepthTestEnabled = false;
+	states.isDepthTestEnabled = m_isEntity;
 
 	target.drawElements(m_vbo, target.cubeIndexBuffer(), 0, 0, states);
 }

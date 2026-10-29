@@ -39,6 +39,7 @@
 #include "client/hud/Minimap.hpp"
 #include "client/graphics/Shader.hpp"
 #include "client/graphics/View.hpp"
+#include "client/graphics/WieldRenderer.hpp"
 
 struct GuiScaleChangedEvent;
 
@@ -53,7 +54,7 @@ class HUD : public Transformable, public Drawable {
 
 		void update();
 
-		void pause() { m_blockCursor.reset(); }
+		void pause() { m_blockCursor.reset(); m_wield.pause(); }
 
 		const BlockCursor &blockCursor() const { return m_blockCursor; }
 
@@ -71,6 +72,7 @@ class HUD : public Transformable, public Drawable {
 		View m_view;
 
 		Hotbar m_hotbar;
+		WieldRenderer m_wield;
 
 		BlockCursor m_blockCursor;
 		Crosshair m_crosshair;

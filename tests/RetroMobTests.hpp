@@ -43,7 +43,7 @@ class RetroMobTests : public CxxTest::TestSuite {
 		void testMobModels() {
 			for (unsigned model : {1u, 2u}) {
 				auto vertices = retro::mobMesh(model);
-				TS_ASSERT_EQUALS(vertices.size(), 216);
+				TS_ASSERT_EQUALS(vertices.size(), model == 1 ? 216 : 252);
 				for (const auto &vertex : vertices) {
 					TS_ASSERT(std::isfinite(vertex.x) && std::isfinite(vertex.y) && std::isfinite(vertex.z));
 					TS_ASSERT(vertex.u >= 0 && vertex.u <= 1);
