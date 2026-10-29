@@ -29,6 +29,10 @@
 
 void InventoryWidget::init(Inventory &inventory, u16 offset, u16 size) {
 	m_inventory = &inventory;
+	if (!m_slotBackground.width()) {
+		m_slotBackground.load("texture-inventory_slot");
+		m_slotBackground.setPosRect(0, 0, 18, 18);
+	}
 
 	m_offset = offset;
 	m_size = size > 0 ? size : inventory.width() * inventory.height();
@@ -133,12 +137,17 @@ void InventoryWidget::sendUpdatePacket() {
 void InventoryWidget::draw(RenderTarget &target, RenderStates states) const {
 	states.transform *= getTransform();
 
-	for (std::size_t i = 0 ; i < m_itemWidgets.size() ; ++i) {
-		target.draw(m_itemWidgets[i], states);
+	for (const auto &item : m_itemWidgets) {
+		RenderStates slotStates = states;
+		slotStates.transform *= item.getTransform();
+		target.draw(m_slotBackground, slotStates);
 	}
 
 	if (m_currentItemWidget)
 		target.draw(m_selectedItemBackground, states);
+
+	for (const auto &item : m_itemWidgets)
+		target.draw(item, states);
 }
 
 void InventoryWidget::loadItemWidgets(u16 offset, u16 size) {

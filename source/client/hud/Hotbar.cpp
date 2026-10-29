@@ -35,12 +35,12 @@
 Hotbar::Hotbar(ClientPlayer &player, ClientCommandHandler &client, Widget *parent)
 	: Widget(182, 22, parent), m_player(player), m_client(client)
 {
-	m_background.load("texture-widgets");
+	m_background.load("texture-hotbar");
 	m_background.setClipRect(0, 0, 182, 22);
 	m_background.setPosition(0, 0, 0);
 
-	m_cursor.load("texture-widgets");
-	m_cursor.setClipRect(0, 22, 24, 24);
+	m_cursor.load("texture-hotbar_selected");
+	m_cursor.setClipRect(0, 0, 24, 24);
 	m_cursor.setPosition(-1, -1, 0);
 }
 

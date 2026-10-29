@@ -29,13 +29,19 @@
 void ImageWidgetDef::serialize(sf::Packet &packet) const {
 	WidgetDef::serialize(packet);
 
-	packet << m_texture << m_clipRect;
+	packet << m_texture << m_clipRect << m_width << m_height << m_border;
 }
 
 void ImageWidgetDef::loadFromLuaTable(const sol::table &table) {
 	WidgetDef::loadFromLuaTable(table);
 
 	m_texture = table["texture"].get<std::string>();
+	m_border = table["border"].get_or<u16>(0);
+	sol::optional<sol::table> size = table["size"];
+	if (size) {
+		m_width = size.value()["x"];
+		m_height = size.value()["y"];
+	}
 
 	sol::optional<sol::table> clipRectTable = table["clip"];
 	if (clipRectTable != sol::nullopt) {

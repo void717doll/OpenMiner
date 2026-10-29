@@ -98,8 +98,17 @@ mod:block {
 			name = "img_background",
 			pos = {x = 0, y = 0},
 
+			texture = modpath .. "/textures/gui/inventory.png",
+			size = {x = 176, y = 166},
+			border = 5,
+		}
+
+		gui:image {
+			name = "img_crafting_arrow",
+			pos = {x = 91, y = 35},
 			texture = modpath .. "/textures/gui/workbench.png",
-			clip = {x = 0, y = 0, width = 176, height = 166},
+			clip = {x = 468, y = 158, width = 73, height = 58},
+			size = {x = 22, y = 17},
 		}
 
 		gui:show(client)

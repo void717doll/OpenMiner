@@ -7,12 +7,21 @@ gui:image {
 	name = "img_background", -- mandatory
 	pos = {x = 0, y = 0},    -- mandatory
 
-	texture = mod:path() .. "/textures/gui/workbench.png",
-	clip = {x = 0, y = 0, width = 176, height = 166},
+	texture = mod:path() .. "/textures/gui/inventory.png",
+	size = {x = 176, y = 166},
+	border = 5,
 }
 ```
 
 ## Attributes
+
+### `size`
+
+optional display size, `{x = width, y = height}`. the source `clip` remains in texture pixels. omitting this keeps the clipped image's original size.
+
+### `border`
+
+optional border width in source pixels. with `size`, a positive border draws the full texture in nine parts, preserving its corners and stretching its edges and center. `clip` is unused for this panel mode.
 
 ### `clip`
 

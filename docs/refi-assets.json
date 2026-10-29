@@ -6,6 +6,111 @@
   "source_root": "/home/mia/Downloads/refi_textures",
   "entries": [
     {
+      "destination": "mods/default/textures/gui/inventory.png",
+      "source": "textures/mcl_inventory/mcl_base_textures_background9.png",
+      "operation": "copy",
+      "source_sha256": "e24cf1c9ef73f05965e9fa29564be65d3177453f7a0b8f77b3921dedcf08d5c5",
+      "output_sha256": "e24cf1c9ef73f05965e9fa29564be65d3177453f7a0b8f77b3921dedcf08d5c5",
+      "source_size": [
+        42,
+        42
+      ],
+      "output_size": [
+        42,
+        42
+      ]
+    },
+    {
+      "destination": "mods/default/textures/gui/workbench.png",
+      "source": "textures/mcl_inventory/crafting_inventory_workbench.png",
+      "operation": "copy",
+      "source_sha256": "5cc9dad04f6e350b7a707f2f8a81a69a3312ffc8b965823c5c76820319d2ea47",
+      "output_sha256": "5cc9dad04f6e350b7a707f2f8a81a69a3312ffc8b965823c5c76820319d2ea47",
+      "source_size": [
+        846,
+        784
+      ],
+      "output_size": [
+        846,
+        784
+      ]
+    },
+    {
+      "destination": "resources/textures/inventory_slot.png",
+      "source": "textures/mcl_inventory/mcl_formspec_itemslot.png",
+      "operation": "copy",
+      "source_sha256": "cba5df51073ad4fffa96a307665860500b7f0b2c8c1e811d28d7a7a6b909c1af",
+      "output_sha256": "cba5df51073ad4fffa96a307665860500b7f0b2c8c1e811d28d7a7a6b909c1af",
+      "source_size": [
+        80,
+        80
+      ],
+      "output_size": [
+        80,
+        80
+      ]
+    },
+    {
+      "destination": "mods/default/textures/gui/furnace_fire_bg.png",
+      "source": "textures/default_mcl_core/gui_hud/default_furnace_fire_bg.png",
+      "operation": "copy",
+      "source_sha256": "436edddae34806fe62ea34ad26d628dda00711a518e4f3ab4b70189d7dfed679",
+      "output_sha256": "436edddae34806fe62ea34ad26d628dda00711a518e4f3ab4b70189d7dfed679",
+      "source_size": [
+        14,
+        14
+      ],
+      "output_size": [
+        14,
+        14
+      ]
+    },
+    {
+      "destination": "mods/default/textures/gui/furnace_fire_fg.png",
+      "source": "textures/default_mcl_core/gui_hud/default_furnace_fire_fg.png",
+      "operation": "copy",
+      "source_sha256": "03f10917aade5a2433a10dfb38a483ce5b39708c04cd4bba3bccdd59a313da59",
+      "output_sha256": "03f10917aade5a2433a10dfb38a483ce5b39708c04cd4bba3bccdd59a313da59",
+      "source_size": [
+        14,
+        14
+      ],
+      "output_size": [
+        14,
+        14
+      ]
+    },
+    {
+      "destination": "resources/textures/hotbar.png",
+      "source": "textures/mcl_inventory/mcl_inventory_hotbar.png",
+      "operation": "copy",
+      "source_sha256": "8c424ee79c89a883f00cd9986e7374bf20de5f18b7c1898ed28a9e60fb67ed86",
+      "output_sha256": "8c424ee79c89a883f00cd9986e7374bf20de5f18b7c1898ed28a9e60fb67ed86",
+      "source_size": [
+        182,
+        22
+      ],
+      "output_size": [
+        182,
+        22
+      ]
+    },
+    {
+      "destination": "resources/textures/hotbar_selected.png",
+      "source": "textures/mcl_inventory/mcl_inventory_hotbar_selected.png",
+      "operation": "copy",
+      "source_sha256": "35a6d38dadf46f1995e2a1624417cd7facb8b867f7b1a6d2417c1ba32ab99078",
+      "output_sha256": "35a6d38dadf46f1995e2a1624417cd7facb8b867f7b1a6d2417c1ba32ab99078",
+      "source_size": [
+        24,
+        24
+      ],
+      "output_size": [
+        24,
+        24
+      ]
+    },
+    {
       "destination": "mods/default/textures/blocks/bedrock.png",
       "source": "textures/default_mcl_core/stone/mcl_core_bedrock.png",
       "operation": "copy",
@@ -3746,8 +3851,6 @@
   ],
   "unchanged_engine_ui": [
     "mods/default/textures/gui/furnace.png",
-    "mods/default/textures/gui/inventory.png",
-    "mods/default/textures/gui/workbench.png",
     "resources/textures/font.png",
     "resources/textures/recipe.png",
     "resources/textures/title_screen.png",

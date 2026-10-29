@@ -26,6 +26,7 @@ set(SOURCE_FILES
 	graphics/ChunkRenderer.cpp
 	graphics/Framebuffer.cpp
 	graphics/Image.cpp
+	graphics/NinePatch.cpp
 	graphics/IndexBuffer.cpp
 	graphics/MobModel.cpp
 	graphics/ItemBillboard.cpp

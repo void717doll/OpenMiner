@@ -42,7 +42,16 @@ mod:key {
 			pos = {x = 0, y = 0},
 
 			texture = modpath .. "/textures/gui/inventory.png",
-			clip = {x = 0, y = 0, width = 176, height = 166},
+			size = {x = 176, y = 166},
+			border = 5,
+		}
+
+		gui:image {
+			name = "img_crafting_arrow",
+			pos = {x = 86, y = 35},
+			texture = modpath .. "/textures/gui/workbench.png",
+			clip = {x = 468, y = 158, width = 73, height = 58},
+			size = {x = 22, y = 17},
 		}
 
 		gui:inventory {
@@ -81,8 +90,8 @@ mod:key {
 
 		gui:crafting {
 			name = "inv_crafting",
-			pos = {x = 97, y = 17},
-			result_pos = {x = 97 + 56, y = 17 + 10},
+			pos = {x = 43, y = 25},
+			result_pos = {x = 115, y = 34},
 
 			inventory = {
 				source = "temp",

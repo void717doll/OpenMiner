@@ -42,6 +42,9 @@ class ImageWidgetDef : public WidgetDef {
 		std::string m_texture;
 
 		FloatRect m_clipRect;
+		u16 m_width = 0;
+		u16 m_height = 0;
+		u16 m_border = 0;
 };
 
 #endif // IMAGEWIDGETDEF_HPP_

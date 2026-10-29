@@ -4,10 +4,13 @@ world artwork is imported from the supplied REFI_Textures distribution by Mystic
 
 [refi-assets.json](refi-assets.json) records every imported source path, destination, source/output dimensions, operation, and sha256 digest. destinations keep their existing names so saved registry ids and lua definitions remain stable.
 
-coverage: 111 block textures, 110 item textures, 21 mob/projectile textures, and seven engine textures. all 258 png files under the default mod and engine texture directories are accounted for, including the retained ui and debug exceptions below. the engine's magenta missing-texture checker is retained as a 16px debug placeholder rather than relabeled as refi artwork.
+coverage: 111 block textures, 110 item textures, 21 mob/projectile textures, and ten engine textures. all 263 png files under the default mod and engine texture directories are accounted for, including the retained ui and debug exceptions below. the engine's magenta missing-texture checker is retained as a 16px debug placeholder rather than relabeled as refi artwork.
 
 ## adaptations
 
+- inventory, workbench, and furnace screens share refi's `mcl_base_textures_background9.png` panel and `mcl_formspec_itemslot.png` slots. the original images are copied unchanged and sized at runtime; the crafting arrow is clipped from the supplied workbench sheet. the inventory shows only working storage and crafting slots, with no shield/offhand or decorative armor slots.
+- furnace fire uses the supplied foreground/background sprites. the white furnace progress arrow remains an engine ui asset. slot highlights draw behind items and stack counts. hud hearts retain their compact nine-pixel size, with a four-pixel margin below the hotbar.
+- the hotbar and selection frame use the supplied refi images directly.
 - block and item art is 16px. ore/material aliases use the corresponding refi texture, with no fallback to the removed texturepacks directory.
 - grass side overlays are composited over the supplied dirt texture. oak leaves use the supplied desaturated oak variant because the existing engine applies foliage tint.
 - zombie and zombie pigman skins use the upper 64x32 section of their supplied 64x64 atlases. slime uses nearest-neighbor reduction from 128x64 to beta's 64x32 coordinates.
@@ -17,8 +20,8 @@ coverage: 111 block textures, 110 item textures, 21 mob/projectile textures, and
 - the five vertical breaking-overlay frames are arranged horizontally, with each repeated twice to fit the existing ten-frame progression. the menu background uses the supplied dirt texture.
 - full and empty hearts are direct copies of `textures/default_mcl_core/gui_hud/heart.png` and `heart_gone.png`. half hearts use clipping of the full-heart artwork at runtime. the saddle item uses the supplied `mcl_mobitems_saddle.png`.
 
-widgets, font, title screen, recipe, world icon, toast, and the default mod's furnace, inventory, and workbench images remain engine ui assets: the supplied distribution has no equivalent atlas layouts for those files. the six labeled block faces under `mods/default/textures/blocks/debug/` retain their original engine artwork, resized from 32px to 16px with nearest-neighbor sampling to match the block atlas. the manifest lists these debug transformations with their original hashes and dimensions, separately identifies the nine unchanged ui images, and does not attribute either group to refi.
+widgets, font, title screen, recipe, world icon, toast, and the default mod's white furnace progress arrow remain engine ui assets. the six labeled block faces under `mods/default/textures/blocks/debug/` retain their original engine artwork, resized from 32px to 16px with nearest-neighbor sampling to match the block atlas. the manifest lists these debug transformations with their original hashes and dimensions, separately identifies the seven unchanged ui images, and does not attribute either group to refi.
 
 ## validation
 
-all 249 manifest entries were checked for readable png data, destination coverage, expected dimensions, and matching source/output digests where a supplied source exists. grass-side composition pixels match the supplied dirt and overlay layers. all block/item images are 16x16. all 219 unique default lua texture paths resolve, including 25 generated tool names, and both sky resource keys resolve through the texture configuration. the retained license matches the supplied file byte for byte. native rendering remains an integration check.
+all 256 manifest entries were checked for readable png data, destination coverage, expected dimensions, and matching source/output digests where a supplied source exists. grass-side composition pixels match the supplied dirt and overlay layers. all block/item images are 16x16. all 219 unique default lua texture paths resolve, including 25 generated tool names, and both sky resource keys resolve through the texture configuration. the retained license matches the supplied file byte for byte. native rendering remains an integration check.

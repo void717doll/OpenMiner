@@ -78,8 +78,8 @@ mod:block {
 			meta = "ticks_remaining",
 			max_meta = "current_burn_time",
 
-			texture = modpath .. "/textures/gui/furnace.png",
-			clip = {x = 176, y = 0, width = 14, height = 14},
+			texture = modpath .. "/textures/gui/furnace_fire_fg.png",
+			clip = {x = 0, y = 0, width = 14, height = 14},
 		}
 
 		gui:inventory {
@@ -171,8 +171,24 @@ mod:block {
 			name = "img_background",
 			pos = {x = 0, y = 0},
 
-			texture = modpath .. "/textures/gui/furnace.png",
-			clip = {x = 0, y = 0, width = 176, height = 166},
+			texture = modpath .. "/textures/gui/inventory.png",
+			size = {x = 176, y = 166},
+			border = 5,
+		}
+
+		gui:image {
+			name = "img_process_arrow",
+			pos = {x = 80, y = 35},
+			texture = modpath .. "/textures/gui/workbench.png",
+			clip = {x = 468, y = 158, width = 73, height = 58},
+			size = {x = 24, y = 17},
+		}
+
+		gui:image {
+			name = "img_fire",
+			pos = {x = 57, y = 37},
+			texture = modpath .. "/textures/gui/furnace_fire_bg.png",
+			clip = {x = 0, y = 0, width = 14, height = 14},
 		}
 
 		gui:show(client)

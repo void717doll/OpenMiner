@@ -32,9 +32,10 @@ Crosshair::Crosshair() {
 }
 
 void Crosshair::setup() {
-	m_hShape.setSize(41, 4);
-	m_vShape1.setSize(4, 19);
-	m_vShape2.setSize(4, 19);
+	float scale = float(Config::guiScale);
+	m_hShape.setSize(11 * scale, scale);
+	m_vShape1.setSize(scale, 5 * scale);
+	m_vShape2.setSize(scale, 5 * scale);
 
 	m_hShape.setFillColor(Color::fromRGBA32(200, 200, 200, 180));
 	m_vShape1.setFillColor(Color::fromRGBA32(200, 200, 200, 180));

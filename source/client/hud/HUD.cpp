@@ -56,7 +56,7 @@ void HUD::setup() {
 
 	m_hotbar.setPosition(
 		Config::screenWidth / getScale().x / 2.f - (float)m_hotbar.width() / 2.f,
-		Config::screenHeight / getScale().y - (float)m_hotbar.height()
+		Config::screenHeight / getScale().y - (float)m_hotbar.height() - 4.f
 	);
 
 	m_blockInfoWidget.setPosition(Config::screenWidth / getScale().x / 2.f - (float)m_blockInfoWidget.width() / 2.f, 2.f);

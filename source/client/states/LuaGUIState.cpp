@@ -39,6 +39,7 @@
 #include "client/core/Config.hpp"
 #include "client/core/Mouse.hpp"
 #include "client/core/input/GamePad.hpp"
+#include "client/graphics/NinePatch.hpp"
 #include "client/gui/InventoryWidget.hpp"
 #include "client/gui/ProgressBarWidget.hpp"
 #include "client/gui/ScrollBarWidget.hpp"
@@ -237,13 +238,23 @@ void LuaGUIState::loadGUI(sf::Packet &packet) {
 void LuaGUIState::loadImage(const std::string &, s32 x, s32 y, sf::Packet &packet) {
 	std::string textureFilename;
 	FloatRect clipRect;
-	packet >> textureFilename >> clipRect.x >> clipRect.y >> clipRect.sizeX >> clipRect.sizeY;
+	u16 width, height, border;
+	packet >> textureFilename >> clipRect.x >> clipRect.y >> clipRect.sizeX >> clipRect.sizeY
+		>> width >> height >> border;
 
 	Texture &texture = loadTexture(textureFilename);
+	if (border && width && height) {
+		auto *panel = new NinePatch(texture, border);
+		panel->setPosition(float(x), float(y));
+		panel->setSize(width, height);
+		m_drawables.emplace_back(panel);
+		return;
+	}
 
 	auto *image = new Image(texture);
 	image->setPosition((float)x, (float)y);
 	image->setClipRect(clipRect.x, clipRect.y, (u16)clipRect.sizeX, (u16)clipRect.sizeY);
+	if (width && height) image->setPosRect(0, 0, width, height);
 	m_drawables.emplace_back(image);
 }
 

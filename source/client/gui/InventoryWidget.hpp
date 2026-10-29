@@ -75,6 +75,7 @@ class InventoryWidget : public AbstractInventoryWidget {
 
 		std::vector<ItemWidget> m_itemWidgets;
 		ItemWidget *m_currentItemWidget = nullptr;
+		Image m_slotBackground;
 
 		RectangleShape m_selectedItemBackground{16, 16, Color::fromRGBA32(255, 255, 255, 80)};
 
