@@ -43,44 +43,22 @@ void TextureAtlas::clear() {
 	m_isReady = false;
 }
 
-void TextureAtlas::loadFromRegistry(const std::string &texturePack) {
-	if (!texturePack.empty() && !fs::exists("texturepacks/" + texturePack))
-		throw EXCEPTION("Texture pack '" + texturePack +"' doesn't exist");
-
-	// FIXME: Undefined texture should be created from current texture size
-	if (texturePack.empty())
-		addFile("mods/default/textures/blocks/", "undefined.png");
-	else
-		addFile("texturepacks/" + texturePack + "/blocks/", "undefined.png");
-
-	for (auto &block : Registry::getInstance().blocks()) {
-		std::string path;
-		if (texturePack.empty())
-			path = "mods/" + block->modName() + "/textures/blocks/";
-		else
-			path = "texturepacks/" + texturePack + "/blocks/";
-
-		for (auto &state : block->states()) {
-			const TilesDef &tiles = state.tiles();
-			for (auto &textureFilename : tiles.textureFilenames())
-				addFile(path, textureFilename);
+void TextureAtlas::loadFromRegistry() {
+	addFile("mods/default/textures/blocks/", "undefined.png");
+	for (const auto &block : Registry::getInstance().blocks()) {
+		std::string path = "mods/" + block->modName() + "/textures/blocks/";
+		for (const auto &state : block->states()) {
+			for (const auto &filename : state.tiles().textureFilenames())
+				addFile(path, filename);
 		}
 	}
-
-	for (auto &item : Registry::getInstance().items()) {
+	for (const auto &item : Registry::getInstance().items()) {
 		if (!item->isBlock() || !item->tiles().textureFilenames().empty()) {
-			std::string path;
-			if (texturePack.empty())
-				path = "mods/" + item->modName() + "/textures/items/";
-			else
-				path = "texturepacks/" + texturePack + "/items/";
-
-			const TilesDef &tiles = item->tiles();
-			for (auto &textureFilename : tiles.textureFilenames())
-				addFile(path, textureFilename);
+			std::string path = "mods/" + item->modName() + "/textures/items/";
+			for (const auto &filename : item->tiles().textureFilenames())
+				addFile(path, filename);
 		}
 	}
-
 	packTextures();
 }
 
@@ -163,21 +141,11 @@ void TextureAtlas::packTextures() {
 	// const u16 atlasHeight = (u16)std::ceil((float)m_textures.size() / atlasWidth);
 	const u16 atlasHeight = 32;
 
-#define MIPMAP_LEVELS 11
-
-	SurfacePtr atlas[MIPMAP_LEVELS] = {
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-		{nullptr, &SDL_FreeSurface},
-	};
+unsigned mipmapLevels = 1;
+	for (unsigned side = atlasWidth * m_tileSize; side > 1; side /= 2) ++mipmapLevels;
+	std::vector<SurfacePtr> atlas;
+	for (unsigned level = 0; level < mipmapLevels; ++level)
+		atlas.emplace_back(nullptr, &SDL_FreeSurface);
 
 	atlas[0].reset(SDL_CreateRGBSurface(0, atlasWidth * m_tileSize, atlasHeight * m_tileSize, 32, rmask, gmask, bmask, amask));
 	if (!atlas[0]) {
@@ -197,12 +165,12 @@ void TextureAtlas::packTextures() {
 		++i;
 	}
 
-	int size[MIPMAP_LEVELS];
+	std::vector<int> size(mipmapLevels);
 	size[0] = atlas[0]->h * atlas[0]->pitch;
 	int totalSize = size[0];
 
 	// Generate mipmaps
-	for (int i = 1; i < MIPMAP_LEVELS; ++i) {
+	for (unsigned i = 1; i < mipmapLevels; ++i) {
 		int width = (atlasWidth * m_tileSize) / (1 << i);
 		int height = (atlasHeight * m_tileSize) / (1 << i);
 
@@ -233,7 +201,7 @@ void TextureAtlas::packTextures() {
 
 	const bgfx::Memory *mem = bgfx::alloc(totalSize);
 	int offset = 0;
-	for (int i = 0; i < MIPMAP_LEVELS; ++i) {
+	for (unsigned i = 0; i < mipmapLevels; ++i) {
 		std::memcpy(mem->data + offset, atlas[i]->pixels, size[i]);
 		offset += size[i];
 	}

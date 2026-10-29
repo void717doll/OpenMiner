@@ -70,6 +70,7 @@ set(HEADER_FILES
 	core/Exception.hpp
 	core/GameClock.hpp
 	core/GameTime.hpp
+	core/HeartBarState.hpp
 	core/ISerializable.hpp
 	core/IntTypes.hpp
 	core/LogStream.hpp

@@ -1,0 +1,3767 @@
+{
+  "source": "REFI_Textures",
+  "author": "MysticTempest",
+  "source_url": "https://github.com/MysticTempest/REFI_Textures",
+  "license": "CC BY-SA 4.0",
+  "source_root": "/home/mia/Downloads/refi_textures",
+  "entries": [
+    {
+      "destination": "mods/default/textures/blocks/bedrock.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_bedrock.png",
+      "operation": "copy",
+      "source_sha256": "8947d74813efdf04dbc6b96c235f5933dfd59595609330843c943bd38846b6b8",
+      "output_sha256": "8947d74813efdf04dbc6b96c235f5933dfd59595609330843c943bd38846b6b8",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/bookshelf.png",
+      "source": "textures/default_mcl_core/default_bookshelf.png",
+      "operation": "copy",
+      "source_sha256": "4abe0640dae2fffa6e50607f1e77b4a8a363f798ea53bde71441a9e60b599cf6",
+      "output_sha256": "4abe0640dae2fffa6e50607f1e77b4a8a363f798ea53bde71441a9e60b599cf6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/bricks.png",
+      "source": "textures/default_mcl_core/stone/default_brick.png",
+      "operation": "copy",
+      "source_sha256": "a54091cab6cc5f1d8dce8a53cfafdfe06a7a3672801f9c596ee357ea315956fe",
+      "output_sha256": "a54091cab6cc5f1d8dce8a53cfafdfe06a7a3672801f9c596ee357ea315956fe",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/cactus_bottom.png",
+      "source": "textures/default_mcl_core/plants/mcl_core_cactus_bottom.png",
+      "operation": "copy",
+      "source_sha256": "71491b6ddcb5ced128a0f0244a65483b48efa4b719ae081bb4f8eb7e81b61a48",
+      "output_sha256": "71491b6ddcb5ced128a0f0244a65483b48efa4b719ae081bb4f8eb7e81b61a48",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/cactus_side.png",
+      "source": "textures/default_mcl_core/plants/mcl_core_cactus_side.png",
+      "operation": "copy",
+      "source_sha256": "e0590b79b5a4d9729b5a464a52e91a1c4fcf4baf3c187dc819df96c1f0dfa7bc",
+      "output_sha256": "e0590b79b5a4d9729b5a464a52e91a1c4fcf4baf3c187dc819df96c1f0dfa7bc",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/cactus_top.png",
+      "source": "textures/default_mcl_core/plants/mcl_core_cactus_top.png",
+      "operation": "copy",
+      "source_sha256": "030748d80e61f3292af1369c51b9e57a0c765e1a1d457ab24c5e5b0c871d082a",
+      "output_sha256": "030748d80e61f3292af1369c51b9e57a0c765e1a1d457ab24c5e5b0c871d082a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/clay.png",
+      "source": "textures/default_mcl_core/soil/default_clay.png",
+      "operation": "copy",
+      "source_sha256": "876eb29d19ad6e95dc2c95adca73f6e0f8f930bf2725814e3c99734621b80ea8",
+      "output_sha256": "876eb29d19ad6e95dc2c95adca73f6e0f8f930bf2725814e3c99734621b80ea8",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/coal_block.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_coal_block.png",
+      "operation": "copy",
+      "source_sha256": "6c0fb4d5be44cc3c842e59df80f1f38cfda50f036b7b49fcd3ad55c567381836",
+      "output_sha256": "6c0fb4d5be44cc3c842e59df80f1f38cfda50f036b7b49fcd3ad55c567381836",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/coal_ore.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_coal_ore.png",
+      "operation": "copy",
+      "source_sha256": "65a981ad7d7caa3e41e067152d6d41880f03c7a679efd9eb24368f3307b9fe66",
+      "output_sha256": "65a981ad7d7caa3e41e067152d6d41880f03c7a679efd9eb24368f3307b9fe66",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/cobblestone.png",
+      "source": "textures/default_mcl_core/stone/default_cobble.png",
+      "operation": "copy",
+      "source_sha256": "90a860855b8d5bc468c1d2a7063a0c188c239a4de62d07db574aebe2f2d4e6a1",
+      "output_sha256": "90a860855b8d5bc468c1d2a7063a0c188c239a4de62d07db574aebe2f2d4e6a1",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/cobblestone_mossy.png",
+      "source": "textures/default_mcl_core/stone/default_mossycobble.png",
+      "operation": "copy",
+      "source_sha256": "289ca2f1acea5e0334a096a05a8731973c5d81767b2de3fa5384e846378cc23f",
+      "output_sha256": "289ca2f1acea5e0334a096a05a8731973c5d81767b2de3fa5384e846378cc23f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/cracked_stone_bricks.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_stonebrick_cracked.png",
+      "operation": "copy",
+      "source_sha256": "9939c0b70b96c0a9b36d5ba09215814174bacda16ee7a2ced8bae992ced7821a",
+      "output_sha256": "9939c0b70b96c0a9b36d5ba09215814174bacda16ee7a2ced8bae992ced7821a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/crafting_table_front.png",
+      "source": "textures/default_mcl_core/crafting_workbench_front.png",
+      "operation": "copy",
+      "source_sha256": "443c9f680deca48a0fd6506583d66b4b4b3fece8995c8e66140f9c82143e58ec",
+      "output_sha256": "443c9f680deca48a0fd6506583d66b4b4b3fece8995c8e66140f9c82143e58ec",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/crafting_table_side.png",
+      "source": "textures/default_mcl_core/crafting_workbench_side.png",
+      "operation": "copy",
+      "source_sha256": "e22e8e907466064833f66b590ea17255ee5ce71bd15d73bd6027beb0e5420a3a",
+      "output_sha256": "e22e8e907466064833f66b590ea17255ee5ce71bd15d73bd6027beb0e5420a3a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/crafting_table_top.png",
+      "source": "textures/default_mcl_core/crafting_workbench_top.png",
+      "operation": "copy",
+      "source_sha256": "3afbe8fb2d6e5224df6e862a8d9496b8b04484be44d723b5abf49aeae7a51599",
+      "output_sha256": "3afbe8fb2d6e5224df6e862a8d9496b8b04484be44d723b5abf49aeae7a51599",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/dandelion.png",
+      "source": "textures/flowers_mcl_flowers/flowers_dandelion_yellow.png",
+      "operation": "copy",
+      "source_sha256": "6308a51da1bf3efb15745c471d0a2442d7725d85cace8bd79dff46012c423204",
+      "output_sha256": "6308a51da1bf3efb15745c471d0a2442d7725d85cace8bd79dff46012c423204",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/deadbush.png",
+      "source": "textures/default_mcl_core/plants/default_dry_shrub.png",
+      "operation": "copy",
+      "source_sha256": "617b6e27e10d03859cb0980fdb5e635aa1c50da60b4061e2c3029e5e992a8074",
+      "output_sha256": "617b6e27e10d03859cb0980fdb5e635aa1c50da60b4061e2c3029e5e992a8074",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/debug/f.png",
+      "source": null,
+      "operation": "nearest_resize_16x16_engine_debug_face",
+      "original_sha256": "980eb373f9b6429c359b8462172cb7cd8e7cace4826355f41b820c66d51440ea",
+      "original_size": [
+        32,
+        32
+      ],
+      "output_sha256": "add75ea5e0e0f8e345e7ff9127f8628fa3c312b35601169360bfe500a03b600e",
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/debug/g.png",
+      "source": null,
+      "operation": "nearest_resize_16x16_engine_debug_face",
+      "original_sha256": "67e11b361fb240e1e76b151b700357c97b9742cf694eb71f8977d0a148218ad9",
+      "original_size": [
+        32,
+        32
+      ],
+      "output_sha256": "fa481b3e842a58e50ba25951785c0602d2f5c01cce5c4e4a43d25e0e357005b5",
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/debug/j.png",
+      "source": null,
+      "operation": "nearest_resize_16x16_engine_debug_face",
+      "original_sha256": "5ca70f5def078b7628b6c430597cfe3c746d90e1f652e18fef3d24f4fb02d70e",
+      "original_size": [
+        32,
+        32
+      ],
+      "output_sha256": "1f1ba4e8cd6e0d357dc9bdca1b4f9f94d226f3c3c6ba54a3a80a60adf965aef3",
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/debug/l.png",
+      "source": null,
+      "operation": "nearest_resize_16x16_engine_debug_face",
+      "original_sha256": "fa3ff4eb5684a86ac89167c53e887e86f20c3575694aaef36f05a759bc9c22bf",
+      "original_size": [
+        32,
+        32
+      ],
+      "output_sha256": "f0e3b9f83b04f114b062a507a78e3bdb018595339076769d3728a80219d3a369",
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/debug/p.png",
+      "source": null,
+      "operation": "nearest_resize_16x16_engine_debug_face",
+      "original_sha256": "08fdba7c3ec858f5572f2e1a097fb53ae8fef47182ed6c288f8fc06b6a4124bf",
+      "original_size": [
+        32,
+        32
+      ],
+      "output_sha256": "c4a1bc0ca0d93808f13441d867e4cec427bcfa2dc832bd0c49c32819da72eda2",
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/debug/r.png",
+      "source": null,
+      "operation": "nearest_resize_16x16_engine_debug_face",
+      "original_sha256": "d917e0e87fa4dc3e0c2d79f5b39a6bf9d79ff3f03327bae96dc5966f49af4ca1",
+      "original_size": [
+        32,
+        32
+      ],
+      "output_sha256": "7769e7cdeb35987cb86fef705eda0f67ff61049228389a0ed8f05bfe9e274ffe",
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/diamond_block.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_diamond_block.png",
+      "operation": "copy",
+      "source_sha256": "be36799276fa046cd06bcebf8602155003bbeffef802b9fb50ad0ee93693c47e",
+      "output_sha256": "be36799276fa046cd06bcebf8602155003bbeffef802b9fb50ad0ee93693c47e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/diamond_ore.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_diamond_ore.png",
+      "operation": "copy",
+      "source_sha256": "0e02e03472c38c7ce6997bcf9baeee5d60c688d037b5d3e3be10fcf054917c1d",
+      "output_sha256": "0e02e03472c38c7ce6997bcf9baeee5d60c688d037b5d3e3be10fcf054917c1d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/dirt.png",
+      "source": "textures/default_mcl_core/soil/default_dirt.png",
+      "operation": "copy",
+      "source_sha256": "f1d329299d4c719d2f3c6f0068c67570d91c91fd30b69b78dabdce7f41ae11be",
+      "output_sha256": "f1d329299d4c719d2f3c6f0068c67570d91c91fd30b69b78dabdce7f41ae11be",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/door_wood_lower.png",
+      "source": "textures/doors_mcl_doors/mcl_doors_door_wood_lower.png",
+      "operation": "copy",
+      "source_sha256": "8b923e07c0055a378775a8c19f3390359de3128bc6af81f13078d75b2e636884",
+      "output_sha256": "8b923e07c0055a378775a8c19f3390359de3128bc6af81f13078d75b2e636884",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/door_wood_upper.png",
+      "source": "textures/doors_mcl_doors/mcl_doors_door_wood_upper.png",
+      "operation": "copy",
+      "source_sha256": "81095fbbf980a161399a1f71b5d4d687ed4cc2b635457c5f6c597e5cd51986d9",
+      "output_sha256": "81095fbbf980a161399a1f71b5d4d687ed4cc2b635457c5f6c597e5cd51986d9",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/emerald_block.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_emerald_block.png",
+      "operation": "copy",
+      "source_sha256": "55882dd1aea978d50ff24d057eb27200e49857a0b5f0f3bc2e75ca65824f5642",
+      "output_sha256": "55882dd1aea978d50ff24d057eb27200e49857a0b5f0f3bc2e75ca65824f5642",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/emerald_ore.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_emerald_ore.png",
+      "operation": "copy",
+      "source_sha256": "d00a8b62cf2bf8b98cb1f6bfb2fbfd2548adc59cfa59ffc9c8a2f813c11678c0",
+      "output_sha256": "d00a8b62cf2bf8b98cb1f6bfb2fbfd2548adc59cfa59ffc9c8a2f813c11678c0",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/end_bricks.png",
+      "source": "textures/mcl_end/mcl_end_end_bricks.png",
+      "operation": "copy",
+      "source_sha256": "30e99ff047805302afa7da852f0aa02a2d771b372d3caad027417355216c4f46",
+      "output_sha256": "30e99ff047805302afa7da852f0aa02a2d771b372d3caad027417355216c4f46",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/end_stone.png",
+      "source": "textures/mcl_end/mcl_end_end_stone.png",
+      "operation": "copy",
+      "source_sha256": "da4b35ff559d02b0c78b0a1d82255c60938de4465816099dc91fb6c30587ef19",
+      "output_sha256": "da4b35ff559d02b0c78b0a1d82255c60938de4465816099dc91fb6c30587ef19",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/end_stone_bricks.png",
+      "source": "textures/mcl_end/mcl_end_end_bricks.png",
+      "operation": "copy",
+      "source_sha256": "30e99ff047805302afa7da852f0aa02a2d771b372d3caad027417355216c4f46",
+      "output_sha256": "30e99ff047805302afa7da852f0aa02a2d771b372d3caad027417355216c4f46",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/farmland_dry.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_farmland_dry.png",
+      "operation": "copy",
+      "source_sha256": "e2f4e3d80959e7f320c46c3ab03e129aa8fc8daf16c3042ba8ccf3b3cf31b8bd",
+      "output_sha256": "e2f4e3d80959e7f320c46c3ab03e129aa8fc8daf16c3042ba8ccf3b3cf31b8bd",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/farmland_wet.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_farmland_wet.png",
+      "operation": "copy",
+      "source_sha256": "84b03e5ca86d702e8702ac38de6e003b01ce0e9c81117a5af2eedf46e3d4932e",
+      "output_sha256": "84b03e5ca86d702e8702ac38de6e003b01ce0e9c81117a5af2eedf46e3d4932e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/furnace_front.png",
+      "source": "textures/default_mcl_core/default_furnace_front.png",
+      "operation": "copy",
+      "source_sha256": "a9cf79c025286aaa259f3520ead277d48c425e9570fcf189e58f93a0bfe1ee4b",
+      "output_sha256": "a9cf79c025286aaa259f3520ead277d48c425e9570fcf189e58f93a0bfe1ee4b",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/furnace_front_on.png",
+      "source": "textures/default_mcl_core/default_furnace_front_active.png",
+      "operation": "copy; first_16x16_animation_frame",
+      "source_sha256": "83289aa894f322d1b744faf16696aca017860b376c0ccc9373a00fac5295fb3b",
+      "output_sha256": "8f53a9442742a8349688d86f17589b55874e14f88040a450ee3194fae1eca439",
+      "source_size": [
+        16,
+        128
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/furnace_side.png",
+      "source": "textures/default_mcl_core/default_furnace_side.png",
+      "operation": "copy",
+      "source_sha256": "d00b6ca5dfaca147cf34a2c56671dff3c6bcce32d3bf62b35c6a8ccf9e8f53ef",
+      "output_sha256": "d00b6ca5dfaca147cf34a2c56671dff3c6bcce32d3bf62b35c6a8ccf9e8f53ef",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/furnace_top.png",
+      "source": "textures/default_mcl_core/default_furnace_top.png",
+      "operation": "copy",
+      "source_sha256": "6c2ca86443aa8aa229a4a27dc92fa19479b04fbccff3678aa47801d2f7997714",
+      "output_sha256": "6c2ca86443aa8aa229a4a27dc92fa19479b04fbccff3678aa47801d2f7997714",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/glass.png",
+      "source": "textures/default_mcl_core/glass/default_glass.png",
+      "operation": "copy",
+      "source_sha256": "783d47ee512d1960f7b55be69151195983e702854d39cbd687cb419b3a9fdb56",
+      "output_sha256": "783d47ee512d1960f7b55be69151195983e702854d39cbd687cb419b3a9fdb56",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/glowstone.png",
+      "source": "textures/mcl_nether/mcl_nether_glowstone.png",
+      "operation": "copy",
+      "source_sha256": "de14f1833fbe6b3709e82200365e9c7cc3df8fc266bbf66076b7e1e57d78d4c1",
+      "output_sha256": "de14f1833fbe6b3709e82200365e9c7cc3df8fc266bbf66076b7e1e57d78d4c1",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/gold_block.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_gold_block.png",
+      "operation": "copy",
+      "source_sha256": "08b30b48107d3064f06c4d99a7f6f2963092785150eaa9ff069191694956fa3f",
+      "output_sha256": "08b30b48107d3064f06c4d99a7f6f2963092785150eaa9ff069191694956fa3f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/gold_ore.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_gold_ore.png",
+      "operation": "copy",
+      "source_sha256": "4109a9ca3d5de76ce13dad0b55e7bce846796c427afeff579749d8d5d1771ab7",
+      "output_sha256": "4109a9ca3d5de76ce13dad0b55e7bce846796c427afeff579749d8d5d1771ab7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/grass.png",
+      "source": "textures/flowers_mcl_flowers/mcl_flowers_tallgrass.png",
+      "operation": "copy",
+      "source_sha256": "fd8b93d8eab1b5b0dc84c2efe74b5e40d714752669e2245e619457a1fe380d91",
+      "output_sha256": "fd8b93d8eab1b5b0dc84c2efe74b5e40d714752669e2245e619457a1fe380d91",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/grass_block_side.png",
+      "source": "textures/default_mcl_core/soil/default_grass_side.png",
+      "composition_sources": [
+        "textures/default_mcl_core/soil/default_dirt.png",
+        "textures/default_mcl_core/soil/default_grass_side.png"
+      ],
+      "operation": "composite_source_grass_overlay_on_source_dirt",
+      "source_sha256": "12a737eb2fe94cb3d1c50627f00ceebcc3a579e2365146f5ab3d30c9f2f47fd2",
+      "output_sha256": "cca361d0bfd4ce685b9bb2dd096d1e762673e0e593145bb864aa1a0f16953954",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/grass_block_side_orig.png",
+      "source": "textures/default_mcl_core/soil/default_grass_side.png",
+      "composition_sources": [
+        "textures/default_mcl_core/soil/default_dirt.png",
+        "textures/default_mcl_core/soil/default_grass_side.png"
+      ],
+      "operation": "composite_source_grass_overlay_on_source_dirt",
+      "source_sha256": "12a737eb2fe94cb3d1c50627f00ceebcc3a579e2365146f5ab3d30c9f2f47fd2",
+      "output_sha256": "cca361d0bfd4ce685b9bb2dd096d1e762673e0e593145bb864aa1a0f16953954",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/grass_block_side_overlay.png",
+      "source": "textures/default_mcl_core/soil/mcl_core_grass_block_side_overlay.png",
+      "operation": "copy",
+      "source_sha256": "b0aa8380b6bf236feed45e329a4bc355cabaa72f670c9cd4e7f838ba239b9e7d",
+      "output_sha256": "b0aa8380b6bf236feed45e329a4bc355cabaa72f670c9cd4e7f838ba239b9e7d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/grass_block_top.png",
+      "source": "textures/default_mcl_core/soil/mcl_core_grass_block_top.png",
+      "operation": "copy",
+      "source_sha256": "71530f2a4192070ddf1596cf9c109e8a0fd50fc3087256d08ddad4bd2770acb3",
+      "output_sha256": "71530f2a4192070ddf1596cf9c109e8a0fd50fc3087256d08ddad4bd2770acb3",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/grass_path_side.png",
+      "source": "textures/default_mcl_core/soil/mcl_core_grass_path_side.png",
+      "operation": "copy",
+      "source_sha256": "6558588f817e02e08e80dc85b11c2e0eb39479440dd6bcf03f2292a2d4900f14",
+      "output_sha256": "6558588f817e02e08e80dc85b11c2e0eb39479440dd6bcf03f2292a2d4900f14",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/grass_path_top.png",
+      "source": "textures/default_mcl_core/soil/mcl_core_grass_path_top.png",
+      "operation": "copy",
+      "source_sha256": "1f7243cf479af1b245be8670cd17e563db47fa5c6c96926cf9601cf9f69db302",
+      "output_sha256": "1f7243cf479af1b245be8670cd17e563db47fa5c6c96926cf9601cf9f69db302",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/gravel.png",
+      "source": "textures/default_mcl_core/stone/default_gravel.png",
+      "operation": "copy",
+      "source_sha256": "3f929fb31a92b4d5be16cae6a293205fd31a09cb7f0db3eb22230a03a672286e",
+      "output_sha256": "3f929fb31a92b4d5be16cae6a293205fd31a09cb7f0db3eb22230a03a672286e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/hay_block_side.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_hayblock_side.png",
+      "operation": "copy",
+      "source_sha256": "7895c4783b9b153e46b260e32df77ab7dab04f430a78b4996641812e9c8a0e63",
+      "output_sha256": "7895c4783b9b153e46b260e32df77ab7dab04f430a78b4996641812e9c8a0e63",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/hay_block_top.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_hayblock_top.png",
+      "operation": "copy",
+      "source_sha256": "0862803a001a449102d3f65159e0d6ef16580824b15c7eeff61445ca7e6171b0",
+      "output_sha256": "0862803a001a449102d3f65159e0d6ef16580824b15c7eeff61445ca7e6171b0",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/ice.png",
+      "source": "textures/default_mcl_core/default_ice.png",
+      "operation": "copy",
+      "source_sha256": "17efb430da37c2151ee8398cb9ff5bf40b2f61c4b057b008fecc88dd48c5bbe2",
+      "output_sha256": "17efb430da37c2151ee8398cb9ff5bf40b2f61c4b057b008fecc88dd48c5bbe2",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/iron_block.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_steel_block.png",
+      "operation": "copy",
+      "source_sha256": "d322fd05205533d1b99d303e4e06a2507b73f7b92c07a9322ee533dca44cc1e8",
+      "output_sha256": "d322fd05205533d1b99d303e4e06a2507b73f7b92c07a9322ee533dca44cc1e8",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/iron_ore.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_iron_ore.png",
+      "operation": "copy",
+      "source_sha256": "d5269386235548d72f6a6ba6bebc816f723967d2cc47da153b1564c32bb05f8a",
+      "output_sha256": "d5269386235548d72f6a6ba6bebc816f723967d2cc47da153b1564c32bb05f8a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/lapis_block.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_lapis_block.png",
+      "operation": "copy",
+      "source_sha256": "bae6588d2f9e68c5d80ce3affb7d15aa6df8150a4c00e9b852c7543e47979766",
+      "output_sha256": "bae6588d2f9e68c5d80ce3affb7d15aa6df8150a4c00e9b852c7543e47979766",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/lapis_ore.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_lapis_ore.png",
+      "operation": "copy",
+      "source_sha256": "1fc6681903f358a3e20849948eec1d61e2a459ccd460b1e7581d6e20ac656e4e",
+      "output_sha256": "1fc6681903f358a3e20849948eec1d61e2a459ccd460b1e7581d6e20ac656e4e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/lava.png",
+      "source": "textures/default_mcl_core/default_lava.png",
+      "operation": "copy",
+      "source_sha256": "a6de01982d35521789f87968fa4fc6ddf51f75e45ce3b52fde437fd17eb9de99",
+      "output_sha256": "a6de01982d35521789f87968fa4fc6ddf51f75e45ce3b52fde437fd17eb9de99",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/nether_bricks.png",
+      "source": "textures/mcl_nether/mcl_nether_nether_brick.png",
+      "operation": "copy",
+      "source_sha256": "74dfcc91195823723dbc2d25107770d8e547af7f700c4b0d0f3a0cc72036820c",
+      "output_sha256": "74dfcc91195823723dbc2d25107770d8e547af7f700c4b0d0f3a0cc72036820c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/nether_wart_stage_0.png",
+      "source": "textures/mcl_nether/mcl_nether_nether_wart_stage_0.png",
+      "operation": "copy",
+      "source_sha256": "6a7b958b16966d781636869715e5ab44283532dafff505739ffad2e40b7fd256",
+      "output_sha256": "6a7b958b16966d781636869715e5ab44283532dafff505739ffad2e40b7fd256",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/nether_wart_stage_1.png",
+      "source": "textures/mcl_nether/mcl_nether_nether_wart_stage_1.png",
+      "operation": "copy",
+      "source_sha256": "feaeb9be27f18e8f22a47d4c134c9a0038609ef2c30fff231013adea1ea06ecc",
+      "output_sha256": "feaeb9be27f18e8f22a47d4c134c9a0038609ef2c30fff231013adea1ea06ecc",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/nether_wart_stage_2.png",
+      "source": "textures/mcl_nether/mcl_nether_nether_wart_stage_2.png",
+      "operation": "copy",
+      "source_sha256": "961e7d44709ffd971afaf57091c1053bb95ffa8200218daab5ee4d9b4aa2b4ec",
+      "output_sha256": "961e7d44709ffd971afaf57091c1053bb95ffa8200218daab5ee4d9b4aa2b4ec",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/netherrack.png",
+      "source": "textures/mcl_nether/mcl_nether_netherrack.png",
+      "operation": "copy",
+      "source_sha256": "cc4e3fffd519db9514f630df14b05e0d731414d09218690ebe21589390f71cc4",
+      "output_sha256": "cc4e3fffd519db9514f630df14b05e0d731414d09218690ebe21589390f71cc4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/oak_leaves.png",
+      "source": "textures/default_mcl_core/trees/mcla_desat_leaves/mcla_desat_leaves_oak.png",
+      "operation": "copy",
+      "source_sha256": "3b9a65f73b64a097ced31200336274f176818cc1cb196a155078686ec28477f7",
+      "output_sha256": "3b9a65f73b64a097ced31200336274f176818cc1cb196a155078686ec28477f7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/oak_log.png",
+      "source": "textures/default_mcl_core/trees/default_tree.png",
+      "operation": "copy",
+      "source_sha256": "5eaf06756a53b60670baa411d257f575729ac29822780dd25160fe3ffb0f2b06",
+      "output_sha256": "5eaf06756a53b60670baa411d257f575729ac29822780dd25160fe3ffb0f2b06",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/oak_log_top.png",
+      "source": "textures/default_mcl_core/trees/default_tree_top.png",
+      "operation": "copy",
+      "source_sha256": "11f48b598d9bb3a170c586fbeb7d180fdd960cc078d21c0cdbdf62e5e803fd2f",
+      "output_sha256": "11f48b598d9bb3a170c586fbeb7d180fdd960cc078d21c0cdbdf62e5e803fd2f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/oak_planks.png",
+      "source": "textures/default_mcl_core/trees/default_wood.png",
+      "operation": "copy",
+      "source_sha256": "973f089ee5518d048416c1fc3ec07a2c81426ac0c80e8dde3bf29b2c987d392d",
+      "output_sha256": "973f089ee5518d048416c1fc3ec07a2c81426ac0c80e8dde3bf29b2c987d392d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/obsidian.png",
+      "source": "textures/default_mcl_core/stone/default_obsidian.png",
+      "operation": "copy",
+      "source_sha256": "7d4c458606234379291d0fd7c00ef7e2adf94bacf15bd74295b731ac1ff41f15",
+      "output_sha256": "7d4c458606234379291d0fd7c00ef7e2adf94bacf15bd74295b731ac1ff41f15",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/portal.png",
+      "source": "textures/mcl_nether/mcl_portals_portal.png",
+      "operation": "copy; first_16x16_animation_frame",
+      "source_sha256": "352b881584ea72dc69c252194814028da8f781321d5a578b0d9c788638a7bd83",
+      "output_sha256": "a831959b9709afd606a8ec01785fefafcd93d7139ce89a1fabe0d1050dc75d5e",
+      "source_size": [
+        16,
+        64
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/red_nether_brick.png",
+      "source": "textures/mcl_nether/mcl_nether_red_nether_brick.png",
+      "operation": "copy",
+      "source_sha256": "3a8feda6a08644eacc0b6177f9669709b1ed02947834488a071920b5e11c4947",
+      "output_sha256": "3a8feda6a08644eacc0b6177f9669709b1ed02947834488a071920b5e11c4947",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/red_sand.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_red_sand.png",
+      "operation": "copy",
+      "source_sha256": "b5bcf7a556a8ba5adad797bc956277e8e4789e72ede33db73a1f9e78908c15c3",
+      "output_sha256": "b5bcf7a556a8ba5adad797bc956277e8e4789e72ede33db73a1f9e78908c15c3",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/red_sandstone_bottom.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_red_sandstone_bottom.png",
+      "operation": "copy",
+      "source_sha256": "74326b786afc74e5bdb0d18a72a81e45ee4348a42c29046d157b1d46ebcb7a95",
+      "output_sha256": "74326b786afc74e5bdb0d18a72a81e45ee4348a42c29046d157b1d46ebcb7a95",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/red_sandstone_carved.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_red_sandstone_carved.png",
+      "operation": "copy",
+      "source_sha256": "8d9f574a567dc8b5621e5df324735a44d4e10bcd010967da94742650955e3118",
+      "output_sha256": "8d9f574a567dc8b5621e5df324735a44d4e10bcd010967da94742650955e3118",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/red_sandstone_normal.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_red_sandstone_normal.png",
+      "operation": "copy",
+      "source_sha256": "e750d3d7bdf6a05b0e8b2b42fccedc786eaf4e41fb4b049ae26e46a9430dbe38",
+      "output_sha256": "e750d3d7bdf6a05b0e8b2b42fccedc786eaf4e41fb4b049ae26e46a9430dbe38",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/red_sandstone_smooth.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_red_sandstone_smooth.png",
+      "operation": "copy",
+      "source_sha256": "d6af3f47558c67a25cf13e465002cd4e20eb8fb79ae404b6d8e93338ce8b786a",
+      "output_sha256": "d6af3f47558c67a25cf13e465002cd4e20eb8fb79ae404b6d8e93338ce8b786a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/red_sandstone_top.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_red_sandstone_top.png",
+      "operation": "copy",
+      "source_sha256": "d2f1e030ecd0e4a27b71e14f5141b304aa2ebc076e6455e8a32d599853ce5d59",
+      "output_sha256": "d2f1e030ecd0e4a27b71e14f5141b304aa2ebc076e6455e8a32d599853ce5d59",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/redstone_block.png",
+      "source": "textures/redstone/mesecons_torch/redstone_redstone_block.png",
+      "operation": "copy",
+      "source_sha256": "dfeac4a8fde20adccc649764149407c130d2f2378e7feff0730e019c0544f028",
+      "output_sha256": "dfeac4a8fde20adccc649764149407c130d2f2378e7feff0730e019c0544f028",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/redstone_lamp_off.png",
+      "source": "textures/redstone/mesecons_lightstone/redstone_lamp_off.png",
+      "operation": "copy",
+      "source_sha256": "722bed70802149018a912f5198e5472406ae857ff9c63216f645a68fb883cc05",
+      "output_sha256": "722bed70802149018a912f5198e5472406ae857ff9c63216f645a68fb883cc05",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/redstone_lamp_on.png",
+      "source": "textures/redstone/mesecons_lightstone/redstone_lamp_on.png",
+      "operation": "copy",
+      "source_sha256": "5ec5a5f9200f4b542d3c0c1b2c56059d923a58a9c8f8a8cf5f36c2f6f9f0f7c2",
+      "output_sha256": "5ec5a5f9200f4b542d3c0c1b2c56059d923a58a9c8f8a8cf5f36c2f6f9f0f7c2",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/redstone_ore.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_redstone_ore.png",
+      "operation": "copy",
+      "source_sha256": "b4f51328371d30e55e0a81e98f1bdbef37569983ae7b778cd3ed2cfbdae0540e",
+      "output_sha256": "b4f51328371d30e55e0a81e98f1bdbef37569983ae7b778cd3ed2cfbdae0540e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/reeds.png",
+      "source": "textures/default_mcl_core/plants/mcl_core_reeds.png",
+      "operation": "copy",
+      "source_sha256": "e7d4f82be508dc3eb2321edefda345dd86cf4372ebb0acdc2fbaa147128165da",
+      "output_sha256": "e7d4f82be508dc3eb2321edefda345dd86cf4372ebb0acdc2fbaa147128165da",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/sand.png",
+      "source": "textures/default_mcl_core/sand/default_sand.png",
+      "operation": "copy",
+      "source_sha256": "94f1f56597d038d27fbf36e3f4bd564d86be5b698ad02a7fc95755f8df5d4dad",
+      "output_sha256": "94f1f56597d038d27fbf36e3f4bd564d86be5b698ad02a7fc95755f8df5d4dad",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/sandstone_bottom.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_sandstone_bottom.png",
+      "operation": "copy",
+      "source_sha256": "7f302462cbaace6eed20cfe0dfabf9a67ba332180f176a89377ff238c77a1ee5",
+      "output_sha256": "7f302462cbaace6eed20cfe0dfabf9a67ba332180f176a89377ff238c77a1ee5",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/sandstone_carved.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_sandstone_carved.png",
+      "operation": "copy",
+      "source_sha256": "598ce42e247f4018b8647b7b613ad5b0282fe58fc06fc8c7ec4a4a8145bdee83",
+      "output_sha256": "598ce42e247f4018b8647b7b613ad5b0282fe58fc06fc8c7ec4a4a8145bdee83",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/sandstone_normal.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_sandstone_normal.png",
+      "operation": "copy",
+      "source_sha256": "04c865a31f8a26966432a338165031089056d789ba2ff8117827fd902d2642f7",
+      "output_sha256": "04c865a31f8a26966432a338165031089056d789ba2ff8117827fd902d2642f7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/sandstone_smooth.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_sandstone_smooth.png",
+      "operation": "copy",
+      "source_sha256": "8ce8efaccc19ddd9cd659e7b234ec85428c5a8d0ba4ea31eda07eb72c1191b0c",
+      "output_sha256": "8ce8efaccc19ddd9cd659e7b234ec85428c5a8d0ba4ea31eda07eb72c1191b0c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/sandstone_top.png",
+      "source": "textures/default_mcl_core/sand/mcl_core_sandstone_top.png",
+      "operation": "copy",
+      "source_sha256": "7f302462cbaace6eed20cfe0dfabf9a67ba332180f176a89377ff238c77a1ee5",
+      "output_sha256": "7f302462cbaace6eed20cfe0dfabf9a67ba332180f176a89377ff238c77a1ee5",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/slime.png",
+      "source": "textures/default_mcl_core/mcl_core_slime.png",
+      "operation": "copy",
+      "source_sha256": "d81ef661e0464f9f34c86d066b613a0bc38ce319203392f8cadfda7fa1e58f1e",
+      "output_sha256": "d81ef661e0464f9f34c86d066b613a0bc38ce319203392f8cadfda7fa1e58f1e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/snow.png",
+      "source": "textures/default_mcl_core/soil/default_snow.png",
+      "operation": "copy",
+      "source_sha256": "ac984bc021bd58b6617738e33d61fc2cf722c59ddb0eb67603c6b7f44e3eed6a",
+      "output_sha256": "ac984bc021bd58b6617738e33d61fc2cf722c59ddb0eb67603c6b7f44e3eed6a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/soul_sand.png",
+      "source": "textures/mcl_nether/mcl_nether_soul_sand.png",
+      "operation": "copy",
+      "source_sha256": "868d8363faa7acac26191633222f6dd3276000a2d09471c69dfcc2cc6436cb4c",
+      "output_sha256": "868d8363faa7acac26191633222f6dd3276000a2d09471c69dfcc2cc6436cb4c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stone.png",
+      "source": "textures/default_mcl_core/stone/default_stone.png",
+      "operation": "copy",
+      "source_sha256": "9ab56c80b7e4fe2849cd8cd4ab4508d81d865ae1621efd025f30747133e0712b",
+      "output_sha256": "9ab56c80b7e4fe2849cd8cd4ab4508d81d865ae1621efd025f30747133e0712b",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stone_andesite.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_andesite.png",
+      "operation": "copy",
+      "source_sha256": "4ff2b4077b5726d51ec8e2faf72d5c4dbacfc3476442e72ce26966777765a0ac",
+      "output_sha256": "4ff2b4077b5726d51ec8e2faf72d5c4dbacfc3476442e72ce26966777765a0ac",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stone_diorite.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_diorite.png",
+      "operation": "copy",
+      "source_sha256": "6b46dded6abe469aaf5892faed65aff5fd4ac024b017e61a83bd55dd69ef7a3a",
+      "output_sha256": "6b46dded6abe469aaf5892faed65aff5fd4ac024b017e61a83bd55dd69ef7a3a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stone_granite.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_granite.png",
+      "operation": "copy",
+      "source_sha256": "379f6b44ecc0e9f3645a733550c79aabe28521324083ceaa624c356289336198",
+      "output_sha256": "379f6b44ecc0e9f3645a733550c79aabe28521324083ceaa624c356289336198",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stonebrick.png",
+      "source": "textures/default_mcl_core/stone/default_stone_brick.png",
+      "operation": "copy",
+      "source_sha256": "01667554a19e333c8bbcf284c4c2b067a4eb02c00617622c5585086cacb8f7a1",
+      "output_sha256": "01667554a19e333c8bbcf284c4c2b067a4eb02c00617622c5585086cacb8f7a1",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stonebrick_carved.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_stonebrick_carved.png",
+      "operation": "copy",
+      "source_sha256": "4117068daa72457ef31ace187372338896155bed8c427981f25f343c838126f9",
+      "output_sha256": "4117068daa72457ef31ace187372338896155bed8c427981f25f343c838126f9",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stonebrick_cracked.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_stonebrick_cracked.png",
+      "operation": "copy",
+      "source_sha256": "9939c0b70b96c0a9b36d5ba09215814174bacda16ee7a2ced8bae992ced7821a",
+      "output_sha256": "9939c0b70b96c0a9b36d5ba09215814174bacda16ee7a2ced8bae992ced7821a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/stonebrick_mossy.png",
+      "source": "textures/default_mcl_core/stone/mcl_core_stonebrick_mossy.png",
+      "operation": "copy",
+      "source_sha256": "d2e050c6c1aed293789e9252c8a9a0443bfe373f4a1e223627e81a26f69ffe91",
+      "output_sha256": "d2e050c6c1aed293789e9252c8a9a0443bfe373f4a1e223627e81a26f69ffe91",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/torch_on.png",
+      "source": "textures/default_mcl_core/default_torch_on_floor.png",
+      "operation": "copy",
+      "source_sha256": "3e87836085fe49fcc421f5b3ef704b17d55dfb76ce50bb91ac1b070b6568f3f6",
+      "output_sha256": "3e87836085fe49fcc421f5b3ef704b17d55dfb76ce50bb91ac1b070b6568f3f6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/undefined.png",
+      "source": null,
+      "operation": "nearest_resize_16x16_engine_debug_checker",
+      "output_sha256": "232fa856a6ef021fd370b4c4d37428b06e43c1e035f07f41dd9ebe7eff7aeead",
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/water.png",
+      "source": "textures/default_mcl_core/default_water.png",
+      "operation": "copy",
+      "source_sha256": "dab0e258885758b4fa2c19344f3f074f57f50ae135869389af8840a9b7bd5258",
+      "output_sha256": "dab0e258885758b4fa2c19344f3f074f57f50ae135869389af8840a9b7bd5258",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_0.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_0.png",
+      "operation": "copy",
+      "source_sha256": "537d6f3624a961c300751db02f379f16f23cc83aa25af79f8d9c38ac51b20f10",
+      "output_sha256": "537d6f3624a961c300751db02f379f16f23cc83aa25af79f8d9c38ac51b20f10",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_1.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_1.png",
+      "operation": "copy",
+      "source_sha256": "ef0f352febb7da7db05575d057545f0642a43191ee912379e57c42a7097b71f3",
+      "output_sha256": "ef0f352febb7da7db05575d057545f0642a43191ee912379e57c42a7097b71f3",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_2.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_2.png",
+      "operation": "copy",
+      "source_sha256": "e35b77aac77676fda21637a271e4d2772f61a7960fee9a1372a98f38d6f12a55",
+      "output_sha256": "e35b77aac77676fda21637a271e4d2772f61a7960fee9a1372a98f38d6f12a55",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_3.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_3.png",
+      "operation": "copy",
+      "source_sha256": "2c0e97dc8603b87c9dcabb9ec7fabfbedcaae20395c196a001ae2a49cf60a40a",
+      "output_sha256": "2c0e97dc8603b87c9dcabb9ec7fabfbedcaae20395c196a001ae2a49cf60a40a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_4.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_4.png",
+      "operation": "copy",
+      "source_sha256": "0a7d635f62483fa9500c7c30d49cdec43f827ed4174e884eee447232dbfd783e",
+      "output_sha256": "0a7d635f62483fa9500c7c30d49cdec43f827ed4174e884eee447232dbfd783e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_5.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_5.png",
+      "operation": "copy",
+      "source_sha256": "2873bdd03549e10779be25ef32d90d3541e407ae3b135b7ee2d05834177edd98",
+      "output_sha256": "2873bdd03549e10779be25ef32d90d3541e407ae3b135b7ee2d05834177edd98",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_6.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_6.png",
+      "operation": "copy",
+      "source_sha256": "78d25f6db4f60ada6265de3455294f1ac90774d1ba6648c00ff276cd6ef349a7",
+      "output_sha256": "78d25f6db4f60ada6265de3455294f1ac90774d1ba6648c00ff276cd6ef349a7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/wheat_stage_7.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_stage_7.png",
+      "operation": "copy",
+      "source_sha256": "f6176a38da5787c424421e75ecce72feaab38bf79efc39ca5a16770838e03c90",
+      "output_sha256": "f6176a38da5787c424421e75ecce72feaab38bf79efc39ca5a16770838e03c90",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/white_wool.png",
+      "source": "textures/wool_mcl_wool/wool_white.png",
+      "operation": "copy",
+      "source_sha256": "6fbd5820c357f36259f614f2177e73c166b4c138b2fb2897141df895856ea20a",
+      "output_sha256": "6fbd5820c357f36259f614f2177e73c166b4c138b2fb2897141df895856ea20a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/apple.png",
+      "source": "textures/default_mcl_core/plants/default_apple.png",
+      "operation": "copy",
+      "source_sha256": "bf3b90763b521d5e3981d0b9a4579c1a484462395702d31fea4255f001993738",
+      "output_sha256": "bf3b90763b521d5e3981d0b9a4579c1a484462395702d31fea4255f001993738",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/apple_golden.png",
+      "source": "textures/default_mcl_core/plants/mcl_core_apple_golden.png",
+      "operation": "copy",
+      "source_sha256": "0e2ea030222e77d6445bd2615fc461b122d3f6ee1720f02a66e0bb6574cc6d35",
+      "output_sha256": "0e2ea030222e77d6445bd2615fc461b122d3f6ee1720f02a66e0bb6574cc6d35",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/arrow.png",
+      "source": "textures/mcl_bows/mcl_bows_arrow_inv.png",
+      "operation": "copy",
+      "source_sha256": "c8fb66ab76d9bcb2f6ac921d917acb594bfb7ee6616e19987f26ef901bb016c6",
+      "output_sha256": "c8fb66ab76d9bcb2f6ac921d917acb594bfb7ee6616e19987f26ef901bb016c6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/beef_cooked.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_beef_cooked.png",
+      "operation": "copy",
+      "source_sha256": "53a8fdf6a4031463940a4428df98d7867f4397467a9c463bdd897a46d7b1beac",
+      "output_sha256": "53a8fdf6a4031463940a4428df98d7867f4397467a9c463bdd897a46d7b1beac",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/beef_raw.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_beef_raw.png",
+      "operation": "copy",
+      "source_sha256": "8c7c895b772fce0464369a3d4881bcac745173e451185f5532226241a16fa491",
+      "output_sha256": "8c7c895b772fce0464369a3d4881bcac745173e451185f5532226241a16fa491",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/beetroot.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_beetroot.png",
+      "operation": "copy",
+      "source_sha256": "fd993ad8b15e255a877317b3ac0db41bcc324f829ed87b0c9adad83d0a490b24",
+      "output_sha256": "fd993ad8b15e255a877317b3ac0db41bcc324f829ed87b0c9adad83d0a490b24",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/beetroot_seeds.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_beetroot_seeds.png",
+      "operation": "copy",
+      "source_sha256": "8d7ba175a711cccb99dbb50df656edc6efbf639635b46dc7c76fd4aae20c14dc",
+      "output_sha256": "8d7ba175a711cccb99dbb50df656edc6efbf639635b46dc7c76fd4aae20c14dc",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/beetroot_soup.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_beetroot_soup.png",
+      "operation": "copy",
+      "source_sha256": "bc2e0c26977a8c4f212743f1457fcb65eeb9d91a2cc4d018cf8cfb0de7b585e0",
+      "output_sha256": "bc2e0c26977a8c4f212743f1457fcb65eeb9d91a2cc4d018cf8cfb0de7b585e0",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/blaze_powder.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_blaze_powder.png",
+      "operation": "copy",
+      "source_sha256": "820170275961c80bc2dc2596b9d7969c67baba9926988bd087ab66804dcce15d",
+      "output_sha256": "820170275961c80bc2dc2596b9d7969c67baba9926988bd087ab66804dcce15d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/blaze_rod.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_blaze_rod.png",
+      "operation": "copy",
+      "source_sha256": "26f799ec22bd3d8ec53f7c3399aeb3d48acffa2f6abe2fd333be6d8e19d9f208",
+      "output_sha256": "26f799ec22bd3d8ec53f7c3399aeb3d48acffa2f6abe2fd333be6d8e19d9f208",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bone.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_bone.png",
+      "operation": "copy",
+      "source_sha256": "01a8b65156e70f3b097808b54987d5e6436c9693952f733095dd8da19c9e2555",
+      "output_sha256": "01a8b65156e70f3b097808b54987d5e6436c9693952f733095dd8da19c9e2555",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bone_meal.png",
+      "source": "textures/default_mcl_core/mcl_bone_meal.png",
+      "operation": "copy",
+      "source_sha256": "9aaab15c638cb1b126d9458425cec3407070c42e2ffb0c22b38b06644166a8a1",
+      "output_sha256": "9aaab15c638cb1b126d9458425cec3407070c42e2ffb0c22b38b06644166a8a1",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/book_normal.png",
+      "source": "textures/default_mcl_core/default_book.png",
+      "operation": "copy",
+      "source_sha256": "84af1db64dd953fff25de62ec4b414fdd45e5208ed6123214b792b849d04a9fa",
+      "output_sha256": "84af1db64dd953fff25de62ec4b414fdd45e5208ed6123214b792b849d04a9fa",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bowl.png",
+      "source": "textures/default_mcl_core/mcl_core_bowl.png",
+      "operation": "copy",
+      "source_sha256": "ff9e2aa49d714873c46dfbb76d9cd199e6ce1e48cf62ce635863485730ba7fa7",
+      "output_sha256": "ff9e2aa49d714873c46dfbb76d9cd199e6ce1e48cf62ce635863485730ba7fa7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bread.png",
+      "source": "textures/farming_mcl_farming/farming_bread.png",
+      "operation": "copy",
+      "source_sha256": "9dfa61b01123ac16c6fb3a293ff47da79378075dbe2a15c1c233a1fed299a5aa",
+      "output_sha256": "9dfa61b01123ac16c6fb3a293ff47da79378075dbe2a15c1c233a1fed299a5aa",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/brick.png",
+      "source": "textures/default_mcl_core/soil/default_clay_brick.png",
+      "operation": "copy",
+      "source_sha256": "ee5f5a99ffcb5c3dd7767a0fa90c545f9cb1aa0998fca8fcdccbeea33622c638",
+      "output_sha256": "ee5f5a99ffcb5c3dd7767a0fa90c545f9cb1aa0998fca8fcdccbeea33622c638",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bucket_empty.png",
+      "source": "textures/bucket_mcl_buckets/bucket.png",
+      "operation": "copy",
+      "source_sha256": "3bfed30fa159303ae5db05d684edccfb3021bceeee28c01613ead119fd421faf",
+      "output_sha256": "3bfed30fa159303ae5db05d684edccfb3021bceeee28c01613ead119fd421faf",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bucket_lava.png",
+      "source": "textures/bucket_mcl_buckets/bucket_lava.png",
+      "operation": "copy",
+      "source_sha256": "ad6fac44fe0613a1b85e6d9361e1d575528e708738ed9f1e892a72b3b5752543",
+      "output_sha256": "ad6fac44fe0613a1b85e6d9361e1d575528e708738ed9f1e892a72b3b5752543",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bucket_milk.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_bucket_milk.png",
+      "operation": "copy",
+      "source_sha256": "4a68858e1378b67896e8f9b6b6251acfc5df4d7e116030b8bd0c2c74234cc51b",
+      "output_sha256": "4a68858e1378b67896e8f9b6b6251acfc5df4d7e116030b8bd0c2c74234cc51b",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/bucket_water.png",
+      "source": "textures/bucket_mcl_buckets/bucket_water.png",
+      "operation": "copy",
+      "source_sha256": "7bed712670ada754d3618f88534b460a3170a440d6c03adaed22f07ecc99e9bc",
+      "output_sha256": "7bed712670ada754d3618f88534b460a3170a440d6c03adaed22f07ecc99e9bc",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/carrot.png",
+      "source": "textures/farming_mcl_farming/farming_carrot.png",
+      "operation": "copy",
+      "source_sha256": "892a0eedc3005eff8a04e7955b6bf13f5c9224876214b4b3282d2bb6a8dd0087",
+      "output_sha256": "892a0eedc3005eff8a04e7955b6bf13f5c9224876214b4b3282d2bb6a8dd0087",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/charcoal.png",
+      "source": "textures/default_mcl_core/mcl_core_charcoal.png",
+      "operation": "copy",
+      "source_sha256": "215eacecd8b0dca1abbddf6d60d655c3492b7814e868de26e6d96ce9c7a91a59",
+      "output_sha256": "215eacecd8b0dca1abbddf6d60d655c3492b7814e868de26e6d96ce9c7a91a59",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/chicken_cooked.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_chicken_cooked.png",
+      "operation": "copy",
+      "source_sha256": "4d1451a5eb0d197b66dc5cb34be72108f14b04989b06667c122c2ea025d02c45",
+      "output_sha256": "4d1451a5eb0d197b66dc5cb34be72108f14b04989b06667c122c2ea025d02c45",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/chicken_raw.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_chicken_raw.png",
+      "operation": "copy",
+      "source_sha256": "5e9c4e7df93ef70e6ca2f1872a06045e78744c97be44ddcf193ea3cfb2a4bcdf",
+      "output_sha256": "5e9c4e7df93ef70e6ca2f1872a06045e78744c97be44ddcf193ea3cfb2a4bcdf",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/clay_ball.png",
+      "source": "textures/default_mcl_core/soil/default_clay_lump.png",
+      "operation": "copy",
+      "source_sha256": "2d33618d2068e40a9d492009705e1db3807331a68ef8bc87ea0cd64220f08b5b",
+      "output_sha256": "2d33618d2068e40a9d492009705e1db3807331a68ef8bc87ea0cd64220f08b5b",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/coal.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_coal_lump.png",
+      "operation": "copy",
+      "source_sha256": "4e9f54d83c8f40f536e73e8ed380b265c9fa929a9113174a9cfe48e4cb9272e5",
+      "output_sha256": "4e9f54d83c8f40f536e73e8ed380b265c9fa929a9113174a9cfe48e4cb9272e5",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/cookie.png",
+      "source": "textures/farming_mcl_farming/farming_cookie.png",
+      "operation": "copy",
+      "source_sha256": "7d1b6d77ec36dc201a31b7beaea914fad92fd027452da65860aab995262863a6",
+      "output_sha256": "7d1b6d77ec36dc201a31b7beaea914fad92fd027452da65860aab995262863a6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/diamond.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_diamond.png",
+      "operation": "copy",
+      "source_sha256": "32728431127509f0311c2c9cfc8251d90690a0ef1265635109e8c2737dc75d0a",
+      "output_sha256": "32728431127509f0311c2c9cfc8251d90690a0ef1265635109e8c2737dc75d0a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/diamond_axe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_diamondaxe.png",
+      "operation": "copy",
+      "source_sha256": "d67fe531c4d43c8da6ac8678acd7e06a9d9b0f5aa983d4201be83445cd44e776",
+      "output_sha256": "d67fe531c4d43c8da6ac8678acd7e06a9d9b0f5aa983d4201be83445cd44e776",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/diamond_hoe.png",
+      "source": "textures/farming_mcl_farming/farming_tool_diamondhoe.png",
+      "operation": "copy",
+      "source_sha256": "55627768d750420f5c2c9a405d03afbf4978c85aecc51c9681719e1d91a714d5",
+      "output_sha256": "55627768d750420f5c2c9a405d03afbf4978c85aecc51c9681719e1d91a714d5",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/diamond_pickaxe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_diamondpick.png",
+      "operation": "copy",
+      "source_sha256": "dee7aebbe50ea264e65136b0065cfbbf666fb4a9e6641909717c67b2677cdc23",
+      "output_sha256": "dee7aebbe50ea264e65136b0065cfbbf666fb4a9e6641909717c67b2677cdc23",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/diamond_shovel.png",
+      "source": "textures/default_mcl_core/tools/default_tool_diamondshovel.png",
+      "operation": "copy",
+      "source_sha256": "9219113f58757a54ba9eedb79678b21fd5ee9d344783feed4acaf02857869b78",
+      "output_sha256": "9219113f58757a54ba9eedb79678b21fd5ee9d344783feed4acaf02857869b78",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/diamond_sword.png",
+      "source": "textures/default_mcl_core/tools/default_tool_diamondsword.png",
+      "operation": "copy",
+      "source_sha256": "4c6d1be9899db37880116e6db0cc9e4ace28a8ecd3df022f61485c72c6bfc8fe",
+      "output_sha256": "4c6d1be9899db37880116e6db0cc9e4ace28a8ecd3df022f61485c72c6bfc8fe",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/door_wood.png",
+      "source": "textures/doors_mcl_doors/doors_item_wood.png",
+      "operation": "copy",
+      "source_sha256": "d807590e143c94dfc442f1323435dc118519f6b0bb596d4a6d8206e0c0d477b4",
+      "output_sha256": "d807590e143c94dfc442f1323435dc118519f6b0bb596d4a6d8206e0c0d477b4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/egg.png",
+      "source": "textures/mobs_mc/mobs_chicken_egg.png",
+      "operation": "copy",
+      "source_sha256": "8707088348d0ef8f036bea94b4d7cc8578a1160a587736ed1a72aabf559c3d82",
+      "output_sha256": "8707088348d0ef8f036bea94b4d7cc8578a1160a587736ed1a72aabf559c3d82",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/emerald.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_emerald.png",
+      "operation": "copy",
+      "source_sha256": "b39f6343c28282116ba4f88e3d2dddfef42d2e06715996d84fb71f10f4b7901e",
+      "output_sha256": "b39f6343c28282116ba4f88e3d2dddfef42d2e06715996d84fb71f10f4b7901e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/feather.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_feather.png",
+      "operation": "copy",
+      "source_sha256": "713b8719302c12544cb44c8a83302d85c4f8cbc7bf16753c11479fb7ffeadb00",
+      "output_sha256": "713b8719302c12544cb44c8a83302d85c4f8cbc7bf16753c11479fb7ffeadb00",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/fish_clownfish_raw.png",
+      "source": "textures/mcl_fishing/mcl_fishing_clownfish_raw.png",
+      "operation": "copy",
+      "source_sha256": "6b93c66c31356a77d9bc19c59d57e3900eb25c87f90332d4bea83089f386fba7",
+      "output_sha256": "6b93c66c31356a77d9bc19c59d57e3900eb25c87f90332d4bea83089f386fba7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/fish_cod_cooked.png",
+      "source": "textures/mcl_fishing/mcl_fishing_fish_cooked.png",
+      "operation": "copy",
+      "source_sha256": "451dae11c8157a2c8359fef9716b6a07cba417fd02e78176a5926decb055ddd3",
+      "output_sha256": "451dae11c8157a2c8359fef9716b6a07cba417fd02e78176a5926decb055ddd3",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/fish_cod_raw.png",
+      "source": "textures/mcl_fishing/mcl_fishing_fish_raw.png",
+      "operation": "copy",
+      "source_sha256": "b5e9f30ac594f300c268c115822409d88a6c6ebf82ae5f4ec176f69a02c58122",
+      "output_sha256": "b5e9f30ac594f300c268c115822409d88a6c6ebf82ae5f4ec176f69a02c58122",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/fish_pufferfish_raw.png",
+      "source": "textures/mcl_fishing/mcl_fishing_pufferfish_raw.png",
+      "operation": "copy",
+      "source_sha256": "b127ae1e6275217f54a35b310f4168f6f14e83b1a621d40f17c2b74643f0b945",
+      "output_sha256": "b127ae1e6275217f54a35b310f4168f6f14e83b1a621d40f17c2b74643f0b945",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/fish_salmon_cooked.png",
+      "source": "textures/mcl_fishing/mcl_fishing_salmon_cooked.png",
+      "operation": "copy",
+      "source_sha256": "c11a113889b657ca79e6d94848ce75de1261f8a570e3d7bfa8824c1f2d38aac6",
+      "output_sha256": "c11a113889b657ca79e6d94848ce75de1261f8a570e3d7bfa8824c1f2d38aac6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/fish_salmon_raw.png",
+      "source": "textures/mcl_fishing/mcl_fishing_salmon_raw.png",
+      "operation": "copy",
+      "source_sha256": "bc6d9be58a91f096d0188a73a1041fa7fa95385f92bfca2107d2923a8fb664c3",
+      "output_sha256": "bc6d9be58a91f096d0188a73a1041fa7fa95385f92bfca2107d2923a8fb664c3",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/flint.png",
+      "source": "textures/default_mcl_core/stone/default_flint.png",
+      "operation": "copy",
+      "source_sha256": "8c47dbea255e1da46d4f2cdde3c0093a5aa63cb168e63c278d7bd2ef6b576c20",
+      "output_sha256": "8c47dbea255e1da46d4f2cdde3c0093a5aa63cb168e63c278d7bd2ef6b576c20",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/glowstone_dust.png",
+      "source": "textures/mcl_nether/mcl_nether_glowstone_dust.png",
+      "operation": "copy",
+      "source_sha256": "95a86f89b2f3ae6e3fc4117fda31afef41cc6e8dabd9ce02044ba3ca063d6860",
+      "output_sha256": "95a86f89b2f3ae6e3fc4117fda31afef41cc6e8dabd9ce02044ba3ca063d6860",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/gold_ingot.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_gold_ingot.png",
+      "operation": "copy",
+      "source_sha256": "cb672e5b895a9fa25e297eeb9682469498f4b0761a45cd88df650799906e32e4",
+      "output_sha256": "cb672e5b895a9fa25e297eeb9682469498f4b0761a45cd88df650799906e32e4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/gold_nugget.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_gold_nugget.png",
+      "operation": "copy",
+      "source_sha256": "ab8f304d92afbfc0855a3e740596ba3823f9a08a8370d741e1b050c88eddb9b5",
+      "output_sha256": "ab8f304d92afbfc0855a3e740596ba3823f9a08a8370d741e1b050c88eddb9b5",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/golden_axe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_goldaxe.png",
+      "operation": "copy",
+      "source_sha256": "bd3806fa2aec5bdd3e4f5999a17d018928f4921edc442f32110e9be9670da775",
+      "output_sha256": "bd3806fa2aec5bdd3e4f5999a17d018928f4921edc442f32110e9be9670da775",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/golden_carrot.png",
+      "source": "textures/farming_mcl_farming/farming_carrot_gold.png",
+      "operation": "copy",
+      "source_sha256": "d871846fa8394d2b0cf3697b46a9c6c83107219b99364c1d3dedb145ca6f7273",
+      "output_sha256": "d871846fa8394d2b0cf3697b46a9c6c83107219b99364c1d3dedb145ca6f7273",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/golden_hoe.png",
+      "source": "textures/farming_mcl_farming/farming_tool_goldhoe.png",
+      "operation": "copy",
+      "source_sha256": "b47bec42c43ea902ee6fce911a2febf19a5519dca680348525be4472e0e5e22e",
+      "output_sha256": "b47bec42c43ea902ee6fce911a2febf19a5519dca680348525be4472e0e5e22e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/golden_pickaxe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_goldpick.png",
+      "operation": "copy",
+      "source_sha256": "216280acc41bc2ddbbb2739ed9004b1d664d994e94007cbf5c12501588bca84d",
+      "output_sha256": "216280acc41bc2ddbbb2739ed9004b1d664d994e94007cbf5c12501588bca84d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/golden_shovel.png",
+      "source": "textures/default_mcl_core/tools/default_tool_goldshovel.png",
+      "operation": "copy",
+      "source_sha256": "bcfbe4117b0b1a118def8c65d07c330a6a7c3b4ab22c2013b98e4732a8566a0f",
+      "output_sha256": "bcfbe4117b0b1a118def8c65d07c330a6a7c3b4ab22c2013b98e4732a8566a0f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/golden_sword.png",
+      "source": "textures/default_mcl_core/tools/default_tool_goldsword.png",
+      "operation": "copy",
+      "source_sha256": "25e45df1129045b1a2e1069eaeb30ca83434801179fac4e5b4dbabd6a9f1a6b7",
+      "output_sha256": "25e45df1129045b1a2e1069eaeb30ca83434801179fac4e5b4dbabd6a9f1a6b7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/gunpowder.png",
+      "source": "textures/mcl_mobitems/default_gunpowder.png",
+      "operation": "copy",
+      "source_sha256": "0c700791b9d7229902ca6a733f21af3892a5bf9ec54845f6211bd144453aed7c",
+      "output_sha256": "0c700791b9d7229902ca6a733f21af3892a5bf9ec54845f6211bd144453aed7c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/ink_sac.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_ink_sac.png",
+      "operation": "copy",
+      "source_sha256": "c729a2c002bdb84abf248e2cd7db29e756bb6a175ee040c7ad6bc878a76587f7",
+      "output_sha256": "c729a2c002bdb84abf248e2cd7db29e756bb6a175ee040c7ad6bc878a76587f7",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/iron_axe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_steelaxe.png",
+      "operation": "copy",
+      "source_sha256": "652fd2cf86646a519165583e31dafe51534fc0965b79247aef5926d35abf44d4",
+      "output_sha256": "652fd2cf86646a519165583e31dafe51534fc0965b79247aef5926d35abf44d4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/iron_hoe.png",
+      "source": "textures/farming_mcl_farming/farming_tool_steelhoe.png",
+      "operation": "copy",
+      "source_sha256": "65bcf6e5cbc8cd29d9df1510b6c12f96609b6c11670d523e7ea5b8e67578d861",
+      "output_sha256": "65bcf6e5cbc8cd29d9df1510b6c12f96609b6c11670d523e7ea5b8e67578d861",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/iron_ingot.png",
+      "source": "textures/default_mcl_core/minerals_ores/default_steel_ingot.png",
+      "operation": "copy",
+      "source_sha256": "4cbfe09713c57add85c3c14e6a43345edc3502bd1b6d7709852d837ad1507ca3",
+      "output_sha256": "4cbfe09713c57add85c3c14e6a43345edc3502bd1b6d7709852d837ad1507ca3",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/iron_nugget.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_iron_nugget.png",
+      "operation": "copy",
+      "source_sha256": "4f047abd30ea0c5db9a5122f44a3e53b01fa8e6cad905e5298c8025bcb1c24c6",
+      "output_sha256": "4f047abd30ea0c5db9a5122f44a3e53b01fa8e6cad905e5298c8025bcb1c24c6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/iron_pickaxe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_steelpick.png",
+      "operation": "copy",
+      "source_sha256": "0ad62339434874cd17750a46aaf32c4ecb3c6e3247343a1cb3e71be1bf33fa90",
+      "output_sha256": "0ad62339434874cd17750a46aaf32c4ecb3c6e3247343a1cb3e71be1bf33fa90",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/iron_shovel.png",
+      "source": "textures/default_mcl_core/tools/default_tool_steelshovel.png",
+      "operation": "copy",
+      "source_sha256": "17794c547fd5be7cca91e8687b1f3fe1a1bc03c4e28109946c96447844ebee8f",
+      "output_sha256": "17794c547fd5be7cca91e8687b1f3fe1a1bc03c4e28109946c96447844ebee8f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/iron_sword.png",
+      "source": "textures/default_mcl_core/tools/default_tool_steelsword.png",
+      "operation": "copy",
+      "source_sha256": "19ad76c3fcd79fb773992c448f1e8a8e157e6722618b5bc09e8810cf151c0d25",
+      "output_sha256": "19ad76c3fcd79fb773992c448f1e8a8e157e6722618b5bc09e8810cf151c0d25",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/lapis_lazuli.png",
+      "source": "textures/default_mcl_core/minerals_ores/mcl_core_lapis.png",
+      "operation": "copy",
+      "source_sha256": "88a785be59c5dbd1ea0389dd6aab822b221141a787543e60c9fc27685c7fa531",
+      "output_sha256": "88a785be59c5dbd1ea0389dd6aab822b221141a787543e60c9fc27685c7fa531",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/leather.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_leather.png",
+      "operation": "copy",
+      "source_sha256": "efe7ebfdccf2cc834b70e58ec49a0fb322e1e77091c457781af526427dcc1310",
+      "output_sha256": "efe7ebfdccf2cc834b70e58ec49a0fb322e1e77091c457781af526427dcc1310",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/magma_cream.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_magma_cream.png",
+      "operation": "copy",
+      "source_sha256": "b3fa3eebeb7bebf5c468b45217430e1c09e7f4e78dcbede63b7a6e4420dcfb35",
+      "output_sha256": "b3fa3eebeb7bebf5c468b45217430e1c09e7f4e78dcbede63b7a6e4420dcfb35",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/melon.png",
+      "source": "textures/farming_mcl_farming/farming_melon.png",
+      "operation": "copy",
+      "source_sha256": "ccc6ed75f871d4260b278106f889deb62c8e0bdfa8a69a6e74784511181f413a",
+      "output_sha256": "ccc6ed75f871d4260b278106f889deb62c8e0bdfa8a69a6e74784511181f413a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/melon_speckled.png",
+      "source": "textures/vessels_mcl_potions/mcl_potions_melon_speckled.png",
+      "operation": "copy",
+      "source_sha256": "69b850178a5e33ab12fc2fb33acb91b9228f6d359b1c706914010be0906443ad",
+      "output_sha256": "69b850178a5e33ab12fc2fb33acb91b9228f6d359b1c706914010be0906443ad",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/mushroom_stew.png",
+      "source": "textures/mcl_mushrooms/farming_mushroom_stew.png",
+      "operation": "copy",
+      "source_sha256": "42da587fd8d046ad5e1f1c26afce0a84dbe27c699cea129040a437857c89b5ac",
+      "output_sha256": "42da587fd8d046ad5e1f1c26afce0a84dbe27c699cea129040a437857c89b5ac",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/mutton_cooked.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_mutton_cooked.png",
+      "operation": "copy",
+      "source_sha256": "a7d6630eca0de506cee1c47bc440806c6f19ffad10d283cf0ba667597bf24634",
+      "output_sha256": "a7d6630eca0de506cee1c47bc440806c6f19ffad10d283cf0ba667597bf24634",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/mutton_raw.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_mutton_raw.png",
+      "operation": "copy",
+      "source_sha256": "a399c1713c6d45aff643240dfb625958b371f4f68999acf7bf065373d79340a0",
+      "output_sha256": "a399c1713c6d45aff643240dfb625958b371f4f68999acf7bf065373d79340a0",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/nether_wart.png",
+      "source": "textures/mcl_nether/mcl_nether_nether_wart.png",
+      "operation": "copy",
+      "source_sha256": "c7ce4f53c2883222ddb585fb06d37025ed498df99791a2516a06686187e3bc03",
+      "output_sha256": "c7ce4f53c2883222ddb585fb06d37025ed498df99791a2516a06686187e3bc03",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/netherbrick.png",
+      "source": "textures/mcl_nether/mcl_nether_netherbrick.png",
+      "operation": "copy",
+      "source_sha256": "396aeb1ea0e0ed97f96389a76ec8abe0637021209045d64b326264c79100b8b8",
+      "output_sha256": "396aeb1ea0e0ed97f96389a76ec8abe0637021209045d64b326264c79100b8b8",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/paper.png",
+      "source": "textures/default_mcl_core/default_paper.png",
+      "operation": "copy",
+      "source_sha256": "c689d9ce38f74a26d12020462134370df249c4cd35c6aafbd850ed0809617319",
+      "output_sha256": "c689d9ce38f74a26d12020462134370df249c4cd35c6aafbd850ed0809617319",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/porkchop_cooked.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_porkchop_cooked.png",
+      "operation": "copy",
+      "source_sha256": "9eab771ac792017339dd8917b9406f6fa915c880784b13debd93e4a8e1f7b2e6",
+      "output_sha256": "9eab771ac792017339dd8917b9406f6fa915c880784b13debd93e4a8e1f7b2e6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/porkchop_raw.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_porkchop_raw.png",
+      "operation": "copy",
+      "source_sha256": "bdf0ca7fedec6bf47a6c26db4d6e0ede6500fd8a2b5fedbf1cd5c4afe5b2b3f9",
+      "output_sha256": "bdf0ca7fedec6bf47a6c26db4d6e0ede6500fd8a2b5fedbf1cd5c4afe5b2b3f9",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/potato.png",
+      "source": "textures/farming_mcl_farming/farming_potato.png",
+      "operation": "copy",
+      "source_sha256": "46c64b54a6cfde8eafe53907d900235d7d94755599873746df880b321b5d0049",
+      "output_sha256": "46c64b54a6cfde8eafe53907d900235d7d94755599873746df880b321b5d0049",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/potato_baked.png",
+      "source": "textures/farming_mcl_farming/farming_potato_baked.png",
+      "operation": "copy",
+      "source_sha256": "3ec6624a8012ab6f2c5980ab39a9b5bf3a48a8f46fb23395c805ba7f4b62c01f",
+      "output_sha256": "3ec6624a8012ab6f2c5980ab39a9b5bf3a48a8f46fb23395c805ba7f4b62c01f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/potato_poisonous.png",
+      "source": "textures/farming_mcl_farming/farming_potato_poison.png",
+      "operation": "copy",
+      "source_sha256": "df3e0c61a96a5575e431922fd7bc9a320da0b36db27579eff25a612af34d4d6c",
+      "output_sha256": "df3e0c61a96a5575e431922fd7bc9a320da0b36db27579eff25a612af34d4d6c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/pumpkin_pie.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_pumpkin_pie.png",
+      "operation": "copy",
+      "source_sha256": "a0b751f60eee4ee39c35794afc1b295cf39e6d5a41e48e803fde90dbf676dd27",
+      "output_sha256": "a0b751f60eee4ee39c35794afc1b295cf39e6d5a41e48e803fde90dbf676dd27",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/rabbit_cooked.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_rabbit_cooked.png",
+      "operation": "copy",
+      "source_sha256": "b3d4b4b7c1656bf54b2d9cc6773640d88fcca15de8ce73579afbfa48c4acbf9e",
+      "output_sha256": "b3d4b4b7c1656bf54b2d9cc6773640d88fcca15de8ce73579afbfa48c4acbf9e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/rabbit_foot.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_rabbit_foot.png",
+      "operation": "copy",
+      "source_sha256": "3c9e9259d0be33cdc2c7969bdc79fc29fb58e937b2df724e8bea65c1538bf88a",
+      "output_sha256": "3c9e9259d0be33cdc2c7969bdc79fc29fb58e937b2df724e8bea65c1538bf88a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/rabbit_hide.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_rabbit_hide.png",
+      "operation": "copy",
+      "source_sha256": "90bcebe6d872f8d668f7dbe960e7e65a0018cf16c424ff661f94906c86597bec",
+      "output_sha256": "90bcebe6d872f8d668f7dbe960e7e65a0018cf16c424ff661f94906c86597bec",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/rabbit_raw.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_rabbit_raw.png",
+      "operation": "copy",
+      "source_sha256": "cb37fda28ad82966f4caa34f19d10a24ef8c8d4f5e64c2e1c250d82d21fa29e9",
+      "output_sha256": "cb37fda28ad82966f4caa34f19d10a24ef8c8d4f5e64c2e1c250d82d21fa29e9",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/rabbit_stew.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_rabbit_stew.png",
+      "operation": "copy",
+      "source_sha256": "892f2c66ba0f6e75ad489bd0d567f0287094cc6174b7bb67592dc3621fdb4247",
+      "output_sha256": "892f2c66ba0f6e75ad489bd0d567f0287094cc6174b7bb67592dc3621fdb4247",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/redstone_dust.png",
+      "source": "textures/redstone/mesecons_wires/redstone_redstone_dust.png",
+      "operation": "copy",
+      "source_sha256": "f05cd08902b074ad891496790d98ebb83fa649e815abb7d10160d7898c14a684",
+      "output_sha256": "f05cd08902b074ad891496790d98ebb83fa649e815abb7d10160d7898c14a684",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/reeds_item.png",
+      "source": "textures/default_mcl_core/plants/mcl_core_reeds.png",
+      "operation": "copy",
+      "source_sha256": "e7d4f82be508dc3eb2321edefda345dd86cf4372ebb0acdc2fbaa147128165da",
+      "output_sha256": "e7d4f82be508dc3eb2321edefda345dd86cf4372ebb0acdc2fbaa147128165da",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/rotten_flesh.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_rotten_flesh.png",
+      "operation": "copy",
+      "source_sha256": "f37e5ffdc09f8e75ad4d9973c851276ca7322e2813ee63f158b0a522c8cedf6d",
+      "output_sha256": "f37e5ffdc09f8e75ad4d9973c851276ca7322e2813ee63f158b0a522c8cedf6d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/saddle.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_saddle.png",
+      "operation": "copy",
+      "source_sha256": "c00a71d13e9a9e3d4e30264de70971e9ddd4f5f90185051915030229e67c68b0",
+      "output_sha256": "c00a71d13e9a9e3d4e30264de70971e9ddd4f5f90185051915030229e67c68b0",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/seeds_melon.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_melon_seeds.png",
+      "operation": "copy",
+      "source_sha256": "b9064c50ae976111c65d7e93ff3529dfbd85970d1a8faa77bffe0cec121780c1",
+      "output_sha256": "b9064c50ae976111c65d7e93ff3529dfbd85970d1a8faa77bffe0cec121780c1",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/seeds_pumpkin.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_pumpkin_seeds.png",
+      "operation": "copy",
+      "source_sha256": "74496a5374749d86a4ad7babb3e9362eab4cdfce819169e54fce3ec4f9a1e39c",
+      "output_sha256": "74496a5374749d86a4ad7babb3e9362eab4cdfce819169e54fce3ec4f9a1e39c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/seeds_wheat.png",
+      "source": "textures/farming_mcl_farming/mcl_farming_wheat_seeds.png",
+      "operation": "copy",
+      "source_sha256": "1cbffd08fbe62f7c8fba51dbc8d5df39dfd27319ce6dcdb76be5532c21be697b",
+      "output_sha256": "1cbffd08fbe62f7c8fba51dbc8d5df39dfd27319ce6dcdb76be5532c21be697b",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/shears.png",
+      "source": "textures/default_mcl_core/tools/default_tool_shears.png",
+      "operation": "copy",
+      "source_sha256": "6ca203cf6c129543726821751f4ba45a16ff269d359f62db354dfc8cc0be4371",
+      "output_sha256": "6ca203cf6c129543726821751f4ba45a16ff269d359f62db354dfc8cc0be4371",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/slimeball.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_slimeball.png",
+      "operation": "copy",
+      "source_sha256": "2723e64c29cfb441c3f106067059aee4f396c1827fd06b6dee3cd795b7c5fdb4",
+      "output_sha256": "2723e64c29cfb441c3f106067059aee4f396c1827fd06b6dee3cd795b7c5fdb4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/snowball.png",
+      "source": "textures/default_mcl_core/soil/default_snowball.png",
+      "operation": "copy",
+      "source_sha256": "52063ccb5a39591049a49dc3874f25d0a62803f00a480740306407141b189384",
+      "output_sha256": "52063ccb5a39591049a49dc3874f25d0a62803f00a480740306407141b189384",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/spider_eye.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_spider_eye.png",
+      "operation": "copy",
+      "source_sha256": "6efbf6d00a33cf3eb2529b4da0dfebf6955ffdff25d7267f215a5f7694dc40cc",
+      "output_sha256": "6efbf6d00a33cf3eb2529b4da0dfebf6955ffdff25d7267f215a5f7694dc40cc",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/spider_eye_fermented.png",
+      "source": "textures/vessels_mcl_potions/mcl_potions_spider_eye_fermented.png",
+      "operation": "copy",
+      "source_sha256": "6776d70bc935d70d812f6edd263cea484d1d65a480805406ac590f3f038d0b6a",
+      "output_sha256": "6776d70bc935d70d812f6edd263cea484d1d65a480805406ac590f3f038d0b6a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/stick.png",
+      "source": "textures/default_mcl_core/default_stick.png",
+      "operation": "copy",
+      "source_sha256": "1b32014a0b0c9326ab1bd2d985c8f99373a6f20c8bb76b9b8f98a6c9cca01a54",
+      "output_sha256": "1b32014a0b0c9326ab1bd2d985c8f99373a6f20c8bb76b9b8f98a6c9cca01a54",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/stone_axe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_stoneaxe.png",
+      "operation": "copy",
+      "source_sha256": "6597caceeb3b9da2c6f7c7277f71a7965dd0a6f2bfb331d71cb6a9b3cee06f6d",
+      "output_sha256": "6597caceeb3b9da2c6f7c7277f71a7965dd0a6f2bfb331d71cb6a9b3cee06f6d",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/stone_hoe.png",
+      "source": "textures/farming_mcl_farming/farming_tool_stonehoe.png",
+      "operation": "copy",
+      "source_sha256": "f8be82be57f1d426015116a1cdc5f9e44bed662cf80dd99e1d374ce2410d9d65",
+      "output_sha256": "f8be82be57f1d426015116a1cdc5f9e44bed662cf80dd99e1d374ce2410d9d65",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/stone_pickaxe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_stonepick.png",
+      "operation": "copy",
+      "source_sha256": "8d77dce0fc319a985c4517ff9012f6662423713aa20e9761fcf1b8cad3325d96",
+      "output_sha256": "8d77dce0fc319a985c4517ff9012f6662423713aa20e9761fcf1b8cad3325d96",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/stone_shovel.png",
+      "source": "textures/default_mcl_core/tools/default_tool_stoneshovel.png",
+      "operation": "copy",
+      "source_sha256": "737699ffd5d7a29c2448e5ed961d624d2c165537edc476e3e6ee91cded62fd00",
+      "output_sha256": "737699ffd5d7a29c2448e5ed961d624d2c165537edc476e3e6ee91cded62fd00",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/stone_sword.png",
+      "source": "textures/default_mcl_core/tools/default_tool_stonesword.png",
+      "operation": "copy",
+      "source_sha256": "8da211c99fa7e545bb48fa4307571c627e06c42c4efd4ccf1add64b03089466a",
+      "output_sha256": "8da211c99fa7e545bb48fa4307571c627e06c42c4efd4ccf1add64b03089466a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/string.png",
+      "source": "textures/mcl_mobitems/mcl_mobitems_string.png",
+      "operation": "copy",
+      "source_sha256": "c5d7b21c9e003414bd04ca6653d4879b9f0c21320d32970ee7b927edbe508a84",
+      "output_sha256": "c5d7b21c9e003414bd04ca6653d4879b9f0c21320d32970ee7b927edbe508a84",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/sugar.png",
+      "source": "textures/default_mcl_core/mcl_core_sugar.png",
+      "operation": "copy",
+      "source_sha256": "783eb848282254829de05cc05eb5d5d667d50231d0c0afe536bb3f34e34470af",
+      "output_sha256": "783eb848282254829de05cc05eb5d5d667d50231d0c0afe536bb3f34e34470af",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/wheat.png",
+      "source": "textures/farming_mcl_farming/farming_wheat.png",
+      "operation": "copy",
+      "source_sha256": "9b6acd4987e05665759fd6d57028858f98f4591a6b19329cfd7859e1a0f4d4d6",
+      "output_sha256": "9b6acd4987e05665759fd6d57028858f98f4591a6b19329cfd7859e1a0f4d4d6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/wooden_axe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_woodaxe.png",
+      "operation": "copy",
+      "source_sha256": "8381434785d3548abde3e7cdb0210f9f42a127abe866cdbbd573826bf28dc1a9",
+      "output_sha256": "8381434785d3548abde3e7cdb0210f9f42a127abe866cdbbd573826bf28dc1a9",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/wooden_hoe.png",
+      "source": "textures/farming_mcl_farming/farming_tool_woodhoe.png",
+      "operation": "copy",
+      "source_sha256": "a14ab5beccc98e8056384880ccbb8edfdbd93a8c46ac1ac4c7ae58a63c03bad4",
+      "output_sha256": "a14ab5beccc98e8056384880ccbb8edfdbd93a8c46ac1ac4c7ae58a63c03bad4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/wooden_pickaxe.png",
+      "source": "textures/default_mcl_core/tools/default_tool_woodpick.png",
+      "operation": "copy",
+      "source_sha256": "b668c8101e9507137b94ca8bd0de3acb3a07ac49e672174240739dd1b80e1d89",
+      "output_sha256": "b668c8101e9507137b94ca8bd0de3acb3a07ac49e672174240739dd1b80e1d89",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/wooden_shovel.png",
+      "source": "textures/default_mcl_core/tools/default_tool_woodshovel.png",
+      "operation": "copy",
+      "source_sha256": "464adb78b76d2dde30226023a1fb061288a4a364e0162d2359f4db0279fa729c",
+      "output_sha256": "464adb78b76d2dde30226023a1fb061288a4a364e0162d2359f4db0279fa729c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/wooden_sword.png",
+      "source": "textures/default_mcl_core/tools/default_tool_woodsword.png",
+      "operation": "copy",
+      "source_sha256": "de8c6bb82a64920c9ac75eb94312235bb3066d54c4ae4c9b708e1ecc74cad81f",
+      "output_sha256": "de8c6bb82a64920c9ac75eb94312235bb3066d54c4ae4c9b708e1ecc74cad81f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/arrow.png",
+      "source": "textures/mcl_bows/mcl_bows_arrow.png",
+      "operation": "copy",
+      "source_sha256": "f673a7b6d8d909199f8005919fcc098f7d5c88c3d340f28b81739d1151ae3584",
+      "output_sha256": "f673a7b6d8d909199f8005919fcc098f7d5c88c3d340f28b81739d1151ae3584",
+      "source_size": [
+        64,
+        64
+      ],
+      "output_size": [
+        64,
+        64
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/chicken.png",
+      "source": "textures/mobs_mc/mobs_mc_chicken.png",
+      "operation": "copy",
+      "source_sha256": "845ae41a37126998ed1b96f7bb62724e97926f17764d60d03e2abe194b40ad68",
+      "output_sha256": "845ae41a37126998ed1b96f7bb62724e97926f17764d60d03e2abe194b40ad68",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/cow.png",
+      "source": "textures/mobs_mc/mobs_mc_cow.png",
+      "operation": "copy",
+      "source_sha256": "c2fbc106ac025d2c5266d5b98ca36cfe0cd8c3a5de95d57cb85f3fd3c98e7537",
+      "output_sha256": "c2fbc106ac025d2c5266d5b98ca36cfe0cd8c3a5de95d57cb85f3fd3c98e7537",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/creeper.png",
+      "source": "textures/mobs_mc/mobs_mc_creeper.png",
+      "operation": "copy",
+      "source_sha256": "cd85286d9a267037efddae046b7d5df9bd65ffc457538eb7b3484c0f634634ed",
+      "output_sha256": "cd85286d9a267037efddae046b7d5df9bd65ffc457538eb7b3484c0f634634ed",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/fireball.png",
+      "source": "textures/mobs_mc/mobs_mc_dragon_fireball.png",
+      "operation": "copy",
+      "source_sha256": "03b2424fb319a8c5c7ca9a5d3a1b6db943f8d003ea9c3eaad725401dcdbf3f9a",
+      "output_sha256": "03b2424fb319a8c5c7ca9a5d3a1b6db943f8d003ea9c3eaad725401dcdbf3f9a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/ghast.png",
+      "source": "textures/mobs_mc/mobs_mc_ghast.png",
+      "operation": "copy",
+      "source_sha256": "f81e638064bbb377aafb2a29dbe110cb58b86330a96e1147a7ee67feca26429a",
+      "output_sha256": "f81e638064bbb377aafb2a29dbe110cb58b86330a96e1147a7ee67feca26429a",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/ghast_shooting.png",
+      "source": "textures/mobs_mc/mobs_mc_ghast.png",
+      "operation": "copy",
+      "source_sha256": "f81e638064bbb377aafb2a29dbe110cb58b86330a96e1147a7ee67feca26429a",
+      "output_sha256": "f81e638064bbb377aafb2a29dbe110cb58b86330a96e1147a7ee67feca26429a",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/pig.png",
+      "source": "textures/mobs_mc/mobs_mc_pig.png",
+      "operation": "copy",
+      "source_sha256": "5068d57b7efd4c94e84c943327515c1df6d69ff71a7c286d6acc0739b41102df",
+      "output_sha256": "5068d57b7efd4c94e84c943327515c1df6d69ff71a7c286d6acc0739b41102df",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/pig_saddle.png",
+      "source": "textures/mobs_mc/mobs_mc_pig_saddle.png",
+      "operation": "copy",
+      "source_sha256": "d6da47bf902751380e12beb774f7d1e20324fdb393352379a7cd84cde76349db",
+      "output_sha256": "d6da47bf902751380e12beb774f7d1e20324fdb393352379a7cd84cde76349db",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/pig_zombie.png",
+      "source": "textures/mobs_mc/mobs_mc_zombie_pigman.png",
+      "operation": "crop_upper_64x32",
+      "source_sha256": "a92d98fe999c2832b95e30e18c5c013253a1f117bd62b33f2dceb1ff17f987ba",
+      "output_sha256": "8c588fe0d1fa16ecd10b0ded4fa2492c1e79bbc18804194d48250ac215090784",
+      "source_size": [
+        64,
+        64
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/sheep.png",
+      "source": "textures/mobs_mc/mobs_mc_sheep.png",
+      "operation": "copy",
+      "source_sha256": "0f27bb6ab428dc6545215b1fdc23d9a74adee8ca3d9dec39104fceab4596061e",
+      "output_sha256": "0f27bb6ab428dc6545215b1fdc23d9a74adee8ca3d9dec39104fceab4596061e",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/sheep_fur.png",
+      "source": "textures/mobs_mc/mobs_mc_sheep_fur.png",
+      "operation": "copy",
+      "source_sha256": "40a450c90195fe72e6c083ce2e353bfbb9551cccee02c6fe4642db43f180caa8",
+      "output_sha256": "40a450c90195fe72e6c083ce2e353bfbb9551cccee02c6fe4642db43f180caa8",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/skeleton.png",
+      "source": "textures/mobs_mc/mobs_mc_skeleton.png",
+      "operation": "copy",
+      "source_sha256": "6ef2a015409b619ab0b9505f96f7f221f66438a10cadbc286e429f7be731fb35",
+      "output_sha256": "6ef2a015409b619ab0b9505f96f7f221f66438a10cadbc286e429f7be731fb35",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/slime.png",
+      "source": "textures/mobs_mc/mobs_mc_slime.png",
+      "operation": "nearest_resize_64x32",
+      "source_sha256": "72f852b613c8282778ddf55f5c4d8535320cc64794680e95b69919b87e466330",
+      "output_sha256": "68523ab4eba7b18ff99839f925757022181a65dcc33567f30a996d09b50ff45b",
+      "source_size": [
+        128,
+        64
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/spider.png",
+      "source": "textures/mobs_mc/mobs_mc_spider.png",
+      "operation": "copy",
+      "source_sha256": "7cbf71392faa7ccb63635e3e7410514823709e5d6d90138c8a1adc6c819b0b63",
+      "output_sha256": "7cbf71392faa7ccb63635e3e7410514823709e5d6d90138c8a1adc6c819b0b63",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/spider_eyes.png",
+      "source": "textures/mobs_mc/mobs_mc_spider_eyes.png",
+      "operation": "copy",
+      "source_sha256": "6dc5f9d41f93c2d0d786bda7cd4def4bbee54ff204f9456048634ccec342a541",
+      "output_sha256": "6dc5f9d41f93c2d0d786bda7cd4def4bbee54ff204f9456048634ccec342a541",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/squid.png",
+      "source": "textures/mobs_mc/mobs_mc_squid.png",
+      "operation": "copy",
+      "source_sha256": "d9ae031ad8375abb7561763005debf373027190dd3710a0202c78e68230b7982",
+      "output_sha256": "d9ae031ad8375abb7561763005debf373027190dd3710a0202c78e68230b7982",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/wolf.png",
+      "source": "textures/mobs_mc/mobs_mc_wolf.png",
+      "operation": "copy",
+      "source_sha256": "44ceb7112bfa88e28303cfb908451b485d3e917d2f05013315f09b23b6921a02",
+      "output_sha256": "44ceb7112bfa88e28303cfb908451b485d3e917d2f05013315f09b23b6921a02",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/wolf_angry.png",
+      "source": "textures/mobs_mc/mobs_mc_wolf_angry.png",
+      "operation": "copy",
+      "source_sha256": "710afd4613a88e6ab60bcf520e15cc11a6a3a922e02a7db2520c22757296ab08",
+      "output_sha256": "710afd4613a88e6ab60bcf520e15cc11a6a3a922e02a7db2520c22757296ab08",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/wolf_tame.png",
+      "source": "textures/mobs_mc/mobs_mc_wolf_tame.png",
+      "operation": "copy",
+      "source_sha256": "5a266d01ce5dc0ce5880e1215913ac150dddc75242a4d5a1819e9f2081cee0ac",
+      "output_sha256": "5a266d01ce5dc0ce5880e1215913ac150dddc75242a4d5a1819e9f2081cee0ac",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/mobs/zombie.png",
+      "source": "textures/mobs_mc/mobs_mc_zombie.png",
+      "operation": "crop_upper_64x32",
+      "source_sha256": "781b14c8a4d91f244703485a4e8b68f2517db2105e628d81768597c8d72fb2a0",
+      "output_sha256": "8bab830fa0569a25a3581205d68bdd395223cff0cc460eb5196e7b914359d83c",
+      "source_size": [
+        64,
+        64
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "resources/textures/block_destroy.png",
+      "source": "textures/default_mcl_core/gui_hud/crack_anylength.png",
+      "operation": "five_vertical_frames_to_ten_horizontal_frames",
+      "source_sha256": "9bfe8cdfa65a0a6f85712e4bd59434ceb3f81fba0ed37fe09b958596933520e1",
+      "output_sha256": "4a40a8722bb7ddc4c74fd930fc80354e4f3c84b1ec70e04b29d70da0948f9866",
+      "source_size": [
+        16,
+        80
+      ],
+      "output_size": [
+        160,
+        16
+      ]
+    },
+    {
+      "destination": "resources/textures/heart_empty.png",
+      "source": "textures/default_mcl_core/gui_hud/heart_gone.png",
+      "operation": "copy",
+      "source_sha256": "b0821056ad1373130b396206ef44a8c59cad0b271c76f6af175d3bef946a3e68",
+      "output_sha256": "b0821056ad1373130b396206ef44a8c59cad0b271c76f6af175d3bef946a3e68",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "resources/textures/heart_full.png",
+      "source": "textures/default_mcl_core/gui_hud/heart.png",
+      "operation": "copy",
+      "source_sha256": "eaf159d95b838849b61d41508e2274744f6abff1d597cf6abf4e45427126f150",
+      "output_sha256": "eaf159d95b838849b61d41508e2274744f6abff1d597cf6abf4e45427126f150",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "resources/textures/menu_background.png",
+      "source": "textures/default_mcl_core/soil/default_dirt.png",
+      "operation": "copy",
+      "source_sha256": "f1d329299d4c719d2f3c6f0068c67570d91c91fd30b69b78dabdce7f41ae11be",
+      "output_sha256": "f1d329299d4c719d2f3c6f0068c67570d91c91fd30b69b78dabdce7f41ae11be",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "resources/textures/moon_phases.png",
+      "source": "textures/sky_weather/mcl_moon_moon_phases.png",
+      "operation": "nearest_resize_128x64",
+      "source_sha256": "984eecb55401f95c979e8289f62df6fed2bdbb03da3e69c5fd5a566c8bc78330",
+      "output_sha256": "c43be141316a79d0a15d99edea53bb0c7d563a51912105237cf914f428ddcd49",
+      "source_size": [
+        768,
+        384
+      ],
+      "output_size": [
+        128,
+        64
+      ]
+    },
+    {
+      "destination": "resources/textures/player.png",
+      "source": "textures/HUD/character.png",
+      "operation": "copy",
+      "source_sha256": "cddd094748273d8a70e530a189107cf5b886f866ac388c7c803427dc1d97410f",
+      "output_sha256": "cddd094748273d8a70e530a189107cf5b886f866ac388c7c803427dc1d97410f",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "resources/textures/sun.png",
+      "source": "textures/sky_weather/sun.png",
+      "operation": "copy",
+      "source_sha256": "abc2e9d43497068ce8ab58fd9bc4f5f651aba8df42aa0bfc17b05ca4d250f312",
+      "output_sha256": "abc2e9d43497068ce8ab58fd9bc4f5f651aba8df42aa0bfc17b05ca4d250f312",
+      "source_size": [
+        96,
+        96
+      ],
+      "output_size": [
+        96,
+        96
+      ]
+    }
+  ],
+  "unchanged_engine_ui": [
+    "mods/default/textures/gui/furnace.png",
+    "mods/default/textures/gui/inventory.png",
+    "mods/default/textures/gui/workbench.png",
+    "resources/textures/font.png",
+    "resources/textures/recipe.png",
+    "resources/textures/title_screen.png",
+    "resources/textures/toasts.png",
+    "resources/textures/widgets.png",
+    "resources/textures/world_icon.png"
+  ],
+  "notes": [
+    "the undefined texture is an engine debug checker, not legacy world artwork",
+    "source ghast has no separate shooting-state atlas; ghast_shooting.png uses the same source artwork",
+    "legacy beta zombie atlases use the top half of the supplied modern64x64 skins",
+    "slime atlas is resized with nearest-neighbor sampling for beta64x32 UVs",
+    "moon phase sheet is resized to retain the existing32px phase size",
+    "breaking overlay repeats each of the five source frames twice in the existing ten-frame horizontal sheet",
+    "six original labeled debug faces are resized from 32x32 to 16x16 with nearest-neighbor sampling to match the built-in block atlas; these are engine assets, not refi artwork"
+  ]
+}

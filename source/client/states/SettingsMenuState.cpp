@@ -39,7 +39,6 @@
 #include "client/core/KeyboardHandler.hpp"
 #include "client/core/input/GamePad.hpp"
 #include "client/states/SettingsMenuState.hpp"
-#include "client/states/TexturePackSelectionState.hpp"
 
 SettingsMenuState::SettingsMenuState(DrawableState *parent) : InterfaceState(parent) {
 	m_background.setScale(Config::guiScale * 2.f, Config::guiScale * 2.f);
@@ -180,10 +179,6 @@ void SettingsMenuState::addMainButtons() {
 	m_menuWidget.addButton("Debug...", [this] (TextButton &) {
 		m_state = MenuState::Debug;
 		addDebugButtons();
-	});
-
-	m_menuWidget.addButton("Texture Pack...", [this] (TextButton &) {
-		m_stateStack->push<TexturePackSelectionState>(this);
 	});
 
 	updateWidgetPosition();

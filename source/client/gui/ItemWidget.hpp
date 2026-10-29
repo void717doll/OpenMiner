@@ -77,7 +77,6 @@ class ItemWidget : public Widget {
 
 		bool m_hasChanged = false;
 
-		std::string m_oldTexturePack{""};
 
 		bool m_isEnabled = true;
 

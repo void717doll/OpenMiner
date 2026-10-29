@@ -99,7 +99,7 @@ void ServerLoadingState::update() {
 		}
 		else if (!m_game.textureAtlas().isReady()) {
 			try {
-				m_game.textureAtlas().loadFromRegistry(Config::texturePack);
+				m_game.textureAtlas().loadFromRegistry();
 			}
 			catch (Exception &e) {
 				m_game.client().disconnect();

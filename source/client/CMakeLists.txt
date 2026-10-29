@@ -68,6 +68,7 @@ set(SOURCE_FILES
 	hud/DebugOverlay.cpp
 	hud/DebugProfilerWindow.cpp
 	hud/HUD.cpp
+	hud/HeartBar.cpp
 	hud/Hotbar.cpp
 	hud/Minimap.cpp
 
@@ -93,7 +94,6 @@ set(SOURCE_FILES
 	states/ServerConnectState.cpp
 	states/ServerLoadingState.cpp
 	states/SettingsMenuState.cpp
-	states/TexturePackSelectionState.cpp
 	states/TitleScreenState.cpp
 	states/WorldCreationState.cpp
 	states/WorldDeletionState.cpp
@@ -174,6 +174,7 @@ set(HEADER_FILES
 	hud/DebugOverlay.hpp
 	hud/DebugProfilerWindow.hpp
 	hud/HUD.hpp
+	hud/HeartBar.hpp
 	hud/Hotbar.hpp
 	hud/Minimap.hpp
 
@@ -200,7 +201,6 @@ set(HEADER_FILES
 	states/ServerConnectState.hpp
 	states/ServerLoadingState.hpp
 	states/SettingsMenuState.hpp
-	states/TexturePackSelectionState.hpp
 	states/TitleScreenState.hpp
 	states/WorldCreationState.hpp
 	states/WorldDeletionState.hpp

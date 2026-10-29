@@ -44,7 +44,7 @@ class TextureAtlas {
 
 		void clear();
 
-		void loadFromRegistry(const std::string &texturePack = "");
+		void loadFromRegistry();
 
 		FloatRect getTexCoords(const std::string &filename, bool normalized = true) const;
 

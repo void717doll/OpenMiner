@@ -80,8 +80,7 @@ void ItemWidget::update() {
 }
 
 void ItemWidget::updateImage(const BlockState *blockState) {
-	if (m_image.width() == 0 || m_oldTexturePack != Config::texturePack) {
-		m_oldTexturePack = Config::texturePack;
+	if (m_image.width() == 0) {
 
 		m_image.load(m_textureAtlas.texture());
 		m_image.setPosition(1, 1, 0);

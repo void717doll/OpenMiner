@@ -35,6 +35,7 @@
 #include "client/hud/DebugOverlay.hpp"
 #include "client/hud/DebugProfilerWindow.hpp"
 #include "client/hud/Hotbar.hpp"
+#include "client/hud/HeartBar.hpp"
 #include "client/hud/Minimap.hpp"
 #include "client/graphics/Shader.hpp"
 #include "client/graphics/View.hpp"
@@ -81,7 +82,7 @@ class HUD : public Transformable, public Drawable {
 		BlockInfoWidget m_blockInfoWidget;
 
 		Text m_fpsText;
-		Text m_healthText;
+		HeartBar m_hearts;
 
 		Chat m_chat;
 
