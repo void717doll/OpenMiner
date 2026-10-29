@@ -36,7 +36,7 @@ void Client::connect(sf::IpAddress serverAddress, u16 serverPort, Player &player
 		throw ClientConnectException("Network error: Unable to connect to server " + serverAddress.toString() + ":" + std::to_string(serverPort));
 
 	Network::Packet packet;
-	packet << Network::Command::ClientConnect << player.name();
+	packet << Network::Command::ClientConnect << player.name() << Network::protocolVersion;
 	m_tcpSocket->send(packet);
 
 	Network::Packet answer;
@@ -51,7 +51,10 @@ void Client::connect(sf::IpAddress serverAddress, u16 serverPort, Player &player
 	if (command != Network::Command::ClientOk)
 		throw ClientConnectException("Network error: Expected 'ClientOk' packet.");
 
-	answer >> m_id >> isSingleplayer;
+	u16 protocolVersion = 0;
+	answer >> m_id >> isSingleplayer >> protocolVersion;
+	if (!answer || protocolVersion != Network::protocolVersion)
+		throw ClientConnectException("incompatible server protocol");
 	if (m_isSingleplayer != isSingleplayer)
 		throw ClientConnectException("Client error: The server is not valid");
 

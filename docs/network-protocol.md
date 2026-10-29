@@ -328,3 +328,7 @@ _This packet has no field._
 | Screen height | u16         | Client screen height                                 |
 | GUI scale     | u8          | Client GUI scale                                     |
 
+
+## protocol compatibility
+
+protocol version 1 appends a `u16` version to both `ClientConnect` (after username) and `ClientOk` (after the singleplayer flag). peers reject missing or different versions. this version requires server-owned item consumption on successful placement; clients must not decrement inventory or send an inventory update for placement.

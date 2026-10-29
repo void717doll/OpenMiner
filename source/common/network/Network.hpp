@@ -33,6 +33,8 @@
 namespace Network {
 	using Packet = CompressedPacket;
 
+	constexpr u16 protocolVersion = 1;
+
 	enum class Command {
 		// Client commands
 		ClientConnect         = 0x00,

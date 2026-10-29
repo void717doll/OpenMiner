@@ -205,7 +205,12 @@ void ServerCommandHandler::sendEntityDespawn(entt::entity entityID, const Client
 void ServerCommandHandler::setupCallbacks() {
 	m_server.setConnectionCallback([this](ClientInfo &client, Network::Packet &connectionPacket) {
 		std::string username;
-		connectionPacket >> username;
+		u16 protocolVersion = 0;
+		connectionPacket >> username >> protocolVersion;
+		if (!connectionPacket || protocolVersion != Network::protocolVersion) {
+			sendServerClosed("incompatible client protocol", &client);
+			return;
+		}
 
 		if (!utils::regexMatch(username, "^[A-Za-z0-9_]+$")) {
 			sendServerClosed("Invalid username", &client);
