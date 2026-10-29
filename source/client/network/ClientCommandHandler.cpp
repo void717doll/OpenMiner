@@ -36,6 +36,7 @@
 #include "common/scene/component/PositionComponent.hpp"
 #include "common/scene/component/RotationComponent.hpp"
 
+#include "client/audio/SoundManager.hpp"
 #include "client/core/GameConfig.hpp"
 #include "client/graphics/Camera.hpp"
 #include "client/network/Client.hpp"
@@ -55,6 +56,15 @@ void ClientCommandHandler::sendPlayerInteract() {
 void ClientCommandHandler::sendPlayerAttack() {
 	Network::Packet packet;
 	packet << Network::Command::PlayerAttack;
+	m_client.send(packet);
+}
+
+void ClientCommandHandler::sendPlayerDropItem() {
+	if (m_player.heldItemSlot() < 0) return;
+	sendPlayerPosUpdate();
+	sendPlayerRotUpdate();
+	Network::Packet packet;
+	packet << Network::Command::PlayerDropItem;
 	m_client.send(packet);
 }
 
@@ -196,7 +206,18 @@ void ClientCommandHandler::setupCallbacks() {
 
 	m_client.setCommandCallback(Network::Command::PlayerHealth, [this](Network::Packet &packet) {
 		u16 health;
-		if (packet >> health) m_player.setHealth(health);
+		if (packet >> health) {
+			m_player.setHealth(health);
+		}
+	});
+
+	m_client.setCommandCallback(Network::Command::PlayerHurt, [this](Network::Packet &) {
+		m_player.notifyDamage();
+		if (auto *sound = SoundManager::instance()) sound->play("player_damage", 0.7f);
+	});
+
+	m_client.setCommandCallback(Network::Command::PlayerToolBroken, [](Network::Packet &) {
+		if (auto *sound = SoundManager::instance()) sound->play("default_tool_breaks", 0.5f);
 	});
 
 	m_client.setCommandCallback(Network::Command::BlockUpdate, [this](Network::Packet &packet) {

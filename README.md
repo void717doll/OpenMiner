@@ -137,3 +137,7 @@ worldgen still needs staged cross-chunk decoration, parallel generation, superch
 local worlds run entirely in the game process. remote joining, hosting, dedicated-server startup, sockets, remote player rendering, and address/username settings have been removed. the simulation thread exchanges local messages with rendering and preserves existing saves.
 
 survival uses [beta movement, mining and tool durability](docs/beta-survival.md). worn tools retain their damage through inventory transfers, drops and saves. fly/noclip/sprint, creative inventory, starter gifts and cheat commands are removed. mining uses tool tiers and ground drops; falling, drowning and hazardous blocks cause damage.
+
+select hotbar slots with 1–9 or the mouse wheel; q drops one held item. both bindings are available in settings. e opens the inventory.
+
+chunk streaming, lighting and mesh work now use [per-update budgets](docs/performance.md). [luanti material sounds](docs/sound-assets.md) cover footsteps, digging, placement, damage and tool breaking; volume is adjustable in settings.

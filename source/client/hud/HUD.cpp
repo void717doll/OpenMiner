@@ -100,7 +100,7 @@ void HUD::onGuiScaleChanged(const GuiScaleChangedEvent &event) {
 }
 
 void HUD::update() {
-	m_hearts.update(m_player.health());
+	m_hearts.update(m_player.health(), m_player.damageSerial());
 	m_wield.update();
 	// FIXME: Shouldn't be called every tick
 	if (Config::isHotbarVisible)

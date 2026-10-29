@@ -10,6 +10,8 @@ player collision clips vertical movement before the two horizontal axes. server 
 
 ## mining and equipment
 
+number keys 1 through 9 select hotbar slots; the mouse wheel cycles through them. q drops one item from the selected slot, preserving equipment damage. these bindings can be changed in settings. drops leave the player's eye area in the look direction and wait 40 simulation ticks before pickup, following beta `EntityPlayer.dropCurrentItem`. thrown-item movement still uses the engine's luanti physics, without beta's random scatter. dropping into an unloaded chunk or when the item-entity cap is full keeps the inventory unchanged.
+
 block interaction reach remains four blocks. common beta blocks use the source hardness values. default pickaxes, axes, and shovels use the source effective-block lists, including their omissions: axes do not speed up workbenches, and pickaxes do not speed up obsidian or redstone ore. harvest tiers still determine whether a broken block drops loot. swords mine at 1.5 strength; shears speed up leaves and wool. mining takes five times as long when the player's head is underwater, and another five times as long while airborne. the wrong-tool branch retains the source's hardness-only penalty. continuous mining waits 250 milliseconds after a completed block.
 
 | equipment | maximum damage |
@@ -29,10 +31,12 @@ inventory swaps, splitting, shift transfers, ground-item pickups, and death drop
 
 mob deaths put loot on the ground for pickup, including environmental deaths. sheep shearing also puts wool on the ground. partial pickups keep the remainder. existing health, immediate food healing, container returns, fall/drowning/lava/fire/cactus/suffocation damage, hurt immunity, and automatic respawn remain active. there is no hunger bar.
 
+accepted damage sends a separate hurt event, including fatal damage before automatic respawn. the client plays the hurt cue and briefly tilts the camera; hearts blink between the previous and current amounts after a hit. health synchronization and healing do not trigger hurt sounds. equipment breakage also has its own event, so moving or dropping a tool does not play a break sound.
+
 undamaged stacks retain their original serialized bytes. a damaged stack writes the reserved `@oldworld:stack_damage` marker followed by the item id, amount, and damage; readers accept both forms in player inventories, containers, and item entities. older saves remain readable; older executables cannot read newly saved damaged stacks.
 
 ## verification and limits
 
 800 samples from the original java movement methods matched the c++ calculations exactly for cardinal-facing walking, sneaking, diagonal input, ice, repeated jumping, water, lava, and ladders. the oracle uses a flat floor and controlled material contacts; it does not prove parity for complete worlds or arbitrary view angles. regression coverage exercises axis ordering, slab ascent accepted by the server, sneak edges, equipment breakage, legacy oversized stacks, and serialized inventory/stack boundaries.
 
-this is a survival rules port, not complete beta feature parity. armor/equipment slots, beds, a death screen, sapling regrowth, weather, fire spread, liquid currents, the full beta mob pathfinder/spawner, knockback, and air/fire hud indicators remain absent or adapted. crafting and inventory messages retain the existing local-client ownership. mining animation and timing use the engine clock rather than the complete beta controller state machine. sound, stepping camera smoothing, and source-exact random drops are not ported. native input and visual checks still require a desktop session.
+this is a survival rules port, not complete beta feature parity. armor/equipment slots, beds, a death screen, sapling regrowth, weather, fire spread, liquid currents, the full beta mob pathfinder/spawner, knockback, and air/fire hud indicators remain absent or adapted. crafting and inventory messages retain the existing local-client ownership. mining animation and timing use the engine clock rather than the complete beta controller state machine. stepping camera smoothing and source-exact random drops are not ported. material footsteps and player action effects now use the [luanti sound assets](sound-assets.md). native input and visual checks still require a desktop session.

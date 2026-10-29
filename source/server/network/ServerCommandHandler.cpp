@@ -70,6 +70,20 @@ bool canReachBlock(const ServerWorld &world, const ServerPlayer &player, int x, 
 }
 }
 
+void ServerCommandHandler::wearHeldItem(Player &player, u16 amount) {
+	int slot = player.heldItemSlot();
+	if (slot < 0 || slot >= player.inventory().width()) return;
+	auto &stack = player.inventory().getStackRef(u16(slot), 0);
+	u16 previous = stack.amount();
+	if (!stack.wear(amount)) return;
+	sendPlayerInvUpdate(player.clientID());
+	if (stack.amount() < previous) {
+		Network::Packet packet;
+		packet << Network::Command::PlayerToolBroken;
+		m_server.sendToAllClients(packet);
+	}
+}
+
 void ServerCommandHandler::sendServerClosed(const std::string &message, ClientInfo *client) const {
 	Network::Packet packet;
 	packet << Network::Command::ServerClosed << message;
@@ -210,6 +224,9 @@ void ServerCommandHandler::damagePlayer(u16 clientID, u16 amount) {
 	amount = player->survival().filterDamage(amount);
 	if (!amount) return;
 	player->damage(amount);
+	Network::Packet hurt;
+	hurt << Network::Command::PlayerHurt;
+	if (player->client()) player->client()->send(hurt);
 	if (player->health() == 0) {
 		ServerWorld &world = getWorldForClient(clientID);
 		world.dropPlayerItems(*player);
@@ -471,7 +488,7 @@ void ServerCommandHandler::setupCallbacks() {
 			m_scriptEngine.luaCore().onEvent(LuaEventType::BlockDigged, glm::ivec3{x, y, z}, *blockState, *player, world, client, *this);
 			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width()) {
 				auto &tool = player->inventory().getStackRef(player->heldItemSlot(), 0);
-				if (tool.wear(retro::diggingWear(tool.item(), *blockState))) sendPlayerInvUpdate(client.id);
+				wearHeldItem(*player, retro::diggingWear(tool.item(), *blockState));
 			}
 
 			Network::Packet answer;
@@ -496,6 +513,11 @@ void ServerCommandHandler::setupCallbacks() {
 		}
 		else
 			logError() << ("Failed to change held item of player " + std::to_string(client.id) + ": Player not found").c_str();
+	});
+
+	m_server.setCommandCallback(Network::Command::PlayerDropItem, [this](ClientInfo &client, Network::Packet &) {
+		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
+		if (player) getWorldForClient(client.id).dropHeldItem(*player);
 	});
 
 	m_server.setCommandCallback(Network::Command::PlayerReady, [this](ClientInfo &client, Network::Packet &) {

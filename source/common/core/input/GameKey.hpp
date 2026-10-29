@@ -43,6 +43,16 @@ namespace GameKey {
 		Shift,
 
 		BlockInfoToggle,
+		Drop,
+		Hotbar1,
+		Hotbar2,
+		Hotbar3,
+		Hotbar4,
+		Hotbar5,
+		Hotbar6,
+		Hotbar7,
+		Hotbar8,
+		Hotbar9,
 
 		KeyCount
 	};

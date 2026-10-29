@@ -29,6 +29,8 @@ nav:
       - 'local world runtime': 'local-world.md'
       - 'lunarchy physics': 'lunarchy-physics.md'
       - 'beta survival': 'beta-survival.md'
+      - 'frame pacing': 'performance.md'
+      - 'sound assets': 'sound-assets.md'
 
 theme:
     name: readthedocs

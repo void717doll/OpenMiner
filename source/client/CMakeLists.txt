@@ -7,6 +7,7 @@ set(PROJECT_NAME ${CMAKE_PROJECT_NAME})
 # Get source files
 #------------------------------------------------------------------------------
 set(SOURCE_FILES
+	audio/SoundManager.cpp
 	core/ClientApplication.cpp
 	core/ClientProfiler.cpp
 	core/Config.cpp
@@ -107,6 +108,7 @@ set(SOURCE_FILES
 )
 
 set(HEADER_FILES
+	audio/SoundManager.hpp
 	core/ClientApplication.hpp
 	core/ClientProfiler.hpp
 	core/Config.hpp

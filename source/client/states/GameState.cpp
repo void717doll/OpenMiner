@@ -35,6 +35,7 @@
 #include "common/event/Events.hpp"
 #include "common/resource/ResourceHandler.hpp"
 
+#include "client/audio/SoundManager.hpp"
 #include "client/core/KeyboardHandler.hpp"
 #include "client/core/Mouse.hpp"
 #include "client/core/input/GamePad.hpp"
@@ -69,6 +70,7 @@ GameState::GameState()
 }
 
 GameState::~GameState() {
+	if (auto *sound = SoundManager::instance()) sound->setPaused(true);
 	m_client.disconnect();
 }
 
@@ -82,6 +84,7 @@ void GameState::init() {
 }
 
 void GameState::onStateInactive() {
+	if (auto *sound = SoundManager::instance()) sound->setPaused(true);
 	m_player.clearInputs();
 	m_hud.pause();
 }
@@ -129,7 +132,10 @@ void GameState::onEvent(const SDL_Event &event) {
 			}
 		}
 		else if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::BlockInfoToggle)) {
+			if (!event.key.repeat && event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Drop)) {
+				m_clientCommandHandler.sendPlayerDropItem();
+			}
+			else if (event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::BlockInfoToggle)) {
 				Config::isBlockInfoWidgetEnabled = !Config::isBlockInfoWidgetEnabled;
 			}
 			else if (event.key.keysym.sym == SDLK_F2) {
@@ -166,6 +172,10 @@ void GameState::onEvent(const SDL_Event &event) {
 }
 
 void GameState::update() {
+	if (auto *sound = SoundManager::instance()) {
+		sound->setPaused(m_stateStack->empty() || &m_stateStack->top() != this);
+		sound->setListener(m_player.physicsPosition(), {m_player.dirTargetedX(), m_player.dirTargetedY(), m_player.dirTargetedZ()});
+	}
 	m_world.checkPlayerChunk(m_player.x(), m_player.y(), m_player.z());
 	m_world.update(!m_stateStack->empty() && (&m_stateStack->top() == this || m_stateStack->top().parent() == this));
 

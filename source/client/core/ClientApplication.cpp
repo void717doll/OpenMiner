@@ -89,6 +89,8 @@ bool ClientApplication::init() {
 	createWindow(Config::screenWidth, Config::screenHeight, APP_NAME);
 	m_window.setVerticalSyncEnabled(Config::isVerticalSyncEnabled);
 	m_window.disableView();
+	m_soundManager.init("resources/config/sounds.xml");
+	m_soundManager.setVolume(Config::soundVolume);
 
 	if (Config::isWireframeModeEnabled)
 		bgfx::setDebug(BGFX_DEBUG_WIREFRAME);
@@ -112,6 +114,7 @@ bool ClientApplication::init() {
 }
 
 void ClientApplication::handleEvents() {
+	m_soundManager.setVolume(Config::soundVolume);
 	OM_PROFILE_START("OS events");
 
 	CoreApplication::handleEvents();

@@ -31,6 +31,7 @@
 #include "common/core/Registry.hpp"
 #include "common/core/input/GameKey.hpp"
 
+#include "client/audio/SoundManager.hpp"
 #include "client/core/GameConfig.hpp"
 #include "client/core/input/GamePad.hpp"
 #include "client/graphics/Camera.hpp"
@@ -74,6 +75,7 @@ void ClientPlayer::updateCamera() {
 
 	if (Config::isViewBobbingEnabled)
 		applyViewBobbing(viewAngleH, viewAngleV, viewAngleRoll);
+	viewAngleRoll += hurtEffect() * 8;
 
 	float ch = cosf(viewAngleH * math::DEG_TO_RADf);
 	float sh = sinf(viewAngleH * math::DEG_TO_RADf);
@@ -85,6 +87,19 @@ void ClientPlayer::updateCamera() {
 	m_forwardDir = Vector3f{ch * cv, sh * cv, sv};
 	m_camera.setDirection(m_forwardDir);
 	m_camera.setUpVector(Vector3f{sh * sr - ch * sv * cr, -ch * sr - sh * sv * cr, cv * cr});
+}
+
+void ClientPlayer::notifyDamage() {
+	m_hurtUntil = GameClock::getInstance().getTicks() + 500;
+	++m_damageSerial;
+}
+
+float ClientPlayer::hurtEffect() const {
+	if (!m_hurtUntil) return 0;
+	u32 now = GameClock::getInstance().getTicks();
+	if (now >= m_hurtUntil) return 0;
+	float remaining = float(m_hurtUntil - now) / 500.f;
+	return std::sin(remaining * remaining * remaining * remaining * float(M_PI));
 }
 
 void ClientPlayer::clearInputs() {
@@ -124,6 +139,21 @@ void ClientPlayer::simulateMovement(const ClientWorld &world) {
 	if (requested.y != movement.y) m_velocity.y = 0;
 	if (requested.z != movement.z) m_velocity.z = 0;
 	retro::dragPlayer(m_velocity, wasGrounded, horizontalCollision, environment);
+	if (auto *sound = SoundManager::instance()) {
+		if (environment.water) {
+			m_stepDistance += movement.length();
+			if (m_stepDistance > 1.6) { sound->play("default_water_footstep", 0.15f); m_stepDistance = 0; }
+		} else if (m_onGround && !m_isSneaking && !environment.lava) {
+			m_stepDistance += std::hypot(movement.x, movement.y);
+			if (m_stepDistance > 1.666 || (!wasGrounded && requested.z < -0.1)) {
+				int x = int(std::floor(m_physicsPosition.x)), y = int(std::floor(m_physicsPosition.y));
+				const BlockState *ground = world.getBlockState(x, y, int(std::floor(m_physicsPosition.z - 0.2)));
+				if (ground) sound->playBlock(*ground, BlockSound::Step, m_physicsPosition);
+				m_stepDistance = 0;
+			}
+		}
+	}
+
 	if (horizontalCollision && (environment.water || environment.lava)) {
 		DoubleBox exit = body;
 		exit.move(movement.x + m_velocity.x, movement.y + m_velocity.y, m_velocity.z + 0.6);
@@ -176,6 +206,7 @@ void ClientPlayer::setPosition(double x, double y, double z) {
 	m_lastPhysicsTime = GameClock::getInstance().getTicks();
 	m_onGround = false;
 	m_physicsRemainder = 0;
+	m_stepDistance = 0;
 	m_previousPhysicsPosition = m_physicsPosition;
 	m_camera.setDPosition(x,y,z + m_cameraLocalPos.z);
 }

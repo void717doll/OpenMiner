@@ -41,6 +41,7 @@ class ClientInfo;
 class DrawableDef;
 class Inventory;
 class PlayerList;
+class Player;
 class Registry;
 class ScriptEngine;
 class Server;
@@ -69,6 +70,7 @@ class ServerCommandHandler {
 		void sendEntityDespawn(entt::entity entityID, const ClientInfo *client = nullptr) const;
 
 		void sendPlayerHealth(u16 clientID) const;
+		void wearHeldItem(Player &player, u16 amount);
 		void damagePlayer(u16 clientID, u16 amount);
 
 		void setupCallbacks();

@@ -47,7 +47,7 @@ class BlockCursor : public Drawable {
 
 		void update(const Hotbar &hotbar);
 
-		void reset() { m_animationStart = 0; m_lastActivationTime.reset(); }
+		void reset() { m_animationStart = 0; m_nextDigSound = 0; m_lastActivationTime.reset(); }
 
 		const BlockState *currentBlock() const { return m_currentBlock; }
 
@@ -74,6 +74,7 @@ class BlockCursor : public Drawable {
 		VertexBuffer m_animationVBO;
 
 		unsigned int m_animationStart = 0;
+		u32 m_nextDigSound = 0;
 		glm::ivec4 m_selectedBlock{0, 0, 0, -1};
 		const BlockState *m_currentBlock = nullptr;
 		const ItemStack *m_currentTool = nullptr;

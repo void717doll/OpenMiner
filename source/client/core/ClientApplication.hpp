@@ -27,6 +27,7 @@
 #ifndef CLIENTAPPLICATION_HPP_
 #define CLIENTAPPLICATION_HPP_
 
+#include "client/audio/SoundManager.hpp"
 #include "client/core/ClientProfiler.hpp"
 #include "client/core/CoreApplication.hpp"
 #include "client/core/KeyboardHandler.hpp"
@@ -46,6 +47,7 @@ class ClientApplication : public CoreApplication {
 		void mainLoop() override;
 
 		KeyboardHandler m_keyboardHandler;
+		SoundManager m_soundManager;
 
 #ifdef OM_PROFILER_ENABLED
 		ClientProfiler m_profiler;

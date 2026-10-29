@@ -80,7 +80,9 @@ void ServerWorld::updateItems() {
 							if (delta.length() > 0.6 || !target.sameItem(stack)
 							 || unsigned(target.amount()) + stack.amount() > target.item().maxStackSize()) continue;
 							target.setAmount(target.amount() + stack.amount());
-							registry.get<PhysicalComponent>(other).age = 0;
+							auto &targetBody = registry.get<PhysicalComponent>(other);
+							targetBody.age = 0;
+							targetBody.pickupDelay = std::max(targetBody.pickupDelay, body.pickupDelay);
 							removed.push_back(entity);
 							merged = true;
 							break;

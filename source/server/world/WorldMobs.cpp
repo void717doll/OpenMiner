@@ -8,6 +8,7 @@
 #include "common/scene/component/DrawableDef.hpp"
 #include "common/scene/component/MobComponent.hpp"
 #include "common/scene/component/NetworkComponent.hpp"
+#include "common/scene/component/PhysicalComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
 #include "common/scene/component/RotationComponent.hpp"
 #include "common/world/Dimension.hpp"
@@ -106,13 +107,13 @@ void syncAppearance(entt::registry &registry, entt::entity entity) {
 	}
 }
 
-bool dropItem(ServerWorld &world, Vector3d position, const std::string &id, u16 count, u16 damage = 0) {
-	if (!count || !Registry::getInstance().hasItem(id)) return false;
+entt::entity dropItem(ServerWorld &world, Vector3d position, const std::string &id, u16 count, u16 damage = 0) {
+	if (!count || !Registry::getInstance().hasItem(id)) return entt::null;
 	auto &definitions = Registry::getInstance();
 	entt::entity model = definitions.getEntityFromStringID("default:item_drop");
-	if (model == entt::null) return false;
+	if (model == entt::null) return entt::null;
 	auto &scene = world.scene();
-	if (scene.registry().view<ItemStack>().size() >= 128) return false;
+	if (scene.registry().view<ItemStack>().size() >= 128) return entt::null;
 	entt::entity entity = scene.createEntityFromModel(definitions.entityRegistry(), model);
 	auto &registry = scene.registry();
 	registry.emplace<PositionComponent>(entity, position.x, position.y, position.z + 0.3, world.dimension().id());
@@ -120,7 +121,7 @@ bool dropItem(ServerWorld &world, Vector3d position, const std::string &id, u16 
 	registry.emplace<std::string>(entity, "default:item_drop");
 	registry.emplace<ItemStack>(entity, id, count, damage);
 	if (auto *drawable = registry.try_get<DrawableDef>(entity)) drawable->getInventoryCubeDef().blockID = id;
-	return true;
+	return entity;
 }
 
 struct Shot { Vector3d position, direction; Kind kind; entt::entity shooter; };
@@ -527,7 +528,8 @@ bool ServerWorld::interactMob(ServerPlayer &player) {
 		traits.sheared = true;
 		auto &position = registry.get<PositionComponent>(entity);
 		dropItem(*this, {position.x, position.y, position.z}, "default:wool", u16(2 + nextRandom(mob) % 3));
-		player.inventory().getStackRef(player.heldItemSlot(), 0).wear(1);
+		if (m_server) m_server->wearHeldItem(player, 1);
+		else player.inventory().getStackRef(player.heldItemSlot(), 0).wear(1);
 		handled = true;
 	}
 	else if (traits.kind == Kind::Wolf) {
@@ -548,14 +550,38 @@ bool ServerWorld::interactMob(ServerPlayer &player) {
 }
 
 bool ServerWorld::dropWorldItem(Vector3d position, const std::string &id, u16 count) {
-	return dropItem(*this, position, id, count);
+	return dropItem(*this, position, id, count) != entt::null;
+}
+
+bool ServerWorld::dropHeldItem(ServerPlayer &player) {
+	int slot = player.heldItemSlot();
+	if (!player.isReady() || !player.health() || player.dimension() != m_dimension.id()
+	 || slot < 0 || slot >= 9 || slot >= player.inventory().width()) return false;
+	ItemStack stack = player.heldItemStack();
+	if (!stack.amount() || !stack.item().id()) return false;
+	const Chunk *chunk = getChunkAtBlockPos(int(std::floor(player.x())), int(std::floor(player.y())), int(std::floor(player.z())));
+	if (!chunk || !chunk->isInitialized()) return false;
+	entt::entity entity = dropItem(*this, {player.x(), player.y(), player.z() + 1.025}, stack.stringID(), 1, stack.damage());
+	if (entity == entt::null) return false;
+
+	double yaw = player.cameraYaw() * math::DEG_TO_RAD;
+	double pitch = player.cameraPitch() * math::DEG_TO_RAD;
+	auto &body = m_scene.registry().emplace<PhysicalComponent>(entity);
+	// beta throws at 0.3 blocks per tick; item physics uses blocks per second.
+	body.velocity = {float(std::cos(yaw) * std::cos(pitch) * 6),
+		float(std::sin(yaw) * std::cos(pitch) * 6), float(std::sin(pitch) * 6 + 2)};
+	body.pickupDelay = 40;
+	stack.setAmount(stack.amount() - 1);
+	player.inventory().setItemStack(u16(slot), 0, stack.amount() ? stack : ItemStack::Empty);
+	if (m_server) m_server->sendPlayerInvUpdate(player.clientID());
+	return true;
 }
 
 void ServerWorld::dropPlayerItems(ServerPlayer &player) {
 	for (u16 y = 0; y < player.inventory().height(); ++y) {
 		for (u16 x = 0; x < player.inventory().width(); ++x) {
 			ItemStack stack = player.inventory().getStack(x, y);
-			if (stack.amount() && dropItem(*this, {player.x(), player.y(), player.z()}, stack.item().stringID(), stack.amount(), stack.damage()))
+			if (stack.amount() && dropItem(*this, {player.x(), player.y(), player.z()}, stack.item().stringID(), stack.amount(), stack.damage()) != entt::null)
 				player.inventory().clearStack(x, y);
 		}
 	}
@@ -593,7 +619,8 @@ bool ServerWorld::attackMob(ServerPlayer &player) {
 	if (player.heldItemSlot() >= 0 && player.heldItemSlot() < player.inventory().width()) {
 		auto &tool = player.inventory().getStackRef(player.heldItemSlot(), 0);
 		damage = retro::attackDamage(tool.item());
-		if (tool.wear(retro::attackingWear(tool.item())) && m_server) m_server->sendPlayerInvUpdate(player.clientID());
+		if (m_server) m_server->wearHeldItem(player, retro::attackingWear(tool.item()));
+		else tool.wear(retro::attackingWear(tool.item()));
 	}
 	mob.health = damage >= mob.health ? 0 : mob.health - damage;
 

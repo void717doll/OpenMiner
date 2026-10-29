@@ -49,6 +49,9 @@ class ClientPlayer : public Player {
 		void updatePosition(const ClientWorld &world);
 
 		void clearInputs();
+		void notifyDamage();
+		float hurtEffect() const;
+		u32 damageSerial() const { return m_damageSerial; }
 
 		float dirTargetedX() const { return m_forwardDir.x; }
 		float dirTargetedY() const { return m_forwardDir.y; }
@@ -78,6 +81,8 @@ class ClientPlayer : public Player {
 		Vector3f m_cameraLocalPos;
 
 		Vector3d m_velocity{0, 0, 0};
+		u32 m_hurtUntil = 0;
+		u32 m_damageSerial = 0;
 		Vector3d m_physicsPosition{0, 0, 0};
 		u32 m_lastPhysicsTime = 0;
 		float m_forwardInput = 0;
@@ -85,6 +90,7 @@ class ClientPlayer : public Player {
 		bool m_jumpPressed = false;
 		bool m_isSneaking = false;
 		bool m_onGround = false;
+		double m_stepDistance = 0;
 		u32 m_physicsRemainder = 0;
 		Vector3d m_previousPhysicsPosition{0, 0, 0};
 

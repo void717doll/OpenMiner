@@ -56,6 +56,7 @@ class ServerWorld : public World {
 		bool spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize = 0);
 		bool attackMob(ServerPlayer &player);
 		void dropPlayerItems(ServerPlayer &player);
+		bool dropHeldItem(ServerPlayer &player);
 		bool interactMob(ServerPlayer &player);
 		entt::entity findMobTarget(ServerPlayer &player, double reach);
 

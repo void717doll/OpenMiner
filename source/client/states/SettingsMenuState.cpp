@@ -176,6 +176,11 @@ void SettingsMenuState::addMainButtons() {
 		addDebugButtons();
 	});
 
+	m_menuWidget.addSlider("sound volume: " + std::to_string(int(Config::soundVolume * 100)) + "%", [] (SliderWidget &slider, u32) {
+		Config::soundVolume = float(slider.getCurrentValue()) / 100;
+		slider.setText("sound volume: " + std::to_string(slider.getCurrentValue()) + "%");
+	}, 0, 100, int(Config::soundVolume * 100));
+
 	updateWidgetPosition();
 }
 

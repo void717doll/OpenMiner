@@ -25,6 +25,9 @@
  * =====================================================================================
  */
 #include "client/core/Config.hpp"
+#include "client/core/KeyboardHandler.hpp"
+#include "client/core/input/GamePad.hpp"
+#include "common/core/input/GameKey.hpp"
 #include "client/hud/Hotbar.hpp"
 #include "client/network/ClientCommandHandler.hpp"
 #include "client/world/ClientPlayer.hpp"
@@ -44,18 +47,28 @@ Hotbar::Hotbar(ClientPlayer &player, ClientCommandHandler &client, Widget *paren
 void Hotbar::onEvent(const SDL_Event &event) {
 	if (m_cursorPos == -1) return;
 
+	int slot = m_cursorPos;
+	if (event.type == SDL_KEYDOWN && !event.key.repeat) {
+		auto *keyboard = static_cast<KeyboardHandler *>(GamePad::getInputHandler());
+		for (int i = 0; i < 9; ++i) {
+			if (event.key.keysym.sym == keyboard->getKeycode(GameKey::Hotbar1 + i)) {
+				slot = i;
+				break;
+			}
+		}
+	}
 	if (event.type == SDL_MOUSEWHEEL) {
 		if (event.wheel.y < 0) {
-			m_cursorPos = (m_cursorPos + 1) % 9;
-			m_player.setHeldItemSlot((u8)m_cursorPos);
-			m_client.sendPlayerHeldItemChanged((u8)m_cursorPos, currentItem().id());
+			slot = (m_cursorPos + 1) % 9;
 		}
 		else if (event.wheel.y > 0) {
-			m_cursorPos = (m_cursorPos == 0) ? 8 : m_cursorPos - 1;
-			m_player.setHeldItemSlot((u8)m_cursorPos);
-			m_client.sendPlayerHeldItemChanged((u8)m_cursorPos, currentItem().id());
+			slot = (m_cursorPos == 0) ? 8 : m_cursorPos - 1;
 		}
-
+	}
+	if (slot != m_cursorPos) {
+		m_cursorPos = slot;
+		m_player.setHeldItemSlot((u8)slot);
+		m_client.sendPlayerHeldItemChanged((u8)slot, currentItem().id());
 		m_cursor.setPosition(-1.f + 20.f * (float)m_cursorPos, -1.f);
 	}
 }
@@ -77,10 +90,7 @@ void Hotbar::update() {
 			widget.setPosition(5.f + 20.f * (float)i - 3.f, 2.f);
 		}
 
-		m_items[i].setStack(
-			m_player.inventory().getStack(i, 0).item().stringID(),
-			m_player.inventory().getStack(i, 0).amount()
-		);
+		m_items[i].update();
 	}
 }
 

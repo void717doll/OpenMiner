@@ -59,6 +59,9 @@ namespace Network {
 		PlayerHealth          = 0x3a,
 		PlayerAttack          = 0x3b,
 		PlayerInteract        = 0x3c,
+		PlayerDropItem        = 0x3d,
+		PlayerToolBroken      = 0x3e,
+		PlayerHurt            = 0x3f,
 
 		BlockUpdate           = 0x40,
 		BlockActivated        = 0x41,

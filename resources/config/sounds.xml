@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sounds>
+  <group name="default_hard_footstep">
+    <clip path="resources/sounds/default_hard_footstep.1.wav" />
+    <clip path="resources/sounds/default_hard_footstep.2.wav" />
+    <clip path="resources/sounds/default_hard_footstep.3.wav" />
+  </group>
+  <group name="default_grass_footstep">
+    <clip path="resources/sounds/default_grass_footstep.1.wav" />
+    <clip path="resources/sounds/default_grass_footstep.2.wav" />
+    <clip path="resources/sounds/default_grass_footstep.3.wav" />
+  </group>
+  <group name="default_dirt_footstep">
+    <clip path="resources/sounds/default_dirt_footstep.1.wav" />
+    <clip path="resources/sounds/default_dirt_footstep.2.wav" />
+  </group>
+  <group name="default_wood_footstep">
+    <clip path="resources/sounds/default_wood_footstep.1.wav" />
+    <clip path="resources/sounds/default_wood_footstep.2.wav" />
+  </group>
+  <group name="default_gravel_footstep">
+    <clip path="resources/sounds/default_gravel_footstep.1.wav" />
+    <clip path="resources/sounds/default_gravel_footstep.2.wav" />
+    <clip path="resources/sounds/default_gravel_footstep.3.wav" />
+    <clip path="resources/sounds/default_gravel_footstep.4.wav" />
+  </group>
+  <group name="default_glass_footstep">
+    <clip path="resources/sounds/default_glass_footstep.wav" />
+  </group>
+  <group name="default_sand_footstep">
+    <clip path="resources/sounds/default_sand_footstep.1.wav" />
+    <clip path="resources/sounds/default_sand_footstep.2.wav" />
+    <clip path="resources/sounds/default_sand_footstep.3.wav" />
+  </group>
+  <group name="default_snow_footstep">
+    <clip path="resources/sounds/default_snow_footstep.1.wav" />
+    <clip path="resources/sounds/default_snow_footstep.2.wav" />
+    <clip path="resources/sounds/default_snow_footstep.3.wav" />
+    <clip path="resources/sounds/default_snow_footstep.4.wav" />
+    <clip path="resources/sounds/default_snow_footstep.5.wav" />
+  </group>
+  <group name="default_water_footstep">
+    <clip path="resources/sounds/default_water_footstep.1.wav" />
+    <clip path="resources/sounds/default_water_footstep.2.wav" />
+    <clip path="resources/sounds/default_water_footstep.3.wav" />
+  </group>
+  <group name="default_dig_cracky">
+    <clip path="resources/sounds/default_dig_cracky.1.wav" />
+    <clip path="resources/sounds/default_dig_cracky.2.wav" />
+    <clip path="resources/sounds/default_dig_cracky.3.wav" />
+  </group>
+  <group name="default_dig_choppy">
+    <clip path="resources/sounds/default_dig_choppy.1.wav" />
+    <clip path="resources/sounds/default_dig_choppy.2.wav" />
+    <clip path="resources/sounds/default_dig_choppy.3.wav" />
+  </group>
+  <group name="default_dig_crumbly">
+    <clip path="resources/sounds/default_dig_crumbly.wav" />
+  </group>
+  <group name="default_dig_snappy">
+    <clip path="resources/sounds/default_dig_snappy.wav" />
+  </group>
+  <group name="default_gravel_dig">
+    <clip path="resources/sounds/default_gravel_dig.1.wav" />
+    <clip path="resources/sounds/default_gravel_dig.2.wav" />
+  </group>
+  <group name="default_gravel_dug">
+    <clip path="resources/sounds/default_gravel_dug.1.wav" />
+    <clip path="resources/sounds/default_gravel_dug.2.wav" />
+    <clip path="resources/sounds/default_gravel_dug.3.wav" />
+  </group>
+  <group name="default_place_node">
+    <clip path="resources/sounds/default_place_node.1.wav" />
+    <clip path="resources/sounds/default_place_node.2.wav" />
+    <clip path="resources/sounds/default_place_node.3.wav" />
+  </group>
+  <group name="default_place_node_hard">
+    <clip path="resources/sounds/default_place_node_hard.1.wav" />
+    <clip path="resources/sounds/default_place_node_hard.2.wav" />
+  </group>
+  <group name="default_tool_breaks">
+    <clip path="resources/sounds/default_tool_breaks.1.wav" />
+    <clip path="resources/sounds/default_tool_breaks.2.wav" />
+    <clip path="resources/sounds/default_tool_breaks.3.wav" />
+  </group>
+  <group name="player_damage">
+    <clip path="resources/sounds/player_damage.wav" />
+  </group>
+  <group name="default_dug_node">
+    <clip path="resources/sounds/default_dug_node.1.wav" />
+    <clip path="resources/sounds/default_dug_node.2.wav" />
+  </group>
+  <group name="default_ice_footstep">
+    <clip path="resources/sounds/default_ice_footstep.1.wav" />
+    <clip path="resources/sounds/default_ice_footstep.2.wav" />
+    <clip path="resources/sounds/default_ice_footstep.3.wav" />
+  </group>
+  <group name="default_ice_dig">
+    <clip path="resources/sounds/default_ice_dig.1.wav" />
+    <clip path="resources/sounds/default_ice_dig.2.wav" />
+    <clip path="resources/sounds/default_ice_dig.3.wav" />
+  </group>
+  <group name="default_ice_dug">
+    <clip path="resources/sounds/default_ice_dug.wav" />
+  </group>
+  <group name="default_break_glass">
+    <clip path="resources/sounds/default_break_glass.1.wav" />
+    <clip path="resources/sounds/default_break_glass.2.wav" />
+    <clip path="resources/sounds/default_break_glass.3.wav" />
+  </group>
+</sounds>

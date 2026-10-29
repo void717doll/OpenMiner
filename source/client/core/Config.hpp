@@ -32,6 +32,7 @@
 #include "common/core/IntTypes.hpp"
 
 namespace Config {
+	extern float soundVolume;
 
 	// Interface
 	extern bool isBlockInfoWidgetEnabled;

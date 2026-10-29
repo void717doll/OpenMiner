@@ -48,6 +48,11 @@ KeyboardHandler::KeyboardHandler() {
 	addKey(GameKey::Shift,           "Shift",             SDLK_LSHIFT);
 
 	addKey(GameKey::BlockInfoToggle, "Block info toggle", SDLK_p);
+	addKey(GameKey::Drop, "drop item", SDLK_q, "_Drop");
+	for (int i = 0; i < 9; ++i) {
+		std::string number = std::to_string(i + 1);
+		addKey(GameKey::Hotbar1 + i, "hotbar " + number, SDLK_1 + i, "_Hotbar" + number);
+	}
 }
 
 void KeyboardHandler::loadKeysFromFile(const std::string &filename) {

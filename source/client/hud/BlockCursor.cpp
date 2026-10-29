@@ -36,6 +36,7 @@
 #include "common/core/input/GameKey.hpp"
 #include "common/resource/ResourceHandler.hpp"
 
+#include "client/audio/SoundManager.hpp"
 #include "client/core/Config.hpp"
 #include "client/graphics/Camera.hpp"
 #include "client/graphics/MobModel.hpp"
@@ -175,7 +176,15 @@ void BlockCursor::update(const Hotbar &hotbar) {
 				}
 				timeToBreak = retro::survivalBreakTime(*m_currentBlock, currentStack.item(), submerged, m_player.onGround());
 
+				if (ticks >= m_animationStart && ticks >= m_nextDigSound) {
+					if (auto *sound = SoundManager::instance())
+						sound->playBlock(*m_currentBlock, BlockSound::Dig, {m_selectedBlock.x + 0.5, m_selectedBlock.y + 0.5, m_selectedBlock.z + 0.5});
+					m_nextDigSound = ticks + 200;
+				}
+
 				if ((float)ticks > (float)m_animationStart + timeToBreak * 1000.f) {
+					if (auto *sound = SoundManager::instance())
+						sound->playBlock(*m_currentBlock, BlockSound::Dug, {m_selectedBlock.x + 0.5, m_selectedBlock.y + 0.5, m_selectedBlock.z + 0.5});
 					m_world.setBlock(m_selectedBlock.x, m_selectedBlock.y, m_selectedBlock.z, 0);
 					m_animationStart = ticks + 250;
 
@@ -270,6 +279,8 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 				}
 
 				m_world.setBlock(x, y, z, hotbar.currentItem().id());
+				if (auto *sound = SoundManager::instance())
+					sound->playBlock(newBlock.getState(0), BlockSound::Place, {x + 0.5, y + 0.5, z + 0.5});
 
 				m_client.sendPlayerPlaceBlock(x, y, z, block);
 

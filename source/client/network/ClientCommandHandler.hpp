@@ -56,6 +56,7 @@ class ClientCommandHandler {
 		void sendPlayerReady();
 		void sendPlayerAttack();
 		void sendPlayerInteract();
+		void sendPlayerDropItem();
 		void sendPlayerChunkPosUpdate() const;
 		void sendBlockActivated(const glm::ivec4 &selectedBlock);
 		void sendBlockInvUpdate(Inventory &inventory);
