@@ -215,7 +215,6 @@ mod:crafting_recipe {
 	}
 }
 
-
 -- Gold Axe
 mod:crafting_recipe {
 	result = {
@@ -569,12 +568,6 @@ mod:smelting_recipe {
 
 -- Iron Ingot
 mod:smelting_recipe {
-	input = {id = "default:emerald_ore", amount = 1},
-	output = {id = "default:emerald", amount = 1}
-}
-
--- Iron Ingot
-mod:smelting_recipe {
 	input = {id = "default:gold_ore", amount = 1},
 	output = {id = "default:gold_ingot", amount = 1}
 }
@@ -603,12 +596,6 @@ mod:smelting_recipe {
 	output = {id = "default:glass", amount = 1}
 }
 
--- Glass
-mod:smelting_recipe {
-	input = {id = "default:red_sand", amount = 1},
-	output = {id = "default:glass", amount = 1}
-}
-
 -- Charcoal
 mod:smelting_recipe {
 	input = {id = "default:oak_wood", amount = 1},
@@ -621,58 +608,16 @@ mod:smelting_recipe {
 	output = {id = "default:brick", amount = 1}
 }
 
--- Nether Brick
-mod:smelting_recipe {
-	input = {id = "default:netherrack", amount = 1},
-	output = {id = "default:netherbrick", amount = 1}
-}
-
--- Baked Brick
-mod:smelting_recipe {
-	input = {id = "default:potato", amount = 1},
-	output = {id = "default:potato_baked", amount = 1}
-}
-
--- Cooked Beef
-mod:smelting_recipe {
-	input = {id = "default:beef_raw", amount = 1},
-	output = {id = "default:beef_cooked", amount = 1}
-}
-
 -- Cooked Porkchop
 mod:smelting_recipe {
 	input = {id = "default:porkchop_raw", amount = 1},
 	output = {id = "default:porkchop_cooked", amount = 1}
 }
 
--- Cooked Mutton
-mod:smelting_recipe {
-	input = {id = "default:mutton_raw", amount = 1},
-	output = {id = "default:mutton_cooked", amount = 1}
-}
-
--- Cooked Chicken
-mod:smelting_recipe {
-	input = {id = "default:chicken_raw", amount = 1},
-	output = {id = "default:chicken_cooked", amount = 1}
-}
-
--- Cooked Rabbit
-mod:smelting_recipe {
-	input = {id = "default:rabbit_raw", amount = 1},
-	output = {id = "default:rabbit_cooked", amount = 1}
-}
-
 -- Cooked Cod
 mod:smelting_recipe {
 	input = {id = "default:fish_cod_raw", amount = 1},
 	output = {id = "default:fish_cod_cooked", amount = 1}
-}
-
--- Cooked Salmon
-mod:smelting_recipe {
-	input = {id = "default:fish_salmon_raw", amount = 1},
-	output = {id = "default:fish_salmon_cooked", amount = 1}
 }
 
 -- Bricks
@@ -686,19 +631,6 @@ mod:crafting_recipe {
 		"##"
 	},
 	keys = {["#"] = "default:brick"}
-}
-
--- Stone Bricks
-mod:crafting_recipe {
-	result = {
-		id = "default:stonebrick",
-		amount = 1
-	},
-	pattern = {
-		"##",
-		"##"
-	},
-	keys = {["#"] = "default:stone"}
 }
 
 -- Oak Wood Slabs
@@ -752,59 +684,6 @@ mod:crafting_recipe {
 	keys = {["#"] = "default:sand"}
 }
 
--- Red Sandstone
-mod:crafting_recipe {
-	result = {
-		id = "default:red_sandstone",
-		amount = 1
-	},
-	pattern = {
-		"##",
-		"##"
-	},
-	keys = {["#"] = "default:red_sand"}
-}
-
--- Cut Sandstone
-mod:crafting_recipe {
-	result = {
-		id = "default:sandstone_smooth",
-		amount = 4
-	},
-	pattern = {
-		"##",
-		"##"
-	},
-	keys = {["#"] = "default:sandstone"}
-}
-
--- Cut Red Sandstone
-mod:crafting_recipe {
-	result = {
-		id = "default:red_sandstone_smooth",
-		amount = 4
-	},
-	pattern = {
-		"##",
-		"##"
-	},
-	keys = {["#"] = "default:red_sandstone"}
-}
-
--- Coal Block
-mod:crafting_recipe {
-	result = {
-		id = "default:coal_block",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"###",
-		"###"
-	},
-	keys = {["#"] = "default:coal"}
-}
-
 -- Iron Block
 mod:crafting_recipe {
 	result = {
@@ -847,20 +726,6 @@ mod:crafting_recipe {
 	keys = {["#"] = "default:lapis_lazuli"}
 }
 
--- Redstone Block
-mod:crafting_recipe {
-	result = {
-		id = "default:redstone_block",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"###",
-		"###"
-	},
-	keys = {["#"] = "default:redstone_dust"}
-}
-
 -- Diamond Block
 mod:crafting_recipe {
 	result = {
@@ -873,32 +738,6 @@ mod:crafting_recipe {
 		"###"
 	},
 	keys = {["#"] = "default:diamond"}
-}
-
--- Emerald Block
-mod:crafting_recipe {
-	result = {
-		id = "default:emerald_block",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"###",
-		"###"
-	},
-	keys = {["#"] = "default:emerald"}
-}
-
--- Coal
-mod:crafting_recipe {
-	result = {
-		id = "default:coal",
-		amount = 9
-	},
-	pattern = {
-		"#"
-	},
-	keys = {["#"] = "default:coal_block"}
 }
 
 -- Iron Ingots
@@ -937,18 +776,6 @@ mod:crafting_recipe {
 	keys = {["#"] = "default:lapis_block"}
 }
 
--- Redstone
-mod:crafting_recipe {
-	result = {
-		id = "default:redstone_dust",
-		amount = 9
-	},
-	pattern = {
-		"#"
-	},
-	keys = {["#"] = "default:redstone_block"}
-}
-
 -- Diamonds
 mod:crafting_recipe {
 	result = {
@@ -959,33 +786,6 @@ mod:crafting_recipe {
 		"#"
 	},
 	keys = {["#"] = "default:diamond_block"}
-}
-
--- Emerald
-mod:crafting_recipe {
-	result = {
-		id = "default:emerald",
-		amount = 9
-	},
-	pattern = {
-		"#"
-	},
-	keys = {["#"] = "default:emerald_block"}
-}
-
-
--- End Stone Bricks
-mod:crafting_recipe {
-	result = {
-		id = "default:end_bricks",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"###",
-		"###"
-	},
-	keys = {["#"] = "default:end_stone"}
 }
 
 -- Glowstone
@@ -999,59 +799,6 @@ mod:crafting_recipe {
 		"##"
 	},
 	keys = {["#"] = "default:glowstone_dust"}
-}
-
--- Nether Bricks
-mod:crafting_recipe {
-	result = {
-		id = "default:nether_bricks",
-		amount = 1
-	},
-	pattern = {
-		"##",
-		"##"
-	},
-	keys = {["#"] = "default:netherbrick"}
-}
-
--- Nether Bricks
-mod:crafting_recipe {
-	result = {
-		id = "default:red_nether_brick",
-		amount = 1
-	},
-	pattern = {
-		"N#",
-		"#N"
-	},
-	keys = {["#"] = "default:netherbrick", ["N"] = "default:nether_wart"}
-}
-
--- Redstone Lamp
-mod:crafting_recipe {
-	result = {
-		id = "default:redstone_lamp",
-		amount = 1
-	},
-	pattern = {
-		" # ",
-		"#G#",
-		" # "
-	},
-	keys = {["#"] = "default:redstone_dust", ["G"] = "default:glowstone"}
-}
-
--- Slime Block
-mod:crafting_recipe {
-	result = {
-		id = "default:slime",
-		amount = 1
-	},
-	pattern = {
-		"##",
-		"##"
-	},
-	keys = {["#"] = "default:slime_ball"}
 }
 
 -- Snow Block
@@ -1079,32 +826,6 @@ mod:crafting_recipe {
 		"X"
 	},
 	keys = {["^"] = "default:flint", ["|"] = "default:stick", ["X"] = "default:feather"}
-}
-
--- Beetroot Soup
-mod:crafting_recipe {
-	result = {
-		id = "default:beetroot_soup",
-		amount = 4
-	},
-	pattern = {
-		"###",
-		"###",
-		" B "
-	},
-	keys = {["#"] = "default:beetroot", ["B"] = "default:bowl"}
-}
-
--- Blaze Powder
-mod:crafting_recipe {
-	result = {
-		id = "default:blaze_powder",
-		amount = 2
-	},
-	pattern = {
-		"#"
-	},
-	keys = {["#"] = "default:blaze_rod"}
 }
 
 -- Bone Meal
@@ -1158,20 +879,6 @@ mod:crafting_recipe {
 	keys = {["#"] = "default:iron_ingot"}
 }
 
--- Glistering Melon Slice
-mod:crafting_recipe {
-	result = {
-		id = "default:melon_speckled",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"#M#",
-		"###"
-	},
-	keys = {["#"] = "default:gold_nugget", ["M"] = "default:melon"}
-}
-
 -- Golden Apple
 mod:crafting_recipe {
 	result = {
@@ -1186,84 +893,6 @@ mod:crafting_recipe {
 	keys = {["#"] = "default:gold_ingot", ["A"] = "default:apple"}
 }
 
--- Golden Carrot
-mod:crafting_recipe {
-	result = {
-		id = "default:golden_carrot",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"#C#",
-		"###"
-	},
-	keys = {["#"] = "default:gold_nugget", ["C"] = "default:carrot"}
-}
-
--- Iron Ingot
-mod:crafting_recipe {
-	result = {
-		id = "default:iron_ingot",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"###",
-		"###"
-	},
-	keys = {["#"] = "default:iron_nugget"}
-}
-
--- Gold Ingot
-mod:crafting_recipe {
-	result = {
-		id = "default:gold_ingot",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"###",
-		"###"
-	},
-	keys = {["#"] = "default:gold_nugget"}
-}
-
--- Iron Nuggets
-mod:crafting_recipe {
-	result = {
-		id = "default:iron_nugget",
-		amount = 9
-	},
-	pattern = {
-		"#"
-	},
-	keys = {["#"] = "default:iron_ingot"}
-}
-
--- Gold Nugget
-mod:crafting_recipe {
-	result = {
-		id = "default:gold_nugget",
-		amount = 9
-	},
-	pattern = {
-		"#"
-	},
-	keys = {["#"] = "default:gold_ingot"}
-}
-
--- Magma Cream
-mod:crafting_recipe {
-	result = {
-		id = "default:magma_cream",
-		amount = 1
-	},
-	pattern = {
-		"#@"
-	},
-	keys = {["#"] = "default:blaze_powder", ["@"] = "default:slime_ball"}
-}
-
 -- Magma Cream
 mod:crafting_recipe {
 	result = {
@@ -1273,21 +902,7 @@ mod:crafting_recipe {
 	pattern = {
 		"###"
 	},
-	keys = {["#"] = "default:sugar_cane"}
-}
-
--- Magma Cream
-mod:crafting_recipe {
-	result = {
-		id = "default:hay_block",
-		amount = 1
-	},
-	pattern = {
-		"###",
-		"###",
-		"###"
-	},
-	keys = {["#"] = "default:wheat"}
+	keys = {["#"] = "default:reeds"}
 }
 
 for _, fuel in ipairs({"coal", "charcoal"}) do

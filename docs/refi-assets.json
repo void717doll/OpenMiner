@@ -870,10 +870,10 @@
     },
     {
       "destination": "mods/default/textures/blocks/gravel.png",
-      "source": "textures/default_mcl_core/stone/default_gravel.png",
+      "source": "alternate_textures/texture_alts/default_gravel_alt.png",
       "operation": "copy",
-      "source_sha256": "3f929fb31a92b4d5be16cae6a293205fd31a09cb7f0db3eb22230a03a672286e",
-      "output_sha256": "3f929fb31a92b4d5be16cae6a293205fd31a09cb7f0db3eb22230a03a672286e",
+      "source_sha256": "4d644158dded0851d12e20f3b39a60c376a530487cc887a4f900c5adfc288bd4",
+      "output_sha256": "4d644158dded0851d12e20f3b39a60c376a530487cc887a4f900c5adfc288bd4",
       "source_size": [
         16,
         16
@@ -3846,6 +3846,741 @@
       "output_size": [
         96,
         96
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/tnt_top.png",
+      "source": "alternate_textures/texture_alts/default_tnt_top_alt.png",
+      "operation": "copy",
+      "source_sha256": "10954d8c5361463de44318d15a9aca0d06dee89fac02fe132bbe1b8b47fdc8a4",
+      "output_sha256": "10954d8c5361463de44318d15a9aca0d06dee89fac02fe132bbe1b8b47fdc8a4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/tnt_side.png",
+      "source": "alternate_textures/texture_alts/default_tnt_side_alt.png",
+      "operation": "copy",
+      "source_sha256": "7d7cad4ec9cbf68d4231c147e833a4767392f2e6542e23809b0a3cb703f0c15c",
+      "output_sha256": "7d7cad4ec9cbf68d4231c147e833a4767392f2e6542e23809b0a3cb703f0c15c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/tnt_bottom.png",
+      "source": "alternate_textures/texture_alts/default_tnt_bottom_alt.png",
+      "operation": "copy",
+      "source_sha256": "89590d19122198f01ac3cd3b4edd63d136b1c2bada00bd2178e9cabf981bf7ca",
+      "output_sha256": "89590d19122198f01ac3cd3b4edd63d136b1c2bada00bd2178e9cabf981bf7ca",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/fern.png",
+      "source": "textures/flowers_mcl_flowers/mcl_flowers_fern.png",
+      "operation": "copy",
+      "source_sha256": "c5da5b5be2dfce0fcb662283f3ef91e738ffe0eee85003c26ac7398611b63b72",
+      "output_sha256": "c5da5b5be2dfce0fcb662283f3ef91e738ffe0eee85003c26ac7398611b63b72",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/fern_item.png",
+      "source": "textures/flowers_mcl_flowers/mcl_flowers_fern_inv.png",
+      "operation": "copy",
+      "source_sha256": "7289dc18ef9179e9f801b3a53323f4d5cefba1c22cd6b23c53c5340301f3d431",
+      "output_sha256": "7289dc18ef9179e9f801b3a53323f4d5cefba1c22cd6b23c53c5340301f3d431",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/flint_and_steel.png",
+      "source": "textures/fire_mcl_fire/mcl_fire_flint_and_steel.png",
+      "operation": "copy",
+      "source_sha256": "5d155b1549c6b372c1a9cb607854ed1efb37c90e35366798e87ebbb8fbc34a58",
+      "output_sha256": "5d155b1549c6b372c1a9cb607854ed1efb37c90e35366798e87ebbb8fbc34a58",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/rose.png",
+      "source": "textures/flowers_mcl_flowers/flowers_rose.png",
+      "operation": "copy",
+      "source_sha256": "12142a6a0a103495da3aaedbe91ebae377a68c0e47913f6e97b18b42a25741d9",
+      "output_sha256": "12142a6a0a103495da3aaedbe91ebae377a68c0e47913f6e97b18b42a25741d9",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/mushroom_brown.png",
+      "source": "textures/mcl_mushrooms/farming_mushroom_brown.png",
+      "operation": "copy",
+      "source_sha256": "ed06a86c74f6e4f549c21e25ddc1619af532d606eb6b5080aeb9ca6e60a9918c",
+      "output_sha256": "ed06a86c74f6e4f549c21e25ddc1619af532d606eb6b5080aeb9ca6e60a9918c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/mushroom_red.png",
+      "source": "textures/mcl_mushrooms/farming_mushroom_red.png",
+      "operation": "copy",
+      "source_sha256": "06195fce5016375514949ec006d60d977128ded77c3d587e5de04cda48ba4a43",
+      "output_sha256": "06195fce5016375514949ec006d60d977128ded77c3d587e5de04cda48ba4a43",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/helmet_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_helmet_leather.png",
+      "operation": "copy",
+      "source_sha256": "b96f6e381dfc872e921626070d8e02ec535b2b23f22b448de06c6df8d1c450d6",
+      "output_sha256": "b96f6e381dfc872e921626070d8e02ec535b2b23f22b448de06c6df8d1c450d6",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/helmet_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_helmet_leather.png",
+      "operation": "copy",
+      "source_sha256": "da05c09f607c9330ce273485f23082cfe6bcfad21aecf1aad148c1effd3830ae",
+      "output_sha256": "da05c09f607c9330ce273485f23082cfe6bcfad21aecf1aad148c1effd3830ae",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/chestplate_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_chestplate_leather.png",
+      "operation": "copy",
+      "source_sha256": "6df44f4af7429f17f058e131cdba74c023f261b5adb380d47d0d7c505d06b824",
+      "output_sha256": "6df44f4af7429f17f058e131cdba74c023f261b5adb380d47d0d7c505d06b824",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/chestplate_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_chestplate_leather.png",
+      "operation": "copy",
+      "source_sha256": "f0f760d535260587e070481b096578c75fad5c862655e70c1f9cc698585145bb",
+      "output_sha256": "f0f760d535260587e070481b096578c75fad5c862655e70c1f9cc698585145bb",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/leggings_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_leggings_leather.png",
+      "operation": "copy",
+      "source_sha256": "c216914cfb5abddf9176453eeabb5075821f69e93a868c0aee9a5289e31cf1d4",
+      "output_sha256": "c216914cfb5abddf9176453eeabb5075821f69e93a868c0aee9a5289e31cf1d4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/leggings_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_leggings_leather.png",
+      "operation": "copy",
+      "source_sha256": "d1e09f0a223742cb4710967a6a315f0f2461fa21949f042e30d819a76c059f9b",
+      "output_sha256": "d1e09f0a223742cb4710967a6a315f0f2461fa21949f042e30d819a76c059f9b",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/boots_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_boots_leather.png",
+      "operation": "copy",
+      "source_sha256": "985103fc873e753af57bc1293d227ddea720417ac5784fa26e7edddf6d25af1f",
+      "output_sha256": "985103fc873e753af57bc1293d227ddea720417ac5784fa26e7edddf6d25af1f",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/boots_leather.png",
+      "source": "textures/mcl_armor/mcl_armor_boots_leather.png",
+      "operation": "copy",
+      "source_sha256": "4bda0e1a66629877a80148639181c1f2b147ada5a05730ce195ef661e21c5394",
+      "output_sha256": "4bda0e1a66629877a80148639181c1f2b147ada5a05730ce195ef661e21c5394",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/helmet_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_helmet_chain.png",
+      "operation": "copy",
+      "source_sha256": "22dff968498937fdfe549e18fcdf390b08883626227f4721b622d54dcd8d7cf4",
+      "output_sha256": "22dff968498937fdfe549e18fcdf390b08883626227f4721b622d54dcd8d7cf4",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/helmet_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_helmet_chain.png",
+      "operation": "copy",
+      "source_sha256": "881a2b3e259c5d4eba154051a254ee278d1b8345e3c4e7257782bb9be1c8adaf",
+      "output_sha256": "881a2b3e259c5d4eba154051a254ee278d1b8345e3c4e7257782bb9be1c8adaf",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/chestplate_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_chestplate_chain.png",
+      "operation": "copy",
+      "source_sha256": "4d5c967e80248b07855e756484b4d86c4ee4434b5b57295213881f27af978805",
+      "output_sha256": "4d5c967e80248b07855e756484b4d86c4ee4434b5b57295213881f27af978805",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/chestplate_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_chestplate_chain.png",
+      "operation": "copy",
+      "source_sha256": "e551472cd275417606321b547418b0a4fd4c88f1acf81b8662b79a59e668b638",
+      "output_sha256": "e551472cd275417606321b547418b0a4fd4c88f1acf81b8662b79a59e668b638",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/leggings_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_leggings_chain.png",
+      "operation": "copy",
+      "source_sha256": "6b9f0b6c22721b9cbec439b734dfc6853ec9a4d06e4ff5420cef3fffcbf9a081",
+      "output_sha256": "6b9f0b6c22721b9cbec439b734dfc6853ec9a4d06e4ff5420cef3fffcbf9a081",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/leggings_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_leggings_chain.png",
+      "operation": "copy",
+      "source_sha256": "b29386b38ef0edb9c713185d1a9590a317fb1e55b385be2d8b1003fe9d23f824",
+      "output_sha256": "b29386b38ef0edb9c713185d1a9590a317fb1e55b385be2d8b1003fe9d23f824",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/boots_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_boots_chain.png",
+      "operation": "copy",
+      "source_sha256": "0f6fc7a2d25970d2dc08290809249340ddc2e08dd4ba86c88b77bd510130b573",
+      "output_sha256": "0f6fc7a2d25970d2dc08290809249340ddc2e08dd4ba86c88b77bd510130b573",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/boots_chain.png",
+      "source": "textures/mcl_armor/mcl_armor_boots_chain.png",
+      "operation": "copy",
+      "source_sha256": "2ae8fd41eeba60108319829dcf107e8f0be5b17aae8ae087a0061b34d7297207",
+      "output_sha256": "2ae8fd41eeba60108319829dcf107e8f0be5b17aae8ae087a0061b34d7297207",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/helmet_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_helmet_iron.png",
+      "operation": "copy",
+      "source_sha256": "ac97abadb46f2d74cc1c3d58f245ca7e61cdb0e3c0e94a14c43404cf79b70d69",
+      "output_sha256": "ac97abadb46f2d74cc1c3d58f245ca7e61cdb0e3c0e94a14c43404cf79b70d69",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/helmet_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_helmet_iron.png",
+      "operation": "copy",
+      "source_sha256": "e546b5f0008cc39dcdf7ecfd84ab9c62e1697ee9b3ad9ffb3ff7ea9579cdb186",
+      "output_sha256": "e546b5f0008cc39dcdf7ecfd84ab9c62e1697ee9b3ad9ffb3ff7ea9579cdb186",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/chestplate_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_chestplate_iron.png",
+      "operation": "copy",
+      "source_sha256": "6d192b75d752369e674e2aafbd43a28c63497ddbb5fa2000e7f0b225c0e6e4cc",
+      "output_sha256": "6d192b75d752369e674e2aafbd43a28c63497ddbb5fa2000e7f0b225c0e6e4cc",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/chestplate_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_chestplate_iron.png",
+      "operation": "copy",
+      "source_sha256": "c7b984b1a6a34e1253d4091503da265332026d2da95a5df8555cbc488c566aac",
+      "output_sha256": "c7b984b1a6a34e1253d4091503da265332026d2da95a5df8555cbc488c566aac",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/leggings_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_leggings_iron.png",
+      "operation": "copy",
+      "source_sha256": "45245f06a64afe067a4a6a21b16bd9e0c6284b7bd2587b1763f51b56dc10b795",
+      "output_sha256": "45245f06a64afe067a4a6a21b16bd9e0c6284b7bd2587b1763f51b56dc10b795",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/leggings_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_leggings_iron.png",
+      "operation": "copy",
+      "source_sha256": "09929c8d3555f973e77b554add9afa4a146912cd34959c190c928e6237a688f4",
+      "output_sha256": "09929c8d3555f973e77b554add9afa4a146912cd34959c190c928e6237a688f4",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/boots_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_boots_iron.png",
+      "operation": "copy",
+      "source_sha256": "880d3dd6a53a9de59746803c8768ce6f8ee5d87839b2c0007c3ff74d94b03cfd",
+      "output_sha256": "880d3dd6a53a9de59746803c8768ce6f8ee5d87839b2c0007c3ff74d94b03cfd",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/boots_iron.png",
+      "source": "textures/mcl_armor/mcl_armor_boots_iron.png",
+      "operation": "copy",
+      "source_sha256": "eed5e060289b9e5b0bb332e8ada5eacb03f37167a8dc72f0e0712010076adff3",
+      "output_sha256": "eed5e060289b9e5b0bb332e8ada5eacb03f37167a8dc72f0e0712010076adff3",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/helmet_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_helmet_diamond.png",
+      "operation": "copy",
+      "source_sha256": "43e7d4d002de501ac416a2589ea6e7b9365139001ae94ed4af4d32a64f2e53ea",
+      "output_sha256": "43e7d4d002de501ac416a2589ea6e7b9365139001ae94ed4af4d32a64f2e53ea",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/helmet_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_helmet_diamond.png",
+      "operation": "copy",
+      "source_sha256": "d5c13064091f0dc751f86f2772c2274685bbe01cde2a6df33deac4829e9cc170",
+      "output_sha256": "d5c13064091f0dc751f86f2772c2274685bbe01cde2a6df33deac4829e9cc170",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/chestplate_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_chestplate_diamond.png",
+      "operation": "copy",
+      "source_sha256": "7e73b2b913b127d3f3aa5c972ec3fb13611661f728e44401719332c5d981bf1e",
+      "output_sha256": "7e73b2b913b127d3f3aa5c972ec3fb13611661f728e44401719332c5d981bf1e",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/chestplate_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_chestplate_diamond.png",
+      "operation": "copy",
+      "source_sha256": "70c9c6ef8db1ab70427e5f65460e2a2f2069b6b32acc4de29e98a7bd08b09b29",
+      "output_sha256": "70c9c6ef8db1ab70427e5f65460e2a2f2069b6b32acc4de29e98a7bd08b09b29",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/leggings_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_leggings_diamond.png",
+      "operation": "copy",
+      "source_sha256": "a438f3d96066430e75532185304fc76598dddcf131fd071f39905c654f218303",
+      "output_sha256": "a438f3d96066430e75532185304fc76598dddcf131fd071f39905c654f218303",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/leggings_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_leggings_diamond.png",
+      "operation": "copy",
+      "source_sha256": "35de1f67dc557b801f08fd6be623ee3196202963137977e80e9f15d75bfbbb43",
+      "output_sha256": "35de1f67dc557b801f08fd6be623ee3196202963137977e80e9f15d75bfbbb43",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/boots_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_boots_diamond.png",
+      "operation": "copy",
+      "source_sha256": "1bfe039b72a91b072c7306647253478a4395870a61ae4877ba1bb804e83a8d9c",
+      "output_sha256": "1bfe039b72a91b072c7306647253478a4395870a61ae4877ba1bb804e83a8d9c",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/boots_diamond.png",
+      "source": "textures/mcl_armor/mcl_armor_boots_diamond.png",
+      "operation": "copy",
+      "source_sha256": "6e12b4f3cd7611a3d56be8ed6183696989473ff5586d8089d6cc3c950461707f",
+      "output_sha256": "6e12b4f3cd7611a3d56be8ed6183696989473ff5586d8089d6cc3c950461707f",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/helmet_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_helmet_gold.png",
+      "operation": "copy",
+      "source_sha256": "1af98ec8a3fd8e8a8daeb407d75473b6db065e9ec529be7d0dbb62ff1ae8fe51",
+      "output_sha256": "1af98ec8a3fd8e8a8daeb407d75473b6db065e9ec529be7d0dbb62ff1ae8fe51",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/helmet_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_helmet_gold.png",
+      "operation": "copy",
+      "source_sha256": "91530cba88db826a592a152491dc7972977bf01372ba776cead7b4894ebb9da9",
+      "output_sha256": "91530cba88db826a592a152491dc7972977bf01372ba776cead7b4894ebb9da9",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/chestplate_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_chestplate_gold.png",
+      "operation": "copy",
+      "source_sha256": "f80f4454d1a19ec315787f5e3c9ef4e1690f680b4c0d0f070aaa21f101b6cb19",
+      "output_sha256": "f80f4454d1a19ec315787f5e3c9ef4e1690f680b4c0d0f070aaa21f101b6cb19",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/chestplate_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_chestplate_gold.png",
+      "operation": "copy",
+      "source_sha256": "7c6cae034dc9dff3ca567f141bd4a2250cd9b8751c85ccf77c97bd01c5afeba7",
+      "output_sha256": "7c6cae034dc9dff3ca567f141bd4a2250cd9b8751c85ccf77c97bd01c5afeba7",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/leggings_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_leggings_gold.png",
+      "operation": "copy",
+      "source_sha256": "09f55e61a32f1132390d3afeef5e1e000d4c417cae93925d6ca2b136e1903318",
+      "output_sha256": "09f55e61a32f1132390d3afeef5e1e000d4c417cae93925d6ca2b136e1903318",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/leggings_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_leggings_gold.png",
+      "operation": "copy",
+      "source_sha256": "4cad5bcee38103bcea877e8e466b1b9d5560f4d7a9e450348b26e0e9957f756f",
+      "output_sha256": "4cad5bcee38103bcea877e8e466b1b9d5560f4d7a9e450348b26e0e9957f756f",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
+      ]
+    },
+    {
+      "destination": "mods/default/textures/items/boots_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_inv_boots_gold.png",
+      "operation": "copy",
+      "source_sha256": "728a6a5d4ff4688d4b8a90166ee0d60276ee23aa49fbb0dfe167e9792a4b8b9a",
+      "output_sha256": "728a6a5d4ff4688d4b8a90166ee0d60276ee23aa49fbb0dfe167e9792a4b8b9a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/armor/boots_gold.png",
+      "source": "textures/mcl_armor/mcl_armor_boots_gold.png",
+      "operation": "copy",
+      "source_sha256": "a8c5c507a1f691d4debea254fbe71ed600dde6fad1e342314a240df689fed1d4",
+      "output_sha256": "a8c5c507a1f691d4debea254fbe71ed600dde6fad1e342314a240df689fed1d4",
+      "source_size": [
+        64,
+        32
+      ],
+      "output_size": [
+        64,
+        32
       ]
     }
   ],

@@ -158,7 +158,7 @@ void ServerCommandHandler::sendPlayerInvUpdate(u16 clientID, const ClientInfo *c
 	if (player) {
 		Network::Packet packet;
 		packet << Network::Command::PlayerInvUpdate;
-		packet << clientID << player->inventory() << player->heldItemSlot();
+		packet << clientID << player->inventory() << player->heldItemSlot() << player->armor();
 
 		if (!client)
 			m_server.sendToAllClients(packet);
@@ -230,6 +230,11 @@ void ServerCommandHandler::damagePlayer(u16 clientID, u16 amount) {
 	if (!player) return;
 	amount = player->survival().filterDamage(amount);
 	if (!amount) return;
+	amount = player->absorbDamage(amount);
+	if (player->armor().hasChanged()) {
+		sendPlayerInvUpdate(clientID);
+		player->armor().setChanged(false);
+	}
 	player->damage(amount);
 	Network::Packet hurt;
 	hurt << Network::Command::PlayerHurt;
@@ -377,7 +382,18 @@ void ServerCommandHandler::setupCallbacks() {
 	m_server.setCommandCallback(Network::Command::PlayerInvUpdate, [this](ClientInfo &client, Network::Packet &packet) {
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
 		if (player) {
-			packet >> player->inventory();
+			Inventory inventory, armor;
+			if (!(packet >> inventory >> armor) || inventory.width() != 9 || inventory.height() != 4
+			 || armor.width() != 1 || armor.height() != 4) return;
+			for (u16 slot = 0; slot < 4; ++slot) {
+				const auto &stack = armor.getStack(0, slot);
+				if (stack.amount() && (stack.amount() != 1 || stack.item().getGroupValue("group:om_armor_slot") != slot + 1)) {
+					sendPlayerInvUpdate(client.id, &client);
+					return;
+				}
+			}
+			player->inventory() = std::move(inventory);
+			player->armor() = std::move(armor);
 		}
 		else
 			logError() << ("Failed to update inventory of player " + std::to_string(client.id) + ": Player not found").c_str();
@@ -424,7 +440,7 @@ void ServerCommandHandler::setupCallbacks() {
 			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width())
 				stack = player->heldItemStack();
 			bool valid = packet && previous && canReachBlock(world, *player, x, y, z) && id > 0 && id < blocks.size()
-				&& stack.amount() > 0 && stack.item().isBlock() && stack.item().id() == id;
+				&& stack.amount() > 0 && stack.item().isBlock() && stack.stringID() == blocks[id]->stringID();
 			if (valid) {
 				const Block &definition = *blocks[id];
 				u16 data = u16(block >> 16);

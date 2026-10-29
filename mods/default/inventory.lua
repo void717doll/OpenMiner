@@ -48,11 +48,22 @@ mod:key {
 
 		gui:image {
 			name = "img_crafting_arrow",
-			pos = {x = 86, y = 35},
+			pos = {x = 129, y = 35},
 			texture = modpath .. "/textures/gui/workbench.png",
 			clip = {x = 468, y = 158, width = 73, height = 58},
-			size = {x = 22, y = 17},
+			size = {x = 18, y = 17},
 		}
+
+		for slot, piece in ipairs({"helmet", "chestplate", "leggings", "boots"}) do
+			gui:inventory {
+				name = "armor_" .. piece,
+				pos = {x = 7, y = 7 + (slot - 1) * 18},
+				inventory = {source = "player", player = "player", inventory_name = "armor", offset = slot - 1, count = 1},
+				size = {x = 1, y = 1},
+				filter = "group:om_armor_" .. piece,
+				shift_destination = "inv_main,inv_hotbar",
+			}
+		end
 
 		gui:inventory {
 			name = "inv_main",
@@ -68,7 +79,7 @@ mod:key {
 
 			size = {x = 9, y = 3},
 
-			shift_destination = "inv_hotbar,inv_main",
+			shift_destination = "armor_helmet,armor_chestplate,armor_leggings,armor_boots,inv_hotbar,inv_main",
 		}
 
 		gui:inventory {
@@ -85,13 +96,13 @@ mod:key {
 
 			size = {x = 9, y = 1},
 
-			shift_destination = "inv_main,inv_hotbar",
+			shift_destination = "armor_helmet,armor_chestplate,armor_leggings,armor_boots,inv_main,inv_hotbar",
 		}
 
 		gui:crafting {
 			name = "inv_crafting",
-			pos = {x = 43, y = 25},
-			result_pos = {x = 115, y = 34},
+			pos = {x = 91, y = 25},
+			result_pos = {x = 151, y = 34},
 
 			inventory = {
 				source = "temp",

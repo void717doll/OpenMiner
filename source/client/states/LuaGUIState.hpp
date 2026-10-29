@@ -33,6 +33,7 @@
 #include "client/gui/CraftingWidget.hpp"
 #include "client/gui/InventoryWidget.hpp"
 #include "client/gui/MouseItemWidget.hpp"
+#include "client/graphics/PlayerModel.hpp"
 #include "client/gui/TextInput.hpp"
 #include "client/states/InterfaceState.hpp"
 
@@ -84,6 +85,7 @@ class LuaGUIState : public InterfaceState {
 
 		ClientPlayer &m_player;
 		ClientWorld &m_world;
+		std::unique_ptr<PlayerModel> m_playerPreview;
 
 		u16 m_width = 0;
 		u16 m_height = 0;

@@ -47,6 +47,7 @@ class Inventory : public ISerializable {
 		ItemStack addStack(const std::string &stringID, u16 amount = 1, u16 offset = 0, u16 size = 0, bool mergeOnly = false, bool retryAfterMerge = false);
 		ItemStack addStack2(const std::string &stringID, u16 amount = 1); // Needed for Lua
 		void clearStack(u16 x, u16 y);
+		std::vector<ItemStack> normalizeStacks();
 
 		void serialize(sf::Packet &packet) const override;
 		void deserialize(sf::Packet &packet) override;

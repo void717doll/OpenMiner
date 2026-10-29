@@ -96,12 +96,6 @@ mod:item {
 }
 
 mod:item {
-	id = "netherbrick",
-	name = "Nether Brick",
-	tiles = "netherbrick.png",
-}
-
-mod:item {
 	id = "snowball",
 	name = "Snowball",
 	tiles = "snowball.png",
@@ -134,36 +128,6 @@ mod:item {
 }
 
 mod:item {
-	id = "melon",
-	name = "Melon Slice",
-	tiles = "melon.png",
-}
-
-mod:item {
-	id = "melon_speckled",
-	name = "Glistering Melon Slice",
-	tiles = "melon_speckled.png",
-}
-
-mod:item {
-	id = "magma_cream",
-	name = "Magma Cream",
-	tiles = "magma_cream.png",
-}
-
-mod:item {
-	id = "iron_nugget",
-	name = "Iron Nugget",
-	tiles = "iron_nugget.png",
-}
-
-mod:item {
-	id = "gold_nugget",
-	name = "Gold Nugget",
-	tiles = "gold_nugget.png",
-}
-
-mod:item {
 	id = "paper",
 	name = "Paper",
 	tiles = "paper.png",
@@ -176,27 +140,9 @@ mod:item {
 }
 
 mod:item {
-	id = "spider_eye",
-	name = "Spider Eye",
-	tiles = "spider_eye.png",
-}
-
-mod:item {
 	id = "redstone_dust",
 	name = "Redstone Dust",
 	tiles = "redstone_dust.png",
-}
-
-mod:item {
-	id = "fish_pufferfish_raw",
-	name = "Pufferfish",
-	tiles = "fish_pufferfish_raw.png",
-}
-
-mod:item {
-	id = "emerald",
-	name = "Emerald",
-	tiles = "emerald.png",
 }
 
 mod:item {
@@ -219,16 +165,9 @@ mod:item {
 
 mod:item {
 	id = "cookie",
-	max_stack_size = 8,
 	heal_amount = 1,
 	name = "Cookie",
 	tiles = "cookie.png",
-}
-
-mod:item {
-	id = "carrot",
-	name = "Carrot",
-	tiles = "carrot.png",
 }
 
 mod:item {
@@ -244,81 +183,15 @@ mod:item {
 }
 
 mod:item {
-	id = "blaze_rod",
-	name = "Blaze Rod",
-	tiles = "blaze_rod.png",
-}
-
-mod:item {
-	id = "blaze_powder",
-	name = "Blaze Powder",
-	tiles = "blaze_powder.png",
-}
-
-mod:item {
 	id = "bowl",
 	name = "Bowl",
 	tiles = "bowl.png",
 }
 
 mod:item {
-	id = "beetroot_seeds",
-	name = "Beetroot Seeds",
-	tiles = "beetroot_seeds.png",
-}
-
-mod:item {
-	id = "beetroot",
-	name = "Beetroot",
-	tiles = "beetroot.png",
-}
-
-mod:item {
-	id = "beetroot_soup",
-	name = "Beetroot Soup",
-	tiles = "beetroot_soup.png",
-}
-
-mod:item {
 	id = "arrow",
 	name = "Arrow",
 	tiles = "arrow.png",
-}
-
-mod:item {
-	id = "rotten_flesh",
-	name = "Rotten Flesh",
-	tiles = "rotten_flesh.png",
-}
-
-mod:item {
-	id = "seeds_pumpkin",
-	name = "Pumpkin Seeds",
-	tiles = "seeds_pumpkin.png",
-}
-
-mod:item {
-	id = "seeds_melon",
-	name = "Melon Seeds",
-	tiles = "seeds_melon.png",
-}
-
-mod:item {
-	id = "pumpkin_pie",
-	name = "Pumpkin Pie",
-	tiles = "pumpkin_pie.png",
-}
-
-mod:item {
-	id = "mutton_raw",
-	name = "Mutton",
-	tiles = "mutton_raw.png",
-}
-
-mod:item {
-	id = "mutton_cooked",
-	name = "Cooked Mutton",
-	tiles = "mutton_cooked.png",
 }
 
 mod:item {
@@ -336,70 +209,16 @@ mod:item {
 }
 
 mod:item {
-	id = "rabbit_raw",
-	name = "Rabbit",
-	tiles = "rabbit_raw.png",
-}
-
-mod:item {
-	id = "rabbit_cooked",
-	name = "Cooked Rabbit",
-	tiles = "rabbit_cooked.png",
-}
-
-mod:item {
-	id = "chicken_raw",
-	name = "Chicken",
-	tiles = "chicken_raw.png",
-}
-
-mod:item {
-	id = "chicken_cooked",
-	name = "Cooked Chicken",
-	tiles = "chicken_cooked.png",
-}
-
-mod:item {
-	id = "fish_clownfish_raw",
-	name = "Salmon",
-	tiles = "fish_clownfish_raw.png",
-}
-
-mod:item {
-	id = "fish_salmon_raw",
-	name = "Salmon",
-	tiles = "fish_salmon_raw.png",
-}
-
-mod:item {
-	id = "fish_salmon_cooked",
-	name = "Cooked Salmon",
-	tiles = "fish_salmon_cooked.png",
-}
-
-mod:item {
-	id = "beef_raw",
-	name = "Beef",
-	tiles = "beef_raw.png",
-}
-
-mod:item {
-	id = "beef_cooked",
-	name = "Cooked Beef",
-	tiles = "beef_cooked.png",
-}
-
-mod:item {
 	id = "fish_cod_raw",
 	heal_amount = 2,
-	name = "Cod",
+	name = "Raw Fish",
 	tiles = "fish_cod_raw.png",
 }
 
 mod:item {
 	id = "fish_cod_cooked",
 	heal_amount = 5,
-	name = "Cooked Cod",
+	name = "Cooked Fish",
 	tiles = "fish_cod_cooked.png",
 }
 
@@ -416,39 +235,9 @@ mod:item {
 }
 
 mod:item {
-	id = "potato_poisonous",
-	name = "Poisonous Potato",
-	tiles = "potato_poisonous.png",
-}
-
-mod:item {
-	id = "potato_baked",
-	name = "Baked Potato",
-	tiles = "potato_baked.png",
-}
-
-mod:item {
-	id = "potato",
-	name = "Potato",
-	tiles = "potato.png",
-}
-
-mod:item {
 	id = "feather",
 	name = "Feather",
 	tiles = "feather.png",
-}
-
-mod:item {
-	id = "spider_eye_fermented",
-	name = "Fermented Spider Eye",
-	tiles = "spider_eye_fermented.png",
-}
-
-mod:item {
-	id = "golden_carrot",
-	name = "Golden Carrot",
-	tiles = "golden_carrot.png",
 }
 
 mod:item {
@@ -473,24 +262,6 @@ mod:item {
 	id = "bucket_milk",
 	name = "Milk Bucket",
 	tiles = "bucket_milk.png",
-}
-
-mod:item {
-	id = "rabbit_foot",
-	name = "Rabbit Foot",
-	tiles = "rabbit_foot.png",
-}
-
-mod:item {
-	id = "rabbit_hide",
-	name = "Rabbit Hide",
-	tiles = "rabbit_hide.png",
-}
-
-mod:item {
-	id = "rabbit_stew",
-	name = "Rabbit Stew",
-	tiles = "rabbit_stew.png",
 }
 
 mod:item {

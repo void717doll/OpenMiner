@@ -265,12 +265,12 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 		// First, we check if the new block is not replacing another block
 		if (blockState && (!blockState->block().id() || blockState->drawType() == BlockDrawType::Liquid || blockState->drawType() == BlockDrawType::XShape)) {
 			// Second, we check if the new block is not inside the player
-			const Block &newBlock = Registry::getInstance().getBlock(hotbar.currentItem().id());
+			const Block &newBlock = Registry::getInstance().getBlockFromStringID(hotbar.currentItem().stringID());
 			const BlockState &newBlockState = newBlock.getState(0); // FIXME: Get state from item stack
 			FloatBox boundingBox = newBlockState.boundingBox() + Vector3f(float(x - m_player.x()), float(y - m_player.y()), float(z - m_player.z()));
 			FloatBox playerBoundingBox = m_player.hitbox();
 			if (!boundingBox.intersects(playerBoundingBox) && newBlock.placementConstraints().check(m_world, {x, y, z})) {
-				u32 block = hotbar.currentItem().id();
+				u32 block = newBlock.id();
 				if (newBlock.isRotatable()) {
 					u16 data = m_player.getOppositeDirection() & 0x3;
 					m_world.setData(x, y, z, data);
@@ -278,7 +278,7 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 					block |= data << 16;
 				}
 
-				m_world.setBlock(x, y, z, hotbar.currentItem().id());
+				m_world.setBlock(x, y, z, newBlock.id());
 				if (auto *sound = SoundManager::instance())
 					sound->playBlock(newBlock.getState(0), BlockSound::Place, {x + 0.5, y + 0.5, z + 0.5});
 

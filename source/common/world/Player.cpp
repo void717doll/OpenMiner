@@ -31,6 +31,27 @@ Player::Player() {
 	m_hitbox = FloatBox{-0.3f, -0.3f, 0, 0.6f, 0.6f, 1.8f};
 }
 
+u16 Player::armorValue() const {
+	unsigned protection = 0, maximum = 0, remaining = 0;
+	for (const auto &stack : m_armor.items()) {
+		if (!stack.amount()) continue;
+		u16 durability = stack.maxDamage();
+		protection += stack.item().getGroupValue("group:om_armor_points");
+		maximum += durability;
+		remaining += durability > stack.damage() ? durability - stack.damage() : 0;
+	}
+	return maximum && protection ? u16((protection - 1) * remaining / maximum + 1) : 0;
+}
+
+u16 Player::absorbDamage(u16 amount) {
+	unsigned reduced = unsigned(amount) * (25 - std::min<u16>(20, armorValue())) + m_armorRemainder;
+	for (u16 slot = 0; slot < 4; ++slot) {
+		if (m_armor.getStackRef(0, slot).wear(amount)) m_armor.setChanged(true);
+	}
+	m_armorRemainder = u16(reduced % 25);
+	return u16(reduced / 25);
+}
+
 // Note: This function returns an angle4
 u8 Player::getDirection() const {
 	return int(floorf(m_viewAngleH / 90.f + 0.5f)) & 3;

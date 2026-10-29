@@ -45,3 +45,5 @@ dofile("item_drop.lua")
 
 
 dofile("mobs.lua")
+dofile("tnt.lua")
+dofile("armor.lua")

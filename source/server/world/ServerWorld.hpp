@@ -50,7 +50,10 @@ class ServerWorld : public World {
 		BlockPhysics &blockPhysics() { return m_blockPhysics; }
 		void updateMobs();
 		void updateItems();
-		bool dropWorldItem(Vector3d position, const std::string &id, u16 count = 1);
+		void updateTnt();
+		bool primeTnt(const Vector3i &position, u16 fuse = 80);
+		void explodeAt(const Vector3d &position, float strength, u32 seed, const std::string &source);
+		bool dropWorldItem(Vector3d position, const std::string &id, u16 count = 1, u16 damage = 0, bool limited = true);
 		void updatePlayerSurvival();
 		bool moveSurvivalPlayer(ServerPlayer &player, double x, double y, double z);
 		bool spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize = 0);

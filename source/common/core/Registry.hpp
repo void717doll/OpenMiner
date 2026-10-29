@@ -47,6 +47,15 @@
 class Registry : public ISerializable {
 	public:
 		template<typename T>
+		void reserveBlockID() {
+			// old saves store numeric block ids; removed blocks leave an air slot.
+			auto block = std::make_unique<T>(0, BLOCK_AIR);
+			block->getState(0) = getBlock(0).getState(0);
+			block->getState(0).setBlock(block.get());
+			m_blocks.emplace_back(std::move(block));
+		}
+
+		template<typename T>
 		auto registerBlock(const std::string &stringID) -> typename std::enable_if<std::is_base_of<Block, T>::value, T&>::type {
 			u16 id = (u16)m_blocks.size();
 			m_blocksID.emplace(stringID, id);

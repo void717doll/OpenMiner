@@ -192,13 +192,7 @@ mod:block {
 	draw_type = "xshape",
 }
 
-mod:block {
-	id = "stonebrick",
-	name = "Stone Bricks",
-	tiles = "stonebrick.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- stonebrick
 
 mod:block {
 	id = "bricks",
@@ -312,18 +306,7 @@ mod:block {
 	hardness = 0,
 }
 
-mod:block {
-	id = "debug",
-	name = "Debug",
-	tiles = {
-		"debug/f.png",
-		"debug/g.png",
-		"debug/j.png",
-		"debug/l.png",
-		"debug/p.png",
-		"debug/r.png",
-	},
-}
+mod:reserve_block_id() -- debug
 
 mod:block {
 	id = "obsidian",
@@ -350,23 +333,7 @@ mod:block {
 	end,
 }
 
-mod:block {
-	id = "redstone_lamp",
-	name = "Redstone Lamp",
-	tiles = "redstone_lamp_off.png",
-	groups = {
-		om_material_stone = 1
-	},
-
-	states = {
-		{ is_light_source = true, tiles = "redstone_lamp_on.png" }
-	},
-
-	on_block_activated = function(pos, block, player, world, client, server)
-		local next_state = math.abs(world:get_block_state(pos.x, pos.y, pos.z):id() - 1)
-		world:set_block_state(pos.x, pos.y, pos.z, next_state)
-	end
-}
+mod:reserve_block_id() -- redstone_lamp
 
 mod:block {
 	id = "farmland",
@@ -386,70 +353,13 @@ mod:block {
 	bounding_box = {0, 0, 0, 1, 1, 15 / 16},
 }
 
-mod:block {
-	id = "grass_path",
-	name = "Grass Path",
-	tiles = {"grass_path_top.png", "dirt.png", "grass_path_side.png"},
-	is_opaque = false,
-	groups = {
-		om_material_dirt = 1,
-	},
+mod:reserve_block_id() -- grass_path
 
-	draw_type = "boundingbox",
-	bounding_box = {0, 0, 0, 1, 1, 15 / 16},
-}
-
-mod:block {
-	id = "nether_wart",
-	name = "Nether Wart",
-	tiles = "nether_wart_stage_0.png",
-	draw_type = "xshape",
-	inventory_image = "nether_wart.png",
-	hardness = 0,
-
-	placement_constraints = {
-		[{0, 0, -1}] = {
-			block = "default:soul_sand",
-			is_whitelist = true
-		}
-	},
-
-	bounding_box = {0, 0, 0, 1, 1, 4.0 / 16.0},
-	draw_offset = {0, 0, -1.0 / 16.0},
-
-	states = {
-		{ tiles = "nether_wart_stage_1.png", bounding_box = {0, 0, 0, 1, 1, 8.0 / 16.0}, },  -- 1
-		{ tiles = "nether_wart_stage_2.png", bounding_box = {0, 0, 0, 1, 1, 12.0 / 16.0}, },  -- 2
-	},
-
-	tick_randomly = true,
-	tick_probability = 0.01,
-
-	on_tick = function(pos, block, chunk, world)
-		local block_param = world:get_data(pos.x, pos.y, pos.z)
-		local current_state = block:param():get_param(BlockParamType.State, block_param)
-		if current_state < 2 then
-			world:set_data(pos.x, pos.y, pos.z, current_state + 1)
-		end
-	end,
-
-	on_block_activated = function(pos, block, player, world, client, server)
-		local block_param = world:get_data(pos.x, pos.y, pos.z)
-		local current_state = block:param():get_param(BlockParamType.State, block_param)
-		if current_state >= 2 then
-			world:set_data(pos.x, pos.y, pos.z,
-				block:param():set_param(BlockParamType.State, block_param, 0))
-
-			-- FIXME: It should drop the item if 'default:use_item_drops' is enabled
-			local item_stack = ItemStack.new("default:nether_wart", 1)
-			mods["default"]:give_item_stack(player, item_stack)
-		end
-	end
-}
+mod:reserve_block_id() -- nether_wart
 
 mod:block {
 	id = "seeds",
-	name = "Seeds (WIP)",
+	name = "Seeds",
 	tiles = "wheat_stage_0.png",
 	draw_type = "xshape",
 	inventory_image = "seeds_wheat.png",
@@ -519,29 +429,11 @@ mod:block {
 	hardness = 0
 }
 
-mod:block {
-	id = "stone_andesite",
-	name = "Andesite",
-	tiles = "stone_andesite.png",
-	hardness = 1.5,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- stone_andesite
 
-mod:block {
-	id = "stone_granite",
-	name = "Granite",
-	tiles = "stone_granite.png",
-	hardness = 1.5,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- stone_granite
 
-mod:block {
-	id = "stone_diorite",
-	name = "Diorite",
-	tiles = "stone_diorite.png",
-	hardness = 1.5,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- stone_diorite
 
 mod:block {
 	id = "ice",
@@ -567,29 +459,11 @@ mod:block {
 	tiles = {"oak_planks.png", "oak_planks.png", "bookshelf.png"},
 }
 
-mod:block {
-	id = "stonebrick_mossy",
-	name = "Mossy Stone Bricks",
-	tiles = "stonebrick_mossy.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- stonebrick_mossy
 
-mod:block {
-	id = "stonebrick_cracked",
-	name = "Cracked Stone Bricks",
-	tiles = "stonebrick_cracked.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- stonebrick_cracked
 
-mod:block {
-	id = "stonebrick_carved",
-	name = "Carved Stone Bricks",
-	tiles = "stonebrick_carved.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- stonebrick_carved
 
 mod:block {
 	id = "cobblestone_mossy",
@@ -599,13 +473,7 @@ mod:block {
 	harvest_requirements = Capability.Pickaxe,
 }
 
-mod:block {
-	id = "coal_block",
-	name = "Coal Block",
-	tiles = "coal_block.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- coal_block
 
 mod:block {
 	id = "diamond_block",
@@ -639,29 +507,11 @@ mod:block {
 	harvest_requirements = Capability.Pickaxe,
 }
 
-mod:block {
-	id = "redstone_block",
-	name = "Redstone Block",
-	tiles = "redstone_block.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- redstone_block
 
-mod:block {
-	id = "emerald_block",
-	name = "Emerald Block",
-	tiles = "emerald_block.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- emerald_block
 
-mod:block {
-	id = "emerald_ore",
-	name = "Emerald Ore",
-	tiles = "emerald_ore.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- emerald_ore
 
 mod:block {
 	id = "gold_ore",
@@ -695,45 +545,15 @@ mod:block {
 	harvest_requirements = Capability.Pickaxe,
 }
 
-mod:block {
-	id = "red_sandstone_smooth",
-	name = "Smooth Red Sandstone",
-	tiles = "red_sandstone_smooth.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- red_sandstone_smooth
 
-mod:block {
-	id = "sandstone_smooth",
-	name = "Smooth Sandstone",
-	tiles = "sandstone_smooth.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- sandstone_smooth
 
-mod:block {
-	id = "red_sandstone_carved",
-	name = "Carved Red Sandstone",
-	tiles = "red_sandstone_carved.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- red_sandstone_carved
 
-mod:block {
-	id = "sandstone_carved",
-	name = "Carved Sandstone",
-	tiles = "sandstone_carved.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- sandstone_carved
 
-mod:block {
-	id = "red_sandstone",
-	name = "Red Sandstone",
-	tiles = {"red_sandstone_top.png", "red_sandstone_bottom.png", "red_sandstone_normal.png"},
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- red_sandstone
 
 mod:block {
 	id = "sandstone",
@@ -743,58 +563,19 @@ mod:block {
 	harvest_requirements = Capability.Pickaxe,
 }
 
-mod:block {
-	id = "red_sand",
-	name = "Red Sand",
-	tiles = "red_sand.png",
-}
+mod:reserve_block_id() -- red_sand
 
-mod:block {
-	id = "slime",
-	name = "Slime Block",
-	tiles = "slime.png",
-	draw_type = "glass",
-}
+mod:reserve_block_id() -- slime
 
-mod:block {
-	id = "nether_bricks",
-	name = "Nether Bricks",
-	tiles = "nether_bricks.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- nether_bricks
 
-mod:block {
-	id = "red_nether_brick",
-	name = "Red Nether Bricks",
-	tiles = "red_nether_brick.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- red_nether_brick
 
-mod:block {
-	id = "end_stone",
-	name = "End Stone",
-	tiles = "end_stone.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- end_stone
 
-mod:block {
-	id = "end_bricks",
-	name = "End Stone Bricks",
-	tiles = "end_bricks.png",
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- end_bricks
 
-mod:block {
-	id = "hay_block",
-	name = "Hay Bale",
-	tiles = {"hay_block_top.png", "hay_block_top.png", "hay_block_side.png"},
-	hardness = 2,
-	harvest_requirements = Capability.Pickaxe,
-}
+mod:reserve_block_id() -- hay_block
 
 dofile("blocks/workbench.lua")
 dofile("blocks/furnace.lua")
@@ -841,3 +622,5 @@ for _, liquid in ipairs({{"water", "Water", {51, 115, 255, 217}, 20, {0, 128, 25
 		groups = {liquid_range = 8, liquid_viscosity = liquid[6]},
 	}
 end
+
+dofile("blocks/plants.lua")

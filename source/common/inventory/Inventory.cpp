@@ -74,6 +74,28 @@ void Inventory::clearStack(u16 x, u16 y) {
 	setStack(x, y, BLOCK_AIR, 0);
 }
 
+std::vector<ItemStack> Inventory::normalizeStacks() {
+	std::vector<ItemStack> excess;
+	for (auto &stack : m_items) {
+		if (!Registry::getInstance().hasItem(stack.stringID())) {
+			stack = ItemStack::Empty;
+			m_hasChanged = true;
+			continue;
+		}
+		u16 maximum = stack.item().maxStackSize();
+		if (stack.amount() <= maximum) continue;
+		excess.emplace_back(stack.stringID(), u16(stack.amount() - maximum), stack.damage());
+		stack.setAmount(maximum);
+		m_hasChanged = true;
+	}
+	std::vector<ItemStack> remaining;
+	for (const auto &stack : excess) {
+		ItemStack rest = addItemStack(stack, 0, 0, true, true);
+		if (rest.amount()) remaining.push_back(rest);
+	}
+	return remaining;
+}
+
 void Inventory::serialize(sf::Packet &packet) const {
 	packet << m_width << m_height << m_name << u8(m_inBlock)
 		<< s32(m_blockPos.x) << s32(m_blockPos.y) << s32(m_blockPos.z)
@@ -100,6 +122,7 @@ void Inventory::deserialize(sf::Packet &packet) {
 
 	if (m_items.size() != m_width * m_height)
 		m_items.resize(m_width * m_height);
+	std::fill(m_items.begin(), m_items.end(), ItemStack::Empty);
 
 	u16 itemListSize, i = 0;
 	packet >> itemListSize;

@@ -33,7 +33,7 @@
 
 namespace fs = ghc::filesystem;
 
-u16 ServerConfig::maxItemStackSize = 64;
+u16 ServerConfig::maxItemStackSize = 99;
 
 u8 ServerConfig::renderDistance = 8;
 
@@ -48,6 +48,7 @@ void ServerConfig::loadConfigFromFile(const char *file) {
 			lua.safe_script_file(file);
 
 			maxItemStackSize = lua["max_item_stack_size"].get_or(maxItemStackSize);
+			if (maxItemStackSize == 64) maxItemStackSize = 99;
 
 			renderDistance = lua["render_distance"].get_or(renderDistance);
 

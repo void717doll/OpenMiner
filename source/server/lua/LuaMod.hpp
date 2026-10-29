@@ -69,6 +69,7 @@ class LuaMod {
 		ItemStack giveItemStack(ServerPlayer &player, ItemStack *itemStack);
 
 		enum class DefinitionType {
+			ReservedBlock,
 			Block,
 			Item,
 			CraftingRecipe,

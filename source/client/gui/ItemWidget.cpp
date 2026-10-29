@@ -63,7 +63,7 @@ void ItemWidget::update() {
 
 	if (m_itemID != stack().item().id()) {
 		if (stack().item().isBlock()) {
-			const Block &block = Registry::getInstance().getBlock(stack().item().id());
+			const Block &block = Registry::getInstance().getBlockFromStringID(stack().item().stringID());
 			const BlockState &blockState = block.getState(0); // FIXME: Get state from item stack
 			if (blockState.drawType() != BlockDrawType::XShape && blockState.inventoryImage().empty()) {
 				m_cube.updateVertexBuffer(block);

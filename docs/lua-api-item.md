@@ -85,7 +85,7 @@ Max amount of items in a stack.
 
 Example:
 ```lua
-max_stack_size = 64
+max_stack_size = 99
 ```
 
 If not defined, it defaults to the server config.
@@ -130,4 +130,4 @@ Parameters:
 
 ## food
 
-`heal_amount` restores health on activation and defaults the stack limit to one. `container_item` replaces the consumed item, as with mushroom stew returning `default:bowl`. `max_stack_size` can override the default, as with eight cookies. food is consumed immediately, including at full health.
+`heal_amount` restores health on activation and limits the stack to one. `container_item` replaces the consumed item, as with mushroom stew returning `default:bowl`. all food, including cookies, stays unstackable even if `max_stack_size` is supplied. food is consumed immediately, including at full health.

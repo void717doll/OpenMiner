@@ -30,24 +30,27 @@ WieldRenderer::WieldRenderer(ClientPlayer &player)
 	m_shader.loadFromFile("basic");
 	m_skin.loadFromFile("resources/textures/player.png");
 	m_armVertices.setupDefaultLayout();
+	m_armorArmVertices.setupDefaultLayout();
 	m_itemVertices.setupDefaultLayout();
 	m_lastX = player.x();
 	m_lastY = player.y();
 
-	retro::MobMeshBuilder arm;
-	arm.box(-2,0,-2,4,12,4,0,0,0,40,16);
-	std::vector<Vertex> vertices;
-	for (const auto &point : arm.vertices) {
-		Vertex vertex;
-		vertex.coord3d[0] = point.x;
-		vertex.coord3d[1] = 1.125f - point.z;
-		vertex.coord3d[2] = -point.y;
-		vertex.texCoord[0] = point.u;
-		vertex.texCoord[1] = point.v;
-		for (float &color : vertex.color) color = 1;
-		vertices.push_back(vertex);
+	for (bool armor : {false, true}) {
+		retro::MobMeshBuilder arm;
+		arm.box(-2,0,-2,4,12,4,0,0,0,40,16,0,0,0,armor ? 1.f : 0.f);
+		std::vector<Vertex> vertices;
+		for (const auto &point : arm.vertices) {
+			Vertex vertex;
+			vertex.coord3d[0] = point.x;
+			vertex.coord3d[1] = 1.125f - point.z;
+			vertex.coord3d[2] = -point.y;
+			vertex.texCoord[0] = point.u;
+			vertex.texCoord[1] = point.v;
+			for (float &color : vertex.color) color = 1;
+			vertices.push_back(vertex);
+		}
+		(armor ? m_armorArmVertices : m_armVertices).init(vertices.data(), u32(vertices.size() * sizeof(Vertex)));
 	}
-	m_armVertices.init(vertices.data(), u32(vertices.size() * sizeof(Vertex)));
 }
 
 WieldRenderer::~WieldRenderer() = default;
@@ -100,6 +103,16 @@ void WieldRenderer::buildItem(const Item &item, const std::string &filename, boo
 }
 
 void WieldRenderer::update() {
+	const auto &chestplate = m_player.armor().getStack(0, 1);
+	if (chestplate.amount()) {
+		std::string id = chestplate.stringID();
+		std::string path = "mods/" + chestplate.item().modName() + "/textures/armor/" + id.substr(id.find(':') + 1) + ".png";
+		if (m_armorSkin.filename() != path) {
+			m_armorSkin.free();
+			m_armorSkin.loadFromFile(path);
+		}
+	}
+
 	const Item *item = nullptr;
 	if (m_player.heldItemSlot() >= 0) {
 		const ItemStack &stack = m_player.heldItemStack();
@@ -187,5 +200,9 @@ void WieldRenderer::draw(RenderTarget &target, RenderStates states) const {
 		states.transform.rotateX(-35.f - swing * 45.f);
 		states.texture = &m_skin;
 		target.draw(m_armVertices, 0, 36, states);
+		if (m_player.armor().getStack(0, 1).amount()) {
+			states.texture = &m_armorSkin;
+			target.draw(m_armorArmVertices, 0, 36, states);
+		}
 	}
 }

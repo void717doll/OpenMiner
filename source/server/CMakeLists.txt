@@ -48,6 +48,7 @@ set(SOURCE_FILES
 	world/ServerItem.cpp
 	world/ServerPlayer.cpp
 	world/ServerWorld.cpp
+	world/WorldTnt.cpp
 	world/WorldMobs.cpp
 	world/WorldItems.cpp
 	world/BlockPhysics.cpp

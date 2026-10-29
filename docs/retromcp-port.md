@@ -58,3 +58,5 @@ flight, noclip, sprint, creative inventory, starter gifts, free stack cloning an
 fall, drowning, lava/burn, cactus and suffocation damage retain beta hurt immunity. food heals immediately. death drops inventory with equipment wear preserved and respawns automatically. common block hardness, tool speeds, effective-block lists, harvest tiers and weapon damage follow the supplied beta source. loot falls to the ground and partial pickups retain the remainder. water/lava, mobs, falling blocks and dropped-item movement retain the [lunarchy world physics port](lunarchy-physics.md).
 
 water/lava now use queued propagation and level parameters; unsupported sand/gravel fall as saved entities. these systems follow lunarchy rather than the beta generator reference.
+
+armor protection, wear and model layers follow the supplied beta `ItemArmor`, `InventoryPlayer` and `RenderPlayer`. tnt uses the beta fuse and motion with the shared blast propagation. 99-item stacks and unstackable cookies are requested deviations.

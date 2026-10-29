@@ -71,7 +71,7 @@ void ClientCommandHandler::sendPlayerDropItem() {
 void ClientCommandHandler::sendPlayerInvUpdate() {
 	Network::Packet invPacket;
 	invPacket << Network::Command::PlayerInvUpdate;
-	invPacket << m_player.inventory();
+	invPacket << m_player.inventory() << m_player.armor();
 	m_client.send(invPacket);
 }
 
@@ -246,7 +246,7 @@ void ClientCommandHandler::setupCallbacks() {
 			packet >> m_player.inventory();
 
 			s8 heldItemSlot;
-			packet >> heldItemSlot;
+			packet >> heldItemSlot >> m_player.armor();
 
 			if (m_player.heldItemSlot() == -1) {
 				m_player.setHeldItemSlot(heldItemSlot);
@@ -357,6 +357,7 @@ void ClientCommandHandler::setupCallbacks() {
 		auto it = m_entityMap.find(entityID);
 		if (it != m_entityMap.end()) {
 			m_world.scene().registry().destroy(it->second);
+			m_entityMap.erase(it);
 		}
 		else
 			logError() << "EntityDespawn: Entity ID" << std::underlying_type_t<entt::entity>(entityID) << "is invalid";

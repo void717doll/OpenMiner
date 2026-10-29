@@ -61,6 +61,7 @@ void ServerWorld::update(bool doTick) {
 		m_blockPhysics.tick();
 		updateMobs();
 		updateItems();
+		updateTnt();
 		updatePlayerSurvival();
 		m_scene.update();
 	}

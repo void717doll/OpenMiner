@@ -121,9 +121,11 @@ void extend_meta_type(const std::string &name, ComponentType type, bool isSerial
 #include "common/scene/component/MobComponent.hpp"
 #include "common/scene/component/PhysicalComponent.hpp"
 #include "common/scene/component/FallingBlockComponent.hpp"
+#include "common/scene/component/TntComponent.hpp"
 #include "common/scene/component/RotationComponent.hpp"
 
 void Scene::registerComponents() {
+	extend_meta_type<TntComponent>("TntComponent", ComponentType::Tnt, false, true);
 	extend_meta_type<FallingBlockComponent>("FallingBlockComponent", ComponentType::FallingBlock, false, true);
 	extend_meta_type<PhysicalComponent>("PhysicalComponent", ComponentType::Physical, false, true);
 	extend_meta_type<BetaMobComponent>("BetaMobComponent", ComponentType::BetaMob, false, true);

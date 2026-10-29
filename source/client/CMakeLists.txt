@@ -31,6 +31,7 @@ set(SOURCE_FILES
 	graphics/MobModel.cpp
 	graphics/ItemBillboard.cpp
 	graphics/ItemMeshBuilder.cpp
+	graphics/PlayerModel.cpp
 	graphics/WieldRenderer.cpp
 	graphics/RectangleShape.cpp
 	graphics/RenderTarget.cpp

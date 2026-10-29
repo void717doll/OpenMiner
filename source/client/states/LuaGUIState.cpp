@@ -66,6 +66,7 @@ LuaGUIState::LuaGUIState(ClientCommandHandler &client, ClientPlayer &player, Cli
 
 	while (!packet.endOfPacket())
 		loadGUI(packet);
+	if (m_inventoryWidgets.count("armor_helmet")) m_playerPreview = std::make_unique<PlayerModel>(m_player);
 
 	isActive = true;
 }
@@ -192,6 +193,14 @@ void LuaGUIState::draw(RenderTarget &target, RenderStates states) const {
 
 	for (auto &it : m_drawables)
 		target.draw(*it, states);
+	if (m_playerPreview) {
+		RenderStates preview = states;
+		preview.transform.translate(57, 75, -40);
+		preview.transform.scale(28, 28, 28);
+		preview.transform.rotateX(90);
+		preview.transform.rotateZ(-20);
+		target.draw(*m_playerPreview, preview);
+	}
 
 	for (auto &it : m_widgets)
 		target.draw(*it, states);
@@ -282,7 +291,7 @@ void LuaGUIState::loadInventoryWidget(const std::string &name, s32 x, s32 y, sf:
 		std::string playerName, inventoryName;
 		packet >> playerName >> inventoryName;
 
-		widgetInventory = &m_player.inventory();
+		widgetInventory = inventoryName == "armor" ? &m_player.armor() : &m_player.inventory();
 	}
 	else if (inventory == "block") {
 		Vector3i block;

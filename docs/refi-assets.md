@@ -25,3 +25,5 @@ widgets, font, title screen, recipe, world icon, toast, and the default mod's wh
 ## validation
 
 all 256 manifest entries were checked for readable png data, destination coverage, expected dimensions, and matching source/output digests where a supplied source exists. grass-side composition pixels match the supplied dirt and overlay layers. all block/item images are 16x16. all 219 unique default lua texture paths resolve, including 25 generated tool names, and both sky resource keys resolve through the texture configuration. the retained license matches the supplied file byte for byte. native rendering remains an integration check.
+
+armor uses refi leather, chain, iron, gold and diamond icons and worn atlases. tnt and gravel use `alternate_textures/texture_alts`; ferns, roses and mushrooms use the main pack. imported paths and hashes are recorded in the manifest.

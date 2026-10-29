@@ -34,6 +34,7 @@
 #include "server/network/ServerCommandHandler.hpp"
 #include "server/scene/EntityWrapper.hpp"
 #include "server/world/ServerPlayer.hpp"
+#include "server/world/ServerBlock.hpp"
 #include "server/world/WorldController.hpp"
 
 void LuaMod::commit() {
@@ -41,6 +42,7 @@ void LuaMod::commit() {
 		auto &it = m_defs.front();
 
 		switch (it.first) {
+			case DefinitionType::ReservedBlock:   Registry::getInstance().reserveBlockID<ServerBlock>(); break;
 			case DefinitionType::Block:           m_blockLoader.loadBlock(it.second);            break;
 			case DefinitionType::Item:            m_itemLoader.loadItem(it.second);              break;
 			case DefinitionType::CraftingRecipe:  m_recipeLoader.loadCraftingRecipe(it.second);  break;
@@ -71,6 +73,7 @@ void LuaMod::initUsertype(sol::state &lua) {
 		"despawn_entity",  &LuaMod::despawnEntity,
 
 		"give_item_stack", &LuaMod::giveItemStack,
+		"reserve_block_id", [](LuaMod &self) { self.m_defs.emplace(DefinitionType::ReservedBlock, sol::table{}); },
 
 		"block",           DEF_FUNC(DefinitionType::Block),
 		"item",            DEF_FUNC(DefinitionType::Item),

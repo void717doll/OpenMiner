@@ -60,6 +60,10 @@ class Player : public ISerializable {
 		u16 clientID() const { return m_clientID; }
 
 		Inventory &inventory() { return m_inventory; }
+		Inventory &armor() { return m_armor; }
+		const Inventory &armor() const { return m_armor; }
+		u16 armorValue() const;
+		u16 absorbDamage(u16 amount);
 
 		void setName(const std::string &name) { m_name = name; }
 		void setPosition(double x, double y, double z) { m_x = x; m_y = y; m_z = z; }
@@ -97,6 +101,8 @@ class Player : public ISerializable {
 		u16 m_clientID = 0;
 
 		Inventory m_inventory{9, 4};
+		Inventory m_armor{1, 4, "armor"};
+		u16 m_armorRemainder = 0;
 
 		FloatBox m_hitbox;
 

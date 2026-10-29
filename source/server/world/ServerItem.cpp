@@ -31,8 +31,22 @@
 #include "server/network/ServerCommandHandler.hpp"
 #include "server/world/ServerItem.hpp"
 #include "server/world/ServerPlayer.hpp"
+#include "server/world/ServerWorld.hpp"
 
 bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &player, World &world, ClientInfo &client, ServerCommandHandler &server) const {
+	if (u16 slot = getGroupValue("group:om_armor_slot")) {
+		if (slot > 4) return false;
+		ItemStack previous = player.armor().getStack(0, slot - 1);
+		player.armor().setItemStack(0, slot - 1, player.heldItemStack());
+		player.inventory().setItemStack(u16(player.heldItemSlot()), 0, previous);
+		server.sendPlayerInvUpdate(client.id);
+		return true;
+	}
+	if (hasGroup("group:om_igniter")) {
+		if (!static_cast<ServerWorld &>(world).primeTnt({pos.x, pos.y, pos.z})) return false;
+		server.wearHeldItem(player, 1);
+		return true;
+	}
 	if (m_healAmount > 0) {
 		ItemStack stack = player.heldItemStack();
 		if (stack.amount() == 0) return false;

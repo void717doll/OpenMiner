@@ -107,13 +107,13 @@ void syncAppearance(entt::registry &registry, entt::entity entity) {
 	}
 }
 
-entt::entity dropItem(ServerWorld &world, Vector3d position, const std::string &id, u16 count, u16 damage = 0) {
+entt::entity dropItem(ServerWorld &world, Vector3d position, const std::string &id, u16 count, u16 damage = 0, bool limited = true) {
 	if (!count || !Registry::getInstance().hasItem(id)) return entt::null;
 	auto &definitions = Registry::getInstance();
 	entt::entity model = definitions.getEntityFromStringID("default:item_drop");
 	if (model == entt::null) return entt::null;
 	auto &scene = world.scene();
-	if (scene.registry().view<ItemStack>().size() >= 128) return entt::null;
+	if (limited && scene.registry().view<ItemStack>().size() >= 128) return entt::null;
 	entt::entity entity = scene.createEntityFromModel(definitions.entityRegistry(), model);
 	auto &registry = scene.registry();
 	registry.emplace<PositionComponent>(entity, position.x, position.y, position.z + 0.3, world.dimension().id());
@@ -125,7 +125,7 @@ entt::entity dropItem(ServerWorld &world, Vector3d position, const std::string &
 }
 
 struct Shot { Vector3d position, direction; Kind kind; entt::entity shooter; };
-struct Blast { Vector3d position; float strength; u32 seed; };
+struct Blast { Vector3d position; float strength; u32 seed; std::string source; };
 
 void spawnShot(ServerWorld &world, const Shot &shot) {
 	auto &registry = world.scene().registry();
@@ -200,7 +200,16 @@ void explode(ServerWorld &world, const Blast &blast) {
 		}
 	}
 	for (const auto &point : blocks) {
-		if (world.getBlock(point.x, point.y, point.z)) world.setBlock(point.x, point.y, point.z, 0);
+		u16 id = world.getBlock(point.x, point.y, point.z);
+		if (!id) continue;
+		const BlockState *state = world.getBlockState(point.x, point.y, point.z);
+		if (state && state->block().stringID() == "default:tnt" && world.primeTnt(point, u16(10 + nextRandom(random) % 20))) continue;
+		if (state && unitRandom(random) < 0.3) {
+			const ItemStack stack = state->getItemDrop();
+			if (Registry::getInstance().hasItem(stack.stringID()))
+				world.dropWorldItem({point.x + 0.5, point.y + 0.5, point.z + 0.5}, stack.stringID(), stack.amount());
+		}
+		world.setBlock(point.x, point.y, point.z, 0);
 	}
 }
 
@@ -215,6 +224,13 @@ bool consumeFor(ServerPlayer &player, const std::string &replacement) {
 	return true;
 }
 
+}
+
+void ServerWorld::explodeAt(const Vector3d &position, float strength, u32 seed, const std::string &source) {
+	explode(*this, {position, strength, seed, source});
+	if (m_server) {
+		m_server->sendSound("tnt_explode", position, m_dimension.id(), 1.f);
+	}
 }
 
 bool ServerWorld::spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize) {
@@ -549,8 +565,8 @@ bool ServerWorld::interactMob(ServerPlayer &player) {
 	return handled;
 }
 
-bool ServerWorld::dropWorldItem(Vector3d position, const std::string &id, u16 count) {
-	return dropItem(*this, position, id, count) != entt::null;
+bool ServerWorld::dropWorldItem(Vector3d position, const std::string &id, u16 count, u16 damage, bool limited) {
+	return dropItem(*this, position, id, count, damage, limited) != entt::null;
 }
 
 bool ServerWorld::dropHeldItem(ServerPlayer &player) {
@@ -578,6 +594,11 @@ bool ServerWorld::dropHeldItem(ServerPlayer &player) {
 }
 
 void ServerWorld::dropPlayerItems(ServerPlayer &player) {
+	for (u16 slot = 0; slot < 4; ++slot) {
+		const auto &stack = player.armor().getStack(0, slot);
+		if (stack.amount() && dropItem(*this, {player.x(),player.y(),player.z()}, stack.stringID(), stack.amount(), stack.damage(), false) != entt::null)
+			player.armor().clearStack(0, slot);
+	}
 	for (u16 y = 0; y < player.inventory().height(); ++y) {
 		for (u16 x = 0; x < player.inventory().width(); ++x) {
 			ItemStack stack = player.inventory().getStack(x, y);

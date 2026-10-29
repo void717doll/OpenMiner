@@ -72,6 +72,10 @@ mod:biome {
 	},
 
 	flora = {
+		{block = "default:fern", spawns_on = "default:grass", probability = 0.035},
+		{block = "default:rose", spawns_on = "default:grass", probability = 0.015},
+		{block = "default:mushroom_brown", spawns_on = "default:grass", probability = 0.006},
+		{block = "default:mushroom_red", spawns_on = "default:grass", probability = 0.004},
 		{
 			block = "default:tallgrass",
 			spawns_on = "default:grass",

@@ -43,4 +43,16 @@ undamaged stacks retain their original serialized bytes. a damaged stack writes 
 
 800 samples from the original java movement methods matched the c++ calculations exactly for cardinal-facing walking, sneaking, diagonal input, ice, repeated jumping, water, lava, and ladders. the oracle uses a flat floor and controlled material contacts; it does not prove parity for complete worlds or arbitrary view angles. regression coverage exercises axis ordering, slab ascent accepted by the server, sneak edges, equipment breakage, legacy oversized stacks, and serialized inventory/stack boundaries.
 
-this is a survival rules port, not complete beta feature parity. armor/equipment slots, beds, a death screen, sapling regrowth, weather, fire spread, liquid currents, the full beta mob pathfinder/spawner, knockback, and air/fire hud indicators remain absent or adapted. crafting and inventory messages retain the existing local-client ownership. mining animation and timing use the engine clock rather than the complete beta controller state machine. stepping camera smoothing and source-exact random drops are not ported. material footsteps and player action effects now use the [luanti sound assets](sound-assets.md). native input and visual checks still require a desktop session.
+this is a survival rules port, not complete beta feature parity. beds, a death screen, sapling regrowth, weather, fire spread, liquid currents, the full beta mob pathfinder/spawner, knockback, and air/fire hud indicators remain absent or adapted. crafting and inventory messages retain the existing local-client ownership. mining animation and timing use the engine clock rather than the complete beta controller state machine. stepping camera smoothing and source-exact random drops are not ported. material footsteps and player action effects now use the [luanti sound assets](sound-assets.md). native input and visual checks still require a desktop session.
+
+## item limits
+
+ordinary items and blocks stack to 99; food, tools, and armor stack to one. the old server default of 64 migrates to 99. all food includes cookies, which deliberately differ from beta's eight-cookie stacks.
+
+later food, materials, and block items have been removed using the supplied beta 1.7.3 item list. their recipes are removed too. reserved air slots preserve old numeric block ids, so removing a block does not change surrounding terrain. removed items disappear on loading; oversized surviving stacks split into available inventory slots, with excess dropped nearby.
+
+## armor and tnt
+
+right click an armor piece to equip or swap it, or use the four filtered inventory slots. shift click also equips a matching empty slot. leather, chain, iron, gold and diamond use beta protection, durability scaling, and damage remainder. armor wears when absorbing damage, drops on death with its wear intact, and saves in an optional `ARMR` trailer. the inventory renders the equipped pieces in 3d; an equipped chestplate also covers the empty first-person hand. chain armor has no survival recipe, matching the unavailable fire ingredient in this engine. shields are absent.
+
+tnt is crafted from five gunpowder and four sand. right click it with flint and steel to start the four-second fuse. blasts damage nearby players and mobs, destroy exposed blocks, drop some debris, and ignite nearby tnt with shorter fuses. terrain outside loaded chunks is untouched. the fuse and motion survive saving.

@@ -71,6 +71,7 @@ class Item : public ISerializable {
 		}
 
 		bool canBeActivated() const { return m_canBeActivated; }
+		void enableActivation() { m_canBeActivated = true; }
 
 		const std::vector<std::string> &effectiveOn() const { return m_effectiveOn; }
 		void addEffectiveBlock(const std::string &blockID) { m_effectiveOn.emplace_back(blockID); }
@@ -99,7 +100,7 @@ class Item : public ISerializable {
 
 		std::vector<std::string> m_effectiveOn;
 
-		u16 m_maxStackSize = 64;
+		u16 m_maxStackSize = 99;
 };
 
 #endif // ITEM_HPP_

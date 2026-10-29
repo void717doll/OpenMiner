@@ -44,7 +44,7 @@ void LuaItemLoader::loadItem(const sol::table &table) const {
 	item.setOnItemActivated(table["on_item_activated"].get<sol::object>());
 	u16 healAmount = table["heal_amount"].get_or<u16>(0);
 	item.setFood(healAmount, table["container_item"].get_or<std::string>(""));
-	item.setMaxStackSize(table["max_stack_size"].get_or<u16>(healAmount ? 1 : ServerConfig::maxItemStackSize));
+	item.setMaxStackSize(healAmount ? 1 : table["max_stack_size"].get_or<u16>(ServerConfig::maxItemStackSize));
 
 	sol::object groupsObject = table["groups"].get<sol::object>();
 	if (groupsObject.valid()) {
@@ -69,4 +69,6 @@ void LuaItemLoader::loadItem(const sol::table &table) const {
 		else
 			logError() << "For item" << stringID << ": 'effective_on' should be a table";
 	}
+	if (item.hasGroup("group:om_igniter") || item.hasGroup("group:om_armor_slot"))
+		item.enableActivation();
 }

@@ -34,8 +34,10 @@ class WieldRenderer : public Drawable {
 		TextureAtlas &m_atlas;
 		Shader m_shader;
 		Texture m_skin;
+		Texture m_armorSkin;
 		mutable Camera m_camera{72.f, 0.05f, 10.f};
 		VertexBuffer m_armVertices;
+		VertexBuffer m_armorArmVertices;
 		VertexBuffer m_itemVertices;
 		u32 m_itemVertexCount = 0;
 		std::unique_ptr<InventoryCube> m_cube;
