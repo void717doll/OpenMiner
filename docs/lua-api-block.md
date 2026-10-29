@@ -422,3 +422,9 @@ Parameters:
 - `chunk` (`ServerChunk`): current chunk
 - `world` (`ServerWorld`): instance of the world
 
+
+### placement validation
+
+placement constraints accept block ids and `group:` names. a group matches when its value is positive. constraints that reference unloaded terrain fail. the server checks constraints before changing the block or consuming its held item.
+
+state hardness and item drops inherit the default block values when omitted. collision uses the active state's bounding box, rotated with the block orientation.

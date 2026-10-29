@@ -37,6 +37,8 @@
 #include "client/world/ClientPlayer.hpp"
 #include "client/world/ClientWorld.hpp"
 
+#include "common/world/WorldCollision.hpp"
+
 ClientPlayer *ClientPlayer::s_instance = nullptr;
 
 ClientPlayer::ClientPlayer(Camera &camera) : m_camera(camera) {
@@ -124,7 +126,7 @@ void ClientPlayer::processInputs() {
 }
 
 void ClientPlayer::updatePosition(const ClientWorld &world) {
-	ClientChunk *chunk = (ClientChunk *)world.getChunkAtBlockPos((int)m_x, (int)m_y, (int)m_z);
+	ClientChunk *chunk = (ClientChunk *)world.getChunkAtBlockPos(int(std::floor(m_x)), int(std::floor(m_y)), int(std::floor(m_z)));
 	if (chunk && chunk->isInitialized()) {
 		if (!Config::isFlyModeEnabled) {
 			m_velocity.z -= chunk->dimension().gravity() * 0.001f;
@@ -141,6 +143,12 @@ void ClientPlayer::updatePosition(const ClientWorld &world) {
 		m_velocity.reset(0, 0, 0);
 	}
 
+	// Increase velocity in fly mode
+	if (Config::isFlyModeEnabled) {
+		m_velocity.x *= 2.f;
+		m_velocity.y *= 2.f;
+	}
+
 	if (!Config::isNoClipEnabled)
 		checkCollisions(world);
 
@@ -148,12 +156,6 @@ void ClientPlayer::updatePosition(const ClientWorld &world) {
 	if (!Config::isFlyModeEnabled && m_velocity.z != 0.f) {
 		m_velocity.x *= 0.65f;
 		m_velocity.y *= 0.65f;
-	}
-
-	// Increase velocity in fly mode
-	if (Config::isFlyModeEnabled) {
-		m_velocity.x *= 2.f;
-		m_velocity.y *= 2.f;
 	}
 
 	if (Config::isViewBobbingEnabled)
@@ -193,35 +195,12 @@ void ClientPlayer::setPosition(double x, double y, double z) {
 }
 
 void ClientPlayer::checkCollisions(const ClientWorld &world) {
-	Vector3d corner{m_x + m_hitbox.x, m_y + m_hitbox.y, m_z + m_hitbox.z};
-
-	constexpr int numPointsPerEdge = 3;
-	constexpr int lastPoint = numPointsPerEdge - 1;
-
-	for (int z = 0; z <= lastPoint; z++) {
-		for (int y = 0; y <= lastPoint; y++) {
-			for (int x = 0; x <= lastPoint; x++) {
-				if (x == 0 || x == lastPoint || y == 0 || y == lastPoint || z == 0 || z == lastPoint)
-					testPoint(world, corner.x + m_hitbox.sizeX * ((double)x / lastPoint),
-					          corner.y + m_hitbox.sizeY * ((double)y / lastPoint),
-					          corner.z + m_hitbox.sizeZ * ((double)z / lastPoint), m_velocity);
-			}
-		}
-	}
-}
-
-bool passable(const ClientWorld &world, double x, double y, double z) {
-	const BlockState *blockState = world.getBlockState((int)floor(x), (int)floor(y), (int)floor(z));
-	return !blockState || !blockState->block().id() || !blockState->isCollidable();
-}
-
-void ClientPlayer::testPoint(const ClientWorld &world, double x, double y, double z, Vector3f &vel) {
-	if(!passable(world, x + vel.x, y, z)) vel.x = 0.f;
-	if(!passable(world, x, y + vel.y, z)) vel.y = 0.f;
-	if(!passable(world, x, y, z + vel.z)) {
-		if(vel.z < 0.f && m_isJumping) m_isJumping = false;
-		vel.z = 0.f;
-	}
+	DoubleBox box = m_hitbox;
+	box.move(m_x, m_y, m_z);
+	Vector3d movement = collision::move(world, box, Vector3d(m_velocity));
+	if (m_velocity.z < 0 && movement.z > m_velocity.z)
+		m_isJumping = false;
+	m_velocity = Vector3f(movement);
 }
 
 void ClientPlayer::applyViewBobbing(float &viewAngleH, float &viewAngleV, float &viewAngleRoll) {

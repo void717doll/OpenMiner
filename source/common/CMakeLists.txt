@@ -138,6 +138,7 @@ set(HEADER_FILES
 	world/Sky.hpp
 	world/Tree.hpp
 	world/World.hpp
+	world/WorldCollision.hpp
 )
 
 om_add_library(${PROJECT_NAME} "${SOURCE_FILES}" "${HEADER_FILES}")

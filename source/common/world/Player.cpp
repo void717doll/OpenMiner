@@ -43,9 +43,9 @@ u8 Player::getOppositeDirection() const {
 
 Vector3i Player::getCurrentChunk() const {
 	return {
-		(static_cast<s32>(m_x) & -CHUNK_WIDTH)  / CHUNK_WIDTH,
-		(static_cast<s32>(m_y) & -CHUNK_DEPTH)  / CHUNK_DEPTH,
-		(static_cast<s32>(m_z) & -CHUNK_HEIGHT) / CHUNK_HEIGHT
+		(static_cast<s32>(std::floor(m_x)) & -CHUNK_WIDTH)  / CHUNK_WIDTH,
+		(static_cast<s32>(std::floor(m_y)) & -CHUNK_DEPTH)  / CHUNK_DEPTH,
+		(static_cast<s32>(std::floor(m_z)) & -CHUNK_HEIGHT) / CHUNK_HEIGHT
 	};
 }
 

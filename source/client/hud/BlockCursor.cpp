@@ -221,13 +221,6 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 
 				m_client.sendPlayerPlaceBlock(x, y, z, block);
 
-				const ItemStack &currentStack = m_player.inventory().getStack((u16)hotbar.cursorPos(), 0);
-				m_player.inventory().setStack((u16)hotbar.cursorPos(), 0, currentStack.amount() > 1
-					? currentStack.item().stringID()
-					: "", currentStack.amount() - 1
-				);
-
-				m_client.sendPlayerInvUpdate();
 			}
 		}
 	}

@@ -224,9 +224,9 @@ inline void LuaBlockLoader::loadPlacementConstraints(ServerBlock &block, const s
 
 				sol::optional<sol::table> blockOffset = constraintsObject.first.as<sol::table>();
 				if (blockOffset != sol::nullopt) {
-					constraint.blockOffset.x = blockOffset.value().get<u32>(1);
-					constraint.blockOffset.y = blockOffset.value().get<u32>(2);
-					constraint.blockOffset.z = blockOffset.value().get<u32>(3);
+					constraint.blockOffset.x = blockOffset.value().get<s32>(1);
+					constraint.blockOffset.y = blockOffset.value().get<s32>(2);
+					constraint.blockOffset.z = blockOffset.value().get<s32>(3);
 				}
 				else
 					logError() << "For block" << block.stringID() << ": 'placement_constraints' offset is wrong";

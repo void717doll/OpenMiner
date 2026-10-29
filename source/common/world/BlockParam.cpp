@@ -27,6 +27,7 @@
 #include <sol/sol.hpp>
 
 #include "common/core/Debug.hpp"
+#include "common/core/Exception.hpp"
 #include "common/world/Block.hpp"
 #include "common/world/BlockParam.hpp"
 
@@ -41,7 +42,7 @@ void BlockParam::deserialize(sf::Packet &packet) {
 void BlockParam::allocateBits(u8 type, u8 size) {
 	auto it = m_allocatedBits.find(type);
 	if (it != m_allocatedBits.end()) {
-		logError() << "Can't allocate param type" << getTypeName(type) << "twice in block" << m_block->stringID();
+		throw EXCEPTION("duplicate block param allocation", getTypeName(type), m_block->stringID());
 	}
 	else if (m_totalSize + size <= 16) {
 		m_allocatedBits.emplace(type, Param{m_totalSize, size});
@@ -56,6 +57,7 @@ void BlockParam::allocateBits(u8 type, u8 size) {
 		for (auto &it : m_allocatedBits) {
 			logError() << "\t-" << getTypeName(it.first) << "=" << (int)it.second.size;
 		}
+		throw EXCEPTION("block params exceed 16 bits", m_block->stringID());
 	}
 }
 
@@ -79,20 +81,21 @@ u16 BlockParam::setParam(u8 type, u16 data, u16 param) const {
 	}
 
 	u16 mask = u16(~(~0u << it->second.size) << it->second.offset);
-	param <<= it->second.offset;
-	if ((param & ~mask) != 0)
+	u32 shifted = u32(param) << it->second.offset;
+	if ((shifted & ~u32(mask)) != 0)
 		logWarning() << "Block param overflow for type" << getTypeName(type) << "in block" << m_block->stringID();
 
-	return u16((data & ~mask) | (param & mask));
+	return u16((data & ~mask) | (shifted & mask));
 }
 
 std::string BlockParam::getTypeName(u8 type) {
 	std::array<std::string, Type::Count> names = {
 		"Rotation",
 		"State",
+		"Custom",
 	};
 
-	return names[type];
+	return type < Type::Count ? names[type] : "unknown";
 }
 
 // Please update 'docs/lua-api-cpp.md' if you change this
@@ -106,6 +109,7 @@ void BlockParam::initUsertype(sol::state &lua) {
 	lua["BlockParamType"] = lua.create_table_with(
 		"Rotation", Type::Rotation,
 		"State", Type::State,
+		"Custom", Type::Custom,
 
 		"Count", Type::Count
 	);

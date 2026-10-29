@@ -65,7 +65,6 @@ class ClientPlayer : public Player {
 		Camera &camera() { return m_camera; }
 
 	private:
-		void testPoint(const ClientWorld &world, double x, double y, double z, Vector3f &vel);
 
 		void applyViewBobbing(float &viewAngleH, float &viewAngleV, float &viewAngleRoll);
 

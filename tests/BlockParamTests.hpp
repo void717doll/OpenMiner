@@ -34,6 +34,26 @@
 
 class BlockParamTests : public CxxTest::TestSuite  {
 	public:
+		void testFullCustomData() {
+			Block block{1, "default:custom"};
+			block.param().allocateBits(BlockParam::Custom, 16);
+			TS_ASSERT_EQUALS(block.param().getParam(BlockParam::Custom,
+				block.param().setParam(BlockParam::Custom, 0, 65535)), 65535);
+			TS_ASSERT_EQUALS(BlockParam::getTypeName(BlockParam::Custom), "Custom");
+			TS_ASSERT_THROWS_ANYTHING(block.param().allocateBits(BlockParam::Rotation, 1));
+		}
+
+		void testStateInheritance() {
+			Block block{1, "default:stateful"};
+			block.getState(0).hardness(4.f);
+			block.getState(0).harvestRequirements(2);
+			block.addState();
+			TS_ASSERT_EQUALS(block.getState(1).hardness(), 4.f);
+			TS_ASSERT_EQUALS(block.getState(1).timeToBreak(0, 1.f, false), 20.f);
+			block.getState(1).hardness(2.f);
+			TS_ASSERT_EQUALS(block.getState(1).timeToBreak(0, 1.f, false), 10.f);
+		}
+
 		void testAllocation() {
 			Block m_block{1, "default:myblock"};
 

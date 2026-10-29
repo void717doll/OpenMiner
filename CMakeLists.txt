@@ -17,7 +17,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 #------------------------------------------------------------------------------
 # Options
 #------------------------------------------------------------------------------
-option(OM_BUILD_TESTS "Enable building tests if CxxTest is available" ON)
+option(OM_BUILD_TESTS "Build regression tests (requires CxxTest)" ON)
+if(OM_BUILD_TESTS)
+	enable_testing()
+endif()
 option(GIT_SUBMODULE  "Check git submodules during build"             ON)
 
 #------------------------------------------------------------------------------

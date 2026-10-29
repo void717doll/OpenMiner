@@ -29,20 +29,24 @@
 #include "common/world/World.hpp"
 
 bool BlockPlacementConstraints::check(const World &world, const Vector3i &pos) const {
-	bool isValid = true;
-	for (auto &it : m_constraints) {
-		const Block &block = Registry::getInstance().getBlockFromStringID(it.blockID);
-		u16 blockIDToCheck = world.getBlock(
-			pos.x + it.blockOffset.x,
-			pos.y + it.blockOffset.y,
-			pos.z + it.blockOffset.z);
-		const Block &blockToCheck = Registry::getInstance().getBlock(blockIDToCheck);
-		bool isSameBlock = (block.id() == blockToCheck.id());
-		if ((it.isWhitelist && !isSameBlock) || (!it.isWhitelist && isSameBlock))
-			isValid = false;
+	for (const auto &constraint : m_constraints) {
+		const BlockState *state = world.getBlockState(
+			pos.x + constraint.blockOffset.x,
+			pos.y + constraint.blockOffset.y,
+			pos.z + constraint.blockOffset.z);
+		// unloaded terrain cannot satisfy placement constraints.
+		if (!state)
+			return false;
+
+		const Block &block = state->block();
+		bool matches = constraint.blockID.compare(0, 6, "group:") == 0
+			? block.getGroupValue(constraint.blockID) > 0
+			: block.stringID() == constraint.blockID;
+		if (constraint.isWhitelist != matches)
+			return false;
 	}
 
-	return isValid;
+	return true;
 }
 
 void BlockPlacementConstraints::serialize(sf::Packet &packet) const {

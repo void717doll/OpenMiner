@@ -2,7 +2,7 @@
 # Unit testing
 #------------------------------------------------------------------------------
 if(OM_BUILD_TESTS)
-	find_package(CxxTest QUIET)
+	find_package(CxxTest REQUIRED)
 
 	if(CXXTEST_FOUND)
 		include_directories(${CXXTEST_INCLUDE_DIRS})

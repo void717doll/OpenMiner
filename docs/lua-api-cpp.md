@@ -164,3 +164,8 @@
 - `const BlockState *get_block_state(int x, int y, int z)`
 - `void set_block_state(int x, int y, int z, u16 stateID)`
 
+
+### custom block params
+
+`BlockParamType.Custom` accesses the bits allocated by `custom_param_bits`.
+rotation, state, and custom allocations share 16 bits; overflow rejects the block definition.

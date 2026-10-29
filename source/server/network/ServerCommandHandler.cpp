@@ -35,6 +35,7 @@
 #include "server/lua/ScriptEngine.hpp"
 #include "server/network/Server.hpp"
 #include "server/network/ServerCommandHandler.hpp"
+#include "common/world/WorldCollision.hpp"
 #include "server/world/ServerBlock.hpp"
 #include "server/world/ServerItem.hpp"
 #include "server/world/WorldController.hpp"
@@ -357,8 +358,44 @@ void ServerCommandHandler::setupCallbacks() {
 			s32 x, y, z;
 			u32 block;
 			packet >> x >> y >> z >> block;
+			if (!packet) return;
 
 			ServerWorld &world = getWorldForClient(client.id);
+			const BlockState *previous = world.getBlockState(x, y, z);
+			u16 id = u16(block & 0xffff);
+			const auto &blocks = Registry::getInstance().blocks();
+			ItemStack stack;
+			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width())
+				stack = player->heldItemStack();
+			bool valid = packet && previous && id > 0 && id < blocks.size()
+				&& stack.amount() > 0 && stack.item().isBlock() && stack.item().id() == id;
+			if (valid) {
+				const Block &definition = *blocks[id];
+				u16 data = u16(block >> 16);
+				u16 stateID = definition.param().hasParam(BlockParam::State)
+					? definition.param().getParam(BlockParam::State, data) : 0;
+				valid = stateID < definition.states().size();
+				if (valid) {
+					const BlockState &state = definition.getState(stateID);
+					DoubleBox playerBox = player->hitbox();
+					playerBox.move(player->x(), player->y(), player->z());
+					valid = !state.isCollidable() || !collision::blockBox(state, data, x, y, z).intersects(playerBox);
+				}
+				valid = valid && (!previous->block().id() || previous->drawType() == BlockDrawType::Liquid
+					|| previous->drawType() == BlockDrawType::XShape)
+					&& definition.placementConstraints().check(world, {x, y, z});
+			}
+			if (!valid) {
+				Network::Packet correction;
+				correction << Network::Command::BlockUpdate << x << y << z
+					<< (u32(world.getBlock(x, y, z)) | (u32(world.getData(x, y, z)) << 16));
+				client.tcpSocket->send(correction);
+				sendPlayerInvUpdate(client.id, &client);
+				return;
+			}
+			player->inventory().setStack(player->heldItemSlot(), 0,
+				stack.amount() > 1 ? stack.item().stringID() : "", stack.amount() - 1);
+			sendPlayerInvUpdate(client.id);
 			world.setData(x, y, z, u16(block >> 16));
 			world.setBlock(x, y, z, u16(block & 0xffff));
 
