@@ -24,6 +24,9 @@
  *
  * =====================================================================================
  */
+#include <chrono>
+#include <memory>
+
 #include "client/core/ClientProfiler.hpp"
 #include "client/graphics/TextureAtlas.hpp"
 #include "client/world/ChunkMeshBuilder.hpp"
@@ -40,53 +43,72 @@
 //       Also, Registry is accessed from server too when running a singleplayer game,
 //       so if it changes during the execution, that would cause problems there too.
 //
-void ChunkMeshBuilder::addMeshBuildingJob(const Chunk &chunk, const TextureAtlas &textureAtlas) {
-	OM_PROFILE_START("ChunkMeshBuilder::addMeshBuildingJob");
+ChunkMeshBuilder::~ChunkMeshBuilder() {
+	for (auto &future : m_futures) delete future.get();
+}
 
-	// Creating the job (creates a copy of the chunk to send it to the thread)
-	ChunkMeshBuildingJob *job = new ChunkMeshBuildingJob;
-	job->textureAtlas = &textureAtlas;
-	job->chunkData.loadFromChunk(chunk);
+void ChunkMeshBuilder::clear() {
+	m_pending.clear();
+	m_pendingSet.clear();
+	m_revisions.clear();
+}
 
-	// Send the job to the thread pool
-	auto future = thread::DefaultThreadPool::submitJob(&ChunkMeshBuilder::buildChunkMesh, job);
-	m_futures.emplace_back(std::move(future));
+void ChunkMeshBuilder::remove(const Vector3i &position) {
+	m_revisions.erase(position);
+	m_pendingSet.erase(position);
+	m_pending.erase(std::remove(m_pending.begin(), m_pending.end(), position), m_pending.end());
+}
 
-	OM_PROFILE_END("ChunkMeshBuilder::addMeshBuildingJob");
+void ChunkMeshBuilder::addMeshBuildingJob(const Chunk &chunk, const TextureAtlas &) {
+	Vector3i position{chunk.x(), chunk.y(), chunk.z()};
+	m_revisions[position] = ++m_nextRevision;
+	if (m_pendingSet.emplace(position).second) m_pending.push_back(position);
 }
 
 void ChunkMeshBuilder::update() {
-	for (auto it = m_futures.begin() ; it != m_futures.end() ; ) {
-		if (it->future().valid() && it->future().wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-			ChunkMeshBuildingJob *job = it->get();
-
-			ClientChunk *chunk = (ClientChunk *)m_world.getChunk(job->chunkData.x, job->chunkData.y, job->chunkData.z);
-			if (chunk && job->totalVertexCount) {
-				VertexBuffer &vbo = chunk->getVertexBuffer();
-
-				vbo.init(nullptr, (u32)job->totalVertexCount * sizeof(Vertex));
-
-				u64 offset = 0;
-				for (u8 i = 0 ; i < ChunkMeshLayer::Count ; ++i) {
-					u32 vertexCount = (u32)job->vertices[i].size();
-					chunk->setVerticesCount(i, vertexCount);
-
-					if (vertexCount) {
-						job->vertices[i].shrink_to_fit();
-
-						vbo.update(job->vertices[i].data(), vertexCount * sizeof(Vertex), (u32)offset);
-
-						offset += vertexCount;
-					}
-				}
+	using Clock = std::chrono::steady_clock;
+	auto deadline = Clock::now() + std::chrono::milliseconds(2);
+	unsigned completed = 0;
+	for (auto it = m_futures.begin(); it != m_futures.end() && completed < 2 && Clock::now() < deadline;) {
+		if (it->future().wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) { ++it; continue; }
+		std::unique_ptr<ChunkMeshBuildingJob> job{it->get()};
+		Vector3i position{job->chunkData.x, job->chunkData.y, job->chunkData.z};
+		m_active.erase(position);
+		auto revision = m_revisions.find(position);
+		ClientChunk *chunk = static_cast<ClientChunk *>(m_world.getChunk(position.x, position.y, position.z));
+		if (chunk && revision != m_revisions.end() && revision->second == job->revision) {
+			VertexBuffer &vbo = chunk->getVertexBuffer();
+			if (job->totalVertexCount) vbo.init(nullptr, u32(job->totalVertexCount * sizeof(Vertex)));
+			else vbo.free();
+			u32 offset = 0;
+			for (u8 layer = 0; layer < ChunkMeshLayer::Count; ++layer) {
+				u32 count = u32(job->vertices[layer].size());
+				chunk->setVerticesCount(layer, count);
+				if (count) vbo.update(job->vertices[layer].data(), count * sizeof(Vertex), offset);
+				offset += count;
 			}
-
-			delete job;
-
-			it = m_futures.erase(it);
 		}
-		else
-			++it;
+		it = m_futures.erase(it);
+		++completed;
+	}
+	std::size_t examined = m_pending.size();
+	unsigned submitted = 0;
+	while (examined-- && !m_pending.empty() && m_futures.size() < 4 && submitted < 2 && Clock::now() < deadline) {
+		Vector3i position = m_pending.front();
+		m_pending.pop_front();
+		if (m_active.count(position)) { m_pending.push_back(position); continue; }
+		m_pendingSet.erase(position);
+		const Chunk *chunk = m_world.getChunk(position.x, position.y, position.z);
+		auto revision = m_revisions.find(position);
+		if (!chunk || revision == m_revisions.end()) continue;
+		auto job = std::make_unique<ChunkMeshBuildingJob>();
+		job->revision = revision->second;
+		job->textureAtlas = &m_world.textureAtlas();
+		job->chunkData.loadFromChunk(*chunk);
+		m_futures.emplace_back(m_workers.submit(&ChunkMeshBuilder::buildChunkMesh, job.get()));
+		job.release();
+		m_active.emplace(position);
+		++submitted;
 	}
 }
 

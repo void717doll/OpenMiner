@@ -24,6 +24,9 @@
  *
  * =====================================================================================
  */
+#include <algorithm>
+#include <chrono>
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/core/EngineConfig.hpp"
@@ -33,18 +36,32 @@
 bool World::isReloadRequested = false;
 
 void World::update() {
-	while (!m_chunkUpdateQueue.empty()) {
-		m_chunkUpdateQueue.front()->update();
-		m_chunkUpdateQueue.pop();
+	using Clock = std::chrono::steady_clock;
+	auto deadline = Clock::now() + std::chrono::milliseconds(2);
+	std::size_t updates = std::min<std::size_t>(16, m_chunkUpdateQueue.size());
+	while (updates > 0 && !m_chunkUpdateQueue.empty() && Clock::now() < deadline) {
+		--updates;
+		Chunk *chunk = m_chunkUpdateQueue.front();
+		m_chunkUpdateQueue.pop_front();
+		m_chunksToUpdate.erase(chunk);
+		chunk->update();
 	}
-
-	while (!m_chunkProcessQueue.empty()) {
-		m_chunkProcessQueue.front()->process();
-		m_chunkProcessQueue.pop();
+	deadline = Clock::now() + std::chrono::milliseconds(2);
+	std::size_t processes = std::min<std::size_t>(2, m_chunkProcessQueue.size());
+	while (processes > 0 && !m_chunkProcessQueue.empty() && Clock::now() < deadline) {
+		--processes;
+		Chunk *chunk = m_chunkProcessQueue.front();
+		m_chunkProcessQueue.pop_front();
+		m_chunksToProcess.erase(chunk);
+		chunk->process();
 	}
+}
 
-	m_chunksToUpdate.clear();
-	m_chunksToProcess.clear();
+void World::removeChunkFromQueues(Chunk *chunk) {
+	m_chunksToUpdate.erase(chunk);
+	m_chunksToProcess.erase(chunk);
+	m_chunkUpdateQueue.erase(std::remove(m_chunkUpdateQueue.begin(), m_chunkUpdateQueue.end(), chunk), m_chunkUpdateQueue.end());
+	m_chunkProcessQueue.erase(std::remove(m_chunkProcessQueue.begin(), m_chunkProcessQueue.end(), chunk), m_chunkProcessQueue.end());
 }
 
 Chunk *World::getChunkAtBlockPos(int x, int y, int z) const {
@@ -117,7 +134,7 @@ void World::setData(int x, int y, int z, u16 data) const {
 bool World::addChunkToUpdate(Chunk *chunk) {
 	if (m_chunksToUpdate.find(chunk) == m_chunksToUpdate.end()) {
 		m_chunksToUpdate.emplace(chunk);
-		m_chunkUpdateQueue.emplace(chunk);
+		m_chunkUpdateQueue.push_back(chunk);
 		return true;
 	}
 	return false;
@@ -126,19 +143,15 @@ bool World::addChunkToUpdate(Chunk *chunk) {
 bool World::addChunkToProcess(Chunk *chunk) {
 	if (m_chunksToProcess.find(chunk) == m_chunksToProcess.end()) {
 		m_chunksToProcess.emplace(chunk);
-		m_chunkProcessQueue.emplace(chunk);
+		m_chunkProcessQueue.push_back(chunk);
 		return true;
 	}
 	return false;
 }
 
 void World::clearUpdateQueues() {
-	while (!m_chunkUpdateQueue.empty())
-		m_chunkUpdateQueue.pop();
-
-	while (!m_chunkProcessQueue.empty())
-		m_chunkProcessQueue.pop();
-
+	m_chunkUpdateQueue.clear();
+	m_chunkProcessQueue.clear();
 	m_chunksToUpdate.clear();
 	m_chunksToProcess.clear();
 }

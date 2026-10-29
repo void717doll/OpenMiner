@@ -75,7 +75,8 @@ void ClientWorld::update(bool allowWorldReload) {
 		ClientChunk::chunkDrawStartFrame = ClientChunk::frameCounter;
 	}
 
-	for (auto it = m_chunksToRemove.begin() ; it != m_chunksToRemove.end() ;) {
+	unsigned removed = 0;
+	for (auto it = m_chunksToRemove.begin(); it != m_chunksToRemove.end() && removed < 4; ++removed) {
 		removeChunk(*it);
 		it = m_chunksToRemove.erase(it);
 	}
@@ -125,6 +126,10 @@ void ClientWorld::checkPlayerChunk(double playerX, double playerY, double player
 }
 
 void ClientWorld::clear() {
+	clearUpdateQueues();
+	m_chunkMeshBuilder.clear();
+	m_chunksToMesh.clear();
+	m_chunksToRemove.clear();
 	m_chunks.clear();
 	m_scene.registry().clear();
 }
@@ -155,6 +160,7 @@ void ClientWorld::receiveChunkData(Network::Packet &packet) {
 	}
 
 	linkChunkNeighbours(chunk);
+	chunk->lightmap().clearPendingUpdates();
 
 	// Receive chunk data
 	// bool hasUpdatedChunk = false;
@@ -231,6 +237,8 @@ void ClientWorld::removeChunk(const Vector3i &chunkPos) {
 	if (m_eventHandler)
 		m_eventHandler->emplaceEvent<ChunkRemovedEvent>(Vector3i{it->second->x(), it->second->y(), it->second->z()});
 
+	removeChunkFromQueues(it->second.get());
+	m_chunkMeshBuilder.remove(chunkPos);
 	m_chunks.erase(it);
 
 	for (u8 i = 0 ; i < 6 ; ++i)

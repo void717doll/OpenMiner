@@ -59,9 +59,9 @@ class ChunkLightmap {
 		bool removeTorchlight(int x, int y, int z);
 		bool removeSunlight(int x, int y, int z);
 
-		void updateLights();
-		void updateTorchlight();
-		void updateSunlight();
+		void updateLights(unsigned budget = 4096);
+		bool hasPendingUpdates() const;
+		void clearPendingUpdates();
 
 		std::optional<u8> tryGetLightData(int x, int y, int z) const;
 		u8 getLightDataRaw(int x, int y, int z) const { return m_lightMap[z][y][x]; }
@@ -80,6 +80,8 @@ class ChunkLightmap {
 		const LightMapArray &data() const { return m_lightMap; }
 
 	private:
+		void updateTorchlight(unsigned &budget);
+		void updateSunlight(unsigned &budget);
 		bool setTorchlight(int x, int y, int z, u8 val);
 
 		Chunk *m_chunk = nullptr;

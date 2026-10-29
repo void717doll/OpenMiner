@@ -27,6 +27,7 @@
 #ifndef WORLD_HPP_
 #define WORLD_HPP_
 
+#include <deque>
 #include <memory>
 #include <set>
 #include <vector>
@@ -38,6 +39,7 @@ class World {
 		virtual ~World() = default;
 
 		void update();
+		void removeChunkFromQueues(Chunk *chunk);
 
 		virtual Chunk *getChunk(int cx, int cy, int cz) const = 0;
 		Chunk *getChunkAtBlockPos(int x, int y, int z) const;
@@ -68,10 +70,10 @@ class World {
 
 	private:
 		std::set<Chunk *> m_chunksToUpdate;
-		std::queue<Chunk *> m_chunkUpdateQueue;
+		std::deque<Chunk *> m_chunkUpdateQueue;
 
 		std::set<Chunk *> m_chunksToProcess;
-		std::queue<Chunk *> m_chunkProcessQueue;
+		std::deque<Chunk *> m_chunkProcessQueue;
 };
 
 #endif // WORLD_HPP_

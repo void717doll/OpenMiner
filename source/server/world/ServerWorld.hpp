@@ -115,6 +115,7 @@ class ServerWorld : public World {
 		};
 
 		std::queue<ChunkSendRequest> m_chunkSendRequestQueue;
+		std::unordered_set<Vector3i> m_queuedChunks;
 };
 
 #endif // SERVERWORLD_HPP_

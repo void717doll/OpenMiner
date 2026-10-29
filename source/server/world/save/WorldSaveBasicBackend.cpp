@@ -154,6 +154,17 @@ void WorldSaveBasicBackend::save(const std::string &name) {
 
 	Network::Packet save;
 	for (auto &world : m_worldList) {
+		// queued lighting must reach its final state before its queues are discarded.
+		bool pending = true;
+		while (pending) {
+			pending = false;
+			for (const auto &entry : world.chunks()) {
+				if (entry.second->isInitialized() && entry.second->lightmap().hasPendingUpdates()) {
+					entry.second->lightmap().updateLights(65536);
+					pending = true;
+				}
+			}
+		}
 		Network::Packet chunks;
 		unsigned int chunkCount = 0;
 		for (auto &it : world.chunks()) {

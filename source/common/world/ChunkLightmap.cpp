@@ -90,13 +90,27 @@ bool ChunkLightmap::removeSunlight(int x, int y, int z) {
 	return setSunlight(x, y, z, 0);
 }
 
-void ChunkLightmap::updateLights() {
-	updateTorchlight();
-	updateSunlight();
+bool ChunkLightmap::hasPendingUpdates() const {
+	return !m_torchlightBfsQueue.empty() || !m_sunlightBfsQueue.empty()
+		|| !m_torchlightRemovalBfsQueue.empty() || !m_sunlightRemovalBfsQueue.empty();
 }
 
-void ChunkLightmap::updateTorchlight() {
-	while (!m_torchlightRemovalBfsQueue.empty()) {
+void ChunkLightmap::clearPendingUpdates() {
+	m_torchlightBfsQueue = {};
+	m_sunlightBfsQueue = {};
+	m_torchlightRemovalBfsQueue = {};
+	m_sunlightRemovalBfsQueue = {};
+}
+
+void ChunkLightmap::updateLights(unsigned budget) {
+	updateTorchlight(budget);
+	updateSunlight(budget);
+	if (hasPendingUpdates()) m_chunk->world().addChunkToUpdate(m_chunk);
+}
+
+void ChunkLightmap::updateTorchlight(unsigned &budget) {
+	while (budget && !m_torchlightRemovalBfsQueue.empty()) {
+		--budget;
 		LightRemovalNode node = m_torchlightRemovalBfsQueue.front();
 		m_torchlightRemovalBfsQueue.pop();
 
@@ -122,7 +136,8 @@ void ChunkLightmap::updateTorchlight() {
 		}
 	}
 
-	while (!m_torchlightBfsQueue.empty()) {
+	while (budget && !m_torchlightBfsQueue.empty()) {
+		--budget;
 		LightNode node = m_torchlightBfsQueue.front();
 		m_torchlightBfsQueue.pop();
 
@@ -152,8 +167,9 @@ void ChunkLightmap::updateTorchlight() {
 	}
 }
 
-void ChunkLightmap::updateSunlight() {
-	while (!m_sunlightRemovalBfsQueue.empty()) {
+void ChunkLightmap::updateSunlight(unsigned &budget) {
+	while (budget && !m_sunlightRemovalBfsQueue.empty()) {
+		--budget;
 		LightRemovalNode node = m_sunlightRemovalBfsQueue.front();
 		m_sunlightRemovalBfsQueue.pop();
 
@@ -179,7 +195,8 @@ void ChunkLightmap::updateSunlight() {
 		}
 	}
 
-	while (!m_sunlightBfsQueue.empty()) {
+	while (budget && !m_sunlightBfsQueue.empty()) {
+		--budget;
 		LightNode node = m_sunlightBfsQueue.front();
 		m_sunlightBfsQueue.pop();
 

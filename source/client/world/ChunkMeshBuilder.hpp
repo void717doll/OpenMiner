@@ -28,6 +28,9 @@
 #define CHUNKMESHBUILDER_HPP_
 
 #include <thread/ThreadPool.hpp>
+#include <deque>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "client/world/mesh/ChunkMeshBuildingJob.hpp"
 
@@ -36,6 +39,9 @@ class ClientWorld;
 class ChunkMeshBuilder {
 	public:
 		ChunkMeshBuilder(ClientWorld &world) : m_world(world) {}
+		~ChunkMeshBuilder();
+		void remove(const Vector3i &position);
+		void clear();
 
 		void addMeshBuildingJob(const Chunk &chunk, const TextureAtlas &textureAtlas);
 
@@ -45,6 +51,12 @@ class ChunkMeshBuilder {
 		static ChunkMeshBuildingJob *buildChunkMesh(ChunkMeshBuildingJob *job);
 
 		ClientWorld &m_world;
+		thread::ThreadPool m_workers{std::min(2u, std::max(1u, std::thread::hardware_concurrency() / 2))};
+		std::deque<Vector3i> m_pending;
+		std::unordered_set<Vector3i> m_pendingSet;
+		std::unordered_set<Vector3i> m_active;
+		std::unordered_map<Vector3i, u64> m_revisions;
+		u64 m_nextRevision = 0;
 
 		std::vector<thread::ThreadPool::TaskFuture<ChunkMeshBuildingJob *>> m_futures;
 };

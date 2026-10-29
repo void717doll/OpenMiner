@@ -76,7 +76,10 @@ void Client::update() {
 	// callbacks may remove the state that owns this client.
 	auto session = m_session;
 	Network::Packet packet;
-	while (session->receiveOnClient(packet)) {
+	auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(2);
+	unsigned processed = 0;
+	while (processed < 64 && std::chrono::steady_clock::now() < deadline && session->receiveOnClient(packet)) {
+		++processed;
 		Network::Command command;
 		packet >> command;
 		if (!packet)

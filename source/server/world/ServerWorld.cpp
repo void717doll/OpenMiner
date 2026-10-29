@@ -33,6 +33,9 @@
 #include "server/core/ServerConfig.hpp"
 #include "server/network/ServerCommandHandler.hpp"
 #include "server/world/ServerPlayer.hpp"
+#include <array>
+#include <chrono>
+
 #include "server/world/ServerWorld.hpp"
 #include "common/world/BetaPlayerMovement.hpp"
 
@@ -103,6 +106,9 @@ void ServerWorld::updatePlayerChunks(ServerPlayer &player, s32 cx, s32 cy, s32 c
 	Vector3i currentChunk{cx, cy, cz};
 
 	player.sentChunks.clear();
+	m_chunkSendRequestQueue = {};
+	m_queuedChunks.clear();
+	m_queuedChunks.emplace(currentChunk);
 	m_chunkSendRequestQueue.emplace(currentChunk, player, GameClock::getInstance().getTicks(true));
 
 	std::list<Vector3i> chunksToRemove;
@@ -210,100 +216,54 @@ bool ServerWorld::generateChunk(ServerChunk &chunk) {
 }
 
 void ServerWorld::processSendRequests() {
-	// Debug variables
-	// u64 chunksGenerated = 0;
-	// u64 chunksSent = 0;
-	// u64 chunksTooOld = 0;
-
-	// if (!m_chunkSendRequestQueue.empty())
-	// 	logDebug() << "Processing send requests...";
-
-	u64 start = GameClock::getInstance().getTicks(true);
-	u64 now = start;
-	while (now - start < 500 && !m_chunkSendRequestQueue.empty()) {
-		auto &[chunkPos, player, timestamp] = m_chunkSendRequestQueue.front();
-
-		bool isTooOld = now - timestamp >= 10000;
-		if (!isTooOld && player.sentChunks.find(chunkPos) == player.sentChunks.end()) {
-			glm::dvec3 chunkWorldPos{
-				chunkPos.x * CHUNK_WIDTH + CHUNK_WIDTH / 2,
-				chunkPos.y * CHUNK_DEPTH + CHUNK_DEPTH / 2,
-				chunkPos.z * CHUNK_HEIGHT + CHUNK_HEIGHT / 2
-			};
-
-			glm::dvec3 playerPos{
-				player.x(),
-				player.y(),
-				player.z()
-			};
-
-			// bool addChunkBackToQueue = false;
-			if (glm::length(playerPos - chunkWorldPos) < (ServerConfig::renderDistance + 2) * CHUNK_WIDTH) {
-				if (player.isOnline() && !player.isChunkLoaded(chunkPos)) {
-					ServerChunk &chunk = getOrCreateChunk(chunkPos.x, chunkPos.y, chunkPos.z);
-
-					// chunksGenerated +=
-					generateChunk(chunk);
-					generateChunk((ServerChunk &)*chunk.getSurroundingChunk(Chunk::West));
-					generateChunk((ServerChunk &)*chunk.getSurroundingChunk(Chunk::East));
-					generateChunk((ServerChunk &)*chunk.getSurroundingChunk(Chunk::South));
-					generateChunk((ServerChunk &)*chunk.getSurroundingChunk(Chunk::North));
-					generateChunk((ServerChunk &)*chunk.getSurroundingChunk(Chunk::Bottom));
-					generateChunk((ServerChunk &)*chunk.getSurroundingChunk(Chunk::Top));
-
-					if (!chunk.areAllNeighboursInitialized())
-						logWarning() << "All neighbours of chunk" << chunkPos << "aren't initialized when they should be";
-					else {
-						chunk.lightmap().updateLights();
-						chunk.setReadyToSend();
-
-						addChunkToProcess(&chunk);
-						player.addLoadedChunk(chunkPos);
-
-						// ++chunksSent;
-					}
+	using Clock = std::chrono::steady_clock;
+	auto deadline = Clock::now() + std::chrono::milliseconds(3);
+	unsigned generated = 0;
+	unsigned processed = 0;
+	while (!m_chunkSendRequestQueue.empty() && processed < 32 && Clock::now() < deadline) {
+		auto &request = m_chunkSendRequestQueue.front();
+		Vector3i position = request.chunkPos;
+		auto &player = request.player;
+		bool expired = GameClock::getInstance().getTicks(true) - request.timestamp >= 10000;
+		Vector3d center{position.x * CHUNK_WIDTH + CHUNK_WIDTH / 2.0,
+			position.y * CHUNK_DEPTH + CHUNK_DEPTH / 2.0, position.z * CHUNK_HEIGHT + CHUNK_HEIGHT / 2.0};
+		Vector3d difference = center - Vector3d{player.x(), player.y(), player.z()};
+		bool inRange = difference.length() < (ServerConfig::renderDistance + 2) * CHUNK_WIDTH;
+		if (!expired && inRange && player.isOnline() && !player.sentChunks.count(position)) {
+			if (!player.isChunkLoaded(position)) {
+				ServerChunk &chunk = getOrCreateChunk(position.x, position.y, position.z);
+				std::array<Chunk *, 7> required{{&chunk, chunk.getSurroundingChunk(Chunk::West),
+					chunk.getSurroundingChunk(Chunk::East), chunk.getSurroundingChunk(Chunk::South),
+					chunk.getSurroundingChunk(Chunk::North), chunk.getSurroundingChunk(Chunk::Bottom),
+					chunk.getSurroundingChunk(Chunk::Top)}};
+				bool ready = true;
+				for (Chunk *neighbor : required) {
+					if (neighbor->isInitialized()) continue;
+					if (!generated && Clock::now() < deadline) {
+						generateChunk(static_cast<ServerChunk &>(*neighbor));
+						++generated;
+					} else { ready = false; break; }
 				}
-
-				// logDebug() << "OK for chunk" << chunkPos.x << chunkPos.y << chunkPos.z << ":" << glm::length(playerPos - chunkWorldPos) << "<" << (int)ServerConfig::renderDistance * CHUNK_WIDTH;
-
-				auto addChunkToQueue = [this](Vector3i pos, s8 dx, s8 dy, s8 dz, ServerPlayer &player) {
-					pos.x += dx; pos.y += dy; pos.z += dz;
-					m_chunkSendRequestQueue.emplace(pos, player, GameClock::getInstance().getTicks(true));
-				};
-
-				addChunkToQueue(chunkPos,  1,  0,  0, player);
-				addChunkToQueue(chunkPos, -1,  0,  0, player);
-				addChunkToQueue(chunkPos,  0,  1,  0, player);
-				addChunkToQueue(chunkPos,  0, -1,  0, player);
-				addChunkToQueue(chunkPos,  0,  0,  1, player);
-				addChunkToQueue(chunkPos,  0,  0, -1, player);
+				// keep the request until its neighbors can supply light and mesh borders.
+				if (!ready) break;
+				chunk.lightmap().updateLights();
+				chunk.setReadyToSend();
+				addChunkToProcess(&chunk);
+				player.addLoadedChunk(position);
 			}
-
-			// if (addChunkBackToQueue)
-			// 	m_chunkSendRequestQueue.emplace(chunkPos, player, timestamp);
-			// else
-				player.sentChunks.emplace(chunkPos);
+			player.sentChunks.emplace(position);
+			for (const Vector3i &offset : {Vector3i{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}, {0,0,-1}}) {
+				Vector3i neighbor = position + offset;
+				if (!player.sentChunks.count(neighbor) && m_queuedChunks.emplace(neighbor).second)
+					m_chunkSendRequestQueue.emplace(neighbor, player, GameClock::getInstance().getTicks(true));
+			}
 		}
-
-		// if (isTooOld)
-		// 	++chunksTooOld;
-
+		m_queuedChunks.erase(position);
 		m_chunkSendRequestQueue.pop();
-
-		now = GameClock::getInstance().getTicks(true);
+		++processed;
 	}
-
-	// if (now - start > 0) {
-	// 	logDebug() << "Done in" << now - start << "ms for dim" << m_dimension.id()
-	// 		<< "| Gen:" << chunksGenerated
-	// 		<< "| Sent:" << chunksSent
-	// 		// << "| BTQ:" << chunksBackToQueue
-	// 		<< "| Old:" << chunksTooOld;
-	// 		// << "| QLen:" << startQueueSize << "->" << m_chunkSendRequestQueue.size();
-	// }
 }
 
-// Please update 'docs/lua-api-cpp.md' if you change this
 void ServerWorld::initUsertype(sol::state &lua) {
 	lua.new_usertype<ServerWorld>("ServerWorld",
 		sol::base_classes, sol::bases<World>(),

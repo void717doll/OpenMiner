@@ -54,6 +54,7 @@ class ClientWorld : public World, public Drawable {
 		void checkPlayerChunk(double playerX, double playerY, double playerZ);
 
 		void clear();
+		const TextureAtlas &textureAtlas() const { return m_textureAtlas; }
 
 		void changeDimension(u16 dimensionID);
 
