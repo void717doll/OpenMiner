@@ -778,3 +778,25 @@ mod:block {
 dofile("blocks/workbench.lua")
 dofile("blocks/furnace.lua")
 dofile("blocks/door.lua")
+
+mod:block {
+	id = "bedrock",
+	name = "Bedrock",
+	tiles = "bedrock.png",
+	hardness = math.huge,
+}
+
+mod:block {
+	id = "gravel",
+	name = "Gravel",
+	tiles = "gravel.png",
+	groups = {om_material_dirt = 1},
+}
+
+mod:block {
+	id = "wool",
+	name = "White Wool",
+	tiles = "white_wool.png",
+	hardness = 0.8,
+	groups = {om_material_wool = 1},
+}

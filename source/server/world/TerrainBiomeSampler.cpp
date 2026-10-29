@@ -29,7 +29,7 @@
 #include "server/world/ServerWorld.hpp"
 #include "server/world/TerrainBiomeSampler.hpp"
 
-TerrainBiomeSampler::TerrainBiomeSampler(const Dimension &dimension, s32 seed) : m_dimension(dimension) {
+TerrainBiomeSampler::TerrainBiomeSampler(const Dimension &dimension, s32 seed) : m_dimension(dimension), m_climate(seed) {
 	for (u8 i = 0; i < biomeParamCount; i++) {
 		m_paramNoises.emplace_back();
 
@@ -42,11 +42,16 @@ TerrainBiomeSampler::TerrainBiomeSampler(const Dimension &dimension, s32 seed) :
 }
 
 void TerrainBiomeSampler::setSeed(s32 seed) {
+	m_climate = retro::Climate(seed);
 	for (std::size_t i = 0; i < m_paramNoises.size(); ++i)
 		m_paramNoises[i].SetSeed(s32(u32(seed) + u32(i)));
 }
 
 u16 TerrainBiomeSampler::getBiomeIndexAt(s32 x, s32 y) {
+	if (m_dimension.id() == 0) {
+		auto climate = m_climate.sample(x, y, 1, 1);
+		return getBetaBiomeIndex(climate.biomes[0]);
+	}
 	// TODO with a lot of biomes, perhaps we want an R-Tree or similar, instead of a long loop.
 	// Should also finish solving for analytic blending, or find completely separate solution such as isotropically-modified genlayer
 	// If we continue with temp/precip/etc params, need to write a weighted lloyd smoother so biomes becone fairly represented.
@@ -71,4 +76,12 @@ u16 TerrainBiomeSampler::getBiomeIndexAt(s32 x, s32 y) {
 	}
 
 	return decidedBiomeIndex;
+}
+
+u16 TerrainBiomeSampler::getBetaBiomeIndex(retro::Biome biome) const {
+	std::string id = std::string("default:") + retro::biomeName(biome);
+	for (const auto &allowed : m_dimension.biomes()) {
+		if (allowed == id) return Registry::getInstance().getBiomeFromStringID(id).id();
+	}
+	return m_dimension.biomes().empty() ? 0 : Registry::getInstance().getBiomeFromStringID(m_dimension.biomes().front()).id();
 }

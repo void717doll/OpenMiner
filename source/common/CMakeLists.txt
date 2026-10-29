@@ -135,6 +135,10 @@ set(HEADER_FILES
 	world/Dimension.hpp
 	world/Heightmap.hpp
 	world/RetroTerrain.hpp
+	world/RetroRandom.hpp
+	world/RetroClimate.hpp
+	world/RetroCaves.hpp
+	world/RetroNether.hpp
 	world/Key.hpp
 	world/PlacementEntry.hpp
 	world/Player.hpp

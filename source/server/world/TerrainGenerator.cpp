@@ -30,7 +30,6 @@
 #include "common/world/Dimension.hpp"
 #include "server/world/ServerChunk.hpp"
 #include "server/world/TerrainGenerator.hpp"
-#include "server/world/CaveTunnels.hpp"
 
 #include <array>
 
@@ -42,13 +41,6 @@ TerrainGenerator::TerrainGenerator(Heightmap &heightmap, const Dimension &dimens
 
 void TerrainGenerator::generate(ServerChunk &chunk) {
 	fastNoiseGeneration(chunk);
-	HeightmapChunk &heightmap = m_heightmap.getOrCreateChunk(chunk.x(), chunk.y());
-	caves::generate(m_seed, m_dimensionID, chunk.x() * CHUNK_WIDTH, chunk.y() * CHUNK_DEPTH,
-		chunk.z() * CHUNK_HEIGHT, CHUNK_WIDTH, CHUNK_DEPTH, CHUNK_HEIGHT,
-		[&](int x, int y, int z) {
-			if (z + chunk.z() * CHUNK_HEIGHT < heightmap.landHeightAt(x, y) - 4)
-				chunk.setBlockRaw(x, y, z, 0);
-		});
 }
 
 void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
@@ -63,56 +55,62 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 	Chunk *topChunk = chunk.getSurroundingChunk(Chunk::Top);
 	for(s8 y = 0 ; y < CHUNK_DEPTH ; y++) {
 		for(s8 x = 0 ; x < CHUNK_WIDTH ; x++) {
-			u16 biomeIndex = m_biomeSampler.getBiomeIndexAt(x + chunk.x() * CHUNK_WIDTH, y + chunk.y() * CHUNK_DEPTH);
+			u16 biomeIndex = m_dimensionID == 0 ? m_biomeSampler.getBetaBiomeIndex(heightmap.biomeAt(x, y))
+				: m_biomeSampler.getBiomeIndexAt(x + chunk.x() * CHUNK_WIDTH, y + chunk.y() * CHUNK_DEPTH);
 			const Biome &biome = Registry::getInstance().getBiome(biomeIndex);
 
 			// Land height
 			double h = heightmap.landHeightAt(x, y);
 
-			// Land blocks
-			for(s8 z = 0 ; z < CHUNK_HEIGHT ; z++) {
-				// Are we above "ground" level?
-				if (heightmap.densityAt(x, y, z + chunk.z() * CHUNK_HEIGHT) <= 0) {
-					// If we are not yet up to sea level, fill with water blocks
-					if (z + chunk.z() * CHUNK_HEIGHT < SEALEVEL) {
-						chunk.setBlockRaw(x, y, z, biome.getLiquidBlockID());
+			for (s8 z = 0; z < CHUNK_HEIGHT; ++z) {
+				int worldZ = z + chunk.z() * CHUNK_HEIGHT;
+				bool isGeneratingTopBlock = worldZ == h && worldZ >= SEALEVEL;
+				if (m_dimensionID == 0 || m_dimensionID == 1) {
+					u8 kind = heightmap.blockAt(x, y, worldZ);
+					u16 block = 0;
+					const char *id = nullptr;
+					switch (kind) {
+						case 1: block = biome.getDeepBlockID(); break;
+						case 2: block = biome.getTopBlockID(); break;
+						case 3: block = biome.getGroundBlockID(); break;
+						case 7: id = "default:bedrock"; break;
+						case 8: case 9: block = biome.getLiquidBlockID(); break;
+						case 10: case 11: id = "default:lava"; break;
+						case 12: id = "default:sand"; break;
+						case 13: id = "default:gravel"; break;
+						case 24: id = "default:sandstone"; break;
+						case 79: id = "default:ice"; break;
+						case 87: id = "default:netherrack"; break;
+						case 88: id = "default:soul_sand"; break;
 					}
-					// Otherwise we are in the air
-					else if (chunk.getBlock(x, y, z) == 0 && z == CHUNK_HEIGHT - 1) {
-						// Add sunlight at the top of the chunk if possible
-						chunk.lightmap().addSunlight(x, y, z, 15);
+					if (id) {
+						auto &registry = Registry::getInstance();
+						block = registry.hasBlock(id) ? registry.getBlockFromStringID(id).id() : biome.getDeepBlockID();
 					}
+					// preserve decorations previously written by neighboring chunks.
+					if (block || !chunk.getBlock(x, y, z)) chunk.setBlockRaw(x, y, z, block);
+				}
+				else if (heightmap.densityAt(x, y, worldZ) <= 0) {
+					if (worldZ < SEALEVEL) chunk.setBlockRaw(x, y, z, biome.getLiquidBlockID());
 				}
 				else {
-					bool isGeneratingTopBlock = z + chunk.z() * CHUNK_HEIGHT == h && z + chunk.z() * CHUNK_HEIGHT > SEALEVEL - 1;
-					if (isGeneratingTopBlock)
-						chunk.setBlockRaw(x, y, z, biome.getTopBlockID());
-					else if (z + chunk.z() * CHUNK_HEIGHT <= SEALEVEL - 1 && h < SEALEVEL && z + chunk.z() * CHUNK_HEIGHT > h - 3)
+					if (isGeneratingTopBlock) chunk.setBlockRaw(x, y, z, biome.getTopBlockID());
+					else if (worldZ <= SEALEVEL - 1 && h < SEALEVEL && worldZ > h - 3)
 						chunk.setBlockRaw(x, y, z, biome.getBeachBlockID());
-					else if (z + chunk.z() * CHUNK_HEIGHT > h - 3)
-						chunk.setBlockRaw(x, y, z, biome.getGroundBlockID());
-					else
-						chunk.setBlockRaw(x, y, z, biome.getDeepBlockID());
-
-
-					// Populate ores.
-					generateOres(chunk, x, y, z, biome, rand);
-
-					// Generate trees, flora and portals
-					if (isGeneratingTopBlock && chunk.getBlock(x, y, z)) {
-						// Try to place a tree
-						bool placedTree = tryPlaceTree(chunk, x, y, z + 1, biome, rand);
-
-						// Otherwise try to place flora.
-						bool placedFlora = false;
-						if (!placedTree)
-							placedFlora = tryPlaceFlora(chunk, x, y, z + 1, biome, rand);
-
-						// Or a portal
-						if (!placedTree && !placedFlora)
-							tryPlacePortal(chunk, x, y, z + 1, biome, rand);
+					else if (worldZ > h - 3) chunk.setBlockRaw(x, y, z, biome.getGroundBlockID());
+					else chunk.setBlockRaw(x, y, z, biome.getDeepBlockID());
+				}
+				if (chunk.getBlock(x, y, z) == biome.getDeepBlockID()) generateOres(chunk, x, y, z, biome, rand);
+				if (isGeneratingTopBlock && chunk.getBlock(x, y, z) == biome.getTopBlockID()) {
+					bool placedTree = tryPlaceTree(chunk, x, y, z + 1, biome, rand);
+					bool placedFlora = !placedTree && tryPlaceFlora(chunk, x, y, z + 1, biome, rand);
+					if (!placedTree && !placedFlora) tryPlacePortal(chunk, x, y, z + 1, biome, rand);
+					if (m_dimensionID == 0 && heightmap.temperatureAt(x, y) < 0.5 && !chunk.getBlock(x, y, z + 1)) {
+						auto &registry = Registry::getInstance();
+						if (registry.hasBlock("default:snow")) chunk.setBlockRaw(x, y, z + 1, registry.getBlockFromStringID("default:snow").id());
 					}
 				}
+				if (!chunk.getBlock(x, y, z) && z == CHUNK_HEIGHT - 1) chunk.lightmap().addSunlight(x, y, z, 15);
 
 				if (topChunk && topChunk->isInitialized()) {
 					u8 sunlightLevel = topChunk->lightmap().getSunlight(x, y, 0);

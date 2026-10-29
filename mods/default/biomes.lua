@@ -140,3 +140,37 @@ mod:biome {
 	},
 }
 
+
+-- keep earlier biome ids stable for saved worlds.
+local beta_biomes = {
+	{"rainforest", "Rainforest", 0.03, 0.3},
+	{"swampland", "Swampland", 0.01, 0.15},
+	{"seasonal_forest", "Seasonal Forest", 0.02, 0.2},
+	{"forest", "Forest", 0.025, 0.2},
+	{"savanna", "Savanna", 0.001, 0.15},
+	{"shrubland", "Shrubland", 0.005, 0.2},
+	{"taiga", "Taiga", 0.02, 0.1},
+	{"plains", "Plains", 0.001, 0.25},
+	{"tundra", "Tundra", 0.001, 0.05},
+	{"ice_desert", "Ice Desert", 0, 0},
+}
+for _, biome in ipairs(beta_biomes) do
+	local sand = biome[1] == "ice_desert"
+	mod:biome {
+		id = biome[1],
+		name = biome[2],
+		params = {temperature = 0.5, precipitation = 0.5},
+		blocks = {
+			top = sand and "default:sand" or "default:grass",
+			ground = sand and "default:sand" or "default:dirt",
+			deep = "default:stone", beach = "default:sand", liquid = "default:water",
+			portal = "default:portal", portal_frame = "default:obsidian",
+		},
+		trees = biome[3] > 0 and {{type = "default:oak", probability = biome[3]}} or {},
+		flora = biome[4] > 0 and {{block = "default:tallgrass", spawns_on = "default:grass", probability = biome[4]}} or {},
+		ores = {
+			{block = "default:coal_ore", probability = 0.001, size = 2, gen_type = "flood_fill"},
+			{block = "default:iron_ore", probability = 0.003, size = 8, gen_type = "random_walk"},
+		},
+	}
+end

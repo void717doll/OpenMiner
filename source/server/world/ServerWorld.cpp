@@ -36,7 +36,7 @@
 ServerWorld::ServerWorld(PlayerList &players, const Dimension &dimension, s32 seed)
 	: m_players(players),
 	  m_dimension(dimension),
-	  m_heightmap(seed),
+	  m_heightmap(seed, dimension.id() == 1),
 	  m_terrainGenerator(m_heightmap, dimension, seed),
 	  m_scene(players),
 	  m_seed(seed)

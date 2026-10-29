@@ -1,15 +1,12 @@
 #ifndef WORLDSYSTEMSTESTS_HPP_
 #define WORLDSYSTEMSTESTS_HPP_
 
-#include <set>
-#include <tuple>
 #include <cxxtest/TestSuite.h>
 
 #include "common/core/Registry.hpp"
 #include "common/world/WorldCollision.hpp"
 #include "common/world/Heightmap.hpp"
 #include "common/world/Player.hpp"
-#include "server/world/CaveTunnels.hpp"
 
 class WorldSystemsTests : public CxxTest::TestSuite {
 	public:
@@ -44,6 +41,15 @@ class WorldSystemsTests : public CxxTest::TestSuite {
 			TS_ASSERT(constraints.check(world, {1, 1, 1}));
 			TS_ASSERT(!constraints.check(world, {2, 2, 1}));
 			TS_ASSERT(!constraints.check(world, {1, 1, 0}));
+		}
+
+		void testMobRaySelection() {
+			DoubleBox box{2, -0.5, 0, 1, 1, 2};
+			TS_ASSERT_EQUALS(collision::rayDistance({0, 0, 1}, {1, 0, 0}, box, 3), 2);
+			TS_ASSERT_EQUALS(collision::rayDistance({0, 1, 1}, {1, 0, 0}, box, 3), -1);
+			TS_ASSERT_EQUALS(collision::rayDistance({0, 0, 1}, {-1, 0, 0}, box, 3), -1);
+			TS_ASSERT_EQUALS(collision::rayDistance({0, 0, 1}, {1, 0, 0}, box, 1), -1);
+			TS_ASSERT_EQUALS(collision::rayDistance({2.5, 0, 1}, {0, 0, 1}, box, 3), 0);
 		}
 
 		void testSweptCollision() {
@@ -94,18 +100,6 @@ class WorldSystemsTests : public CxxTest::TestSuite {
 				TS_ASSERT_EQUALS(reused.getHighestBlockAt(x, 20), fresh.getHighestBlockAt(x, 20));
 		}
 
-		void testCavesAcrossChunkBoundaries() {
-			using Cell = std::tuple<int, int, int>;
-			std::set<Cell> together, split;
-			caves::generate(2, 0, -16, 0, 0, 32, 16, 32,
-				[&](int x, int y, int z) { together.emplace(x - 16, y, z); });
-			for (int start : {-16, 0}) {
-				caves::generate(2, 0, start, 0, 0, 16, 16, 32,
-					[&](int x, int y, int z) { split.emplace(x + start, y, z); });
-			}
-			TS_ASSERT(!together.empty());
-			TS_ASSERT(together == split);
-		}
 };
 
 #endif // WORLDSYSTEMSTESTS_HPP_

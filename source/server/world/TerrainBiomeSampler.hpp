@@ -32,6 +32,7 @@
 #include <FastNoiseLite.hpp>
 
 #include "common/core/IntTypes.hpp"
+#include "common/world/RetroClimate.hpp"
 
 class Dimension;
 
@@ -40,6 +41,7 @@ class TerrainBiomeSampler {
 		TerrainBiomeSampler(const Dimension &dimension, s32 seed);
 
 		u16 getBiomeIndexAt(s32 x, s32 y);
+		u16 getBetaBiomeIndex(retro::Biome biome) const;
 		void setSeed(s32 seed);
 
 		// std::vector<WeightedIndex> getWeightedBiomeIndicesAt(double x, double y);
@@ -51,6 +53,7 @@ class TerrainBiomeSampler {
 		const Dimension &m_dimension;
 
 		std::vector<FastNoiseLite> m_paramNoises;
+		retro::Climate m_climate;
 };
 
 #endif // TERRAINBIOMESAMPLER_HPP_

@@ -26,6 +26,35 @@ class RetroTerrainTests : public CxxTest::TestSuite {
 			}
 		}
 
+		void testBetaClimateOracle() {
+			retro::Climate climate(0);
+			auto map = climate.sample(0, 0);
+			TS_ASSERT_DELTA(map.temperature[0], 0.91868674455220250, 1e-14);
+			TS_ASSERT_DELTA(map.humidity[0], 0.51627697992666610, 1e-14);
+			TS_ASSERT_EQUALS(int(map.biomes[0]), int(retro::Biome::Forest));
+			TS_ASSERT_EQUALS(int(retro::lookupBiome(0.05, 0.9)), int(retro::Biome::Tundra));
+			TS_ASSERT_EQUALS(int(retro::lookupBiome(1, 0.1)), int(retro::Biome::Desert));
+			TS_ASSERT_EQUALS(int(retro::lookupBiome(1, 1)), int(retro::Biome::Rainforest));
+		}
+
+		void testBetaSurfaceOracle() {
+			const std::uint64_t expected[] = {
+				0xebd5180d10a0dd38ULL, 0x4ba668733554f410ULL, 0xb6b13a50b1a3c3feULL,
+				0xe5d746bae3d9f4e6ULL, 0x04cd4fbc6c001876ULL, 0xc41785bcb0975f53ULL,
+				0xac1b9626f8d55035ULL, 0x7a825ed28a0e46fcULL, 0x644d12f35d1660faULL
+			};
+			std::size_t sample = 0;
+			for (int seed : {0, 42, -99}) {
+				retro::Terrain terrain(seed);
+				for (auto position : {std::array<int, 2>{0, 0}, {-1, 2}, {17, -8}}) {
+					auto blocks = terrain.surface(position[0], position[1]);
+					std::uint64_t hash = 1469598103934665603ULL;
+					for (auto block : blocks) hash = (hash ^ block) * 1099511628211ULL;
+					TS_ASSERT_EQUALS(hash, expected[sample++]);
+				}
+			}
+		}
+
 };
 
 #endif // RETROTERRAINTESTS_HPP_

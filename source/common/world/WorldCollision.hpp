@@ -40,6 +40,27 @@ inline double clipAxis(const DoubleBox &box, const DoubleBox &obstacle, int axis
 	return movement;
 }
 
+inline double rayDistance(const Vector3d &origin, const Vector3d &direction, const DoubleBox &box, double limit) {
+	double low[3] = {box.x, box.y, box.z};
+	double high[3] = {box.x + box.sizeX, box.y + box.sizeY, box.z + box.sizeZ};
+	double start[3] = {origin.x, origin.y, origin.z};
+	double ray[3] = {direction.x, direction.y, direction.z};
+	double enter = 0, leave = limit;
+	for (int axis = 0; axis < 3; ++axis) {
+		if (std::abs(ray[axis]) < 1e-9) {
+			if (start[axis] < low[axis] || start[axis] > high[axis]) return -1;
+			continue;
+		}
+		double a = (low[axis] - start[axis]) / ray[axis];
+		double b = (high[axis] - start[axis]) / ray[axis];
+		if (a > b) std::swap(a, b);
+		enter = std::max(enter, a);
+		leave = std::min(leave, b);
+		if (enter > leave) return -1;
+	}
+	return enter;
+}
+
 inline Vector3d move(const World &world, DoubleBox box, Vector3d movement) {
 	// resolve vertical motion first, then slide along each horizontal axis.
 	for (int axis : {2, 0, 1}) {

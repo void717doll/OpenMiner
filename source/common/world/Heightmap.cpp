@@ -25,14 +25,28 @@
  * =====================================================================================
  */
 #include "common/world/Heightmap.hpp"
+#include "common/world/RetroCaves.hpp"
 #include "common/world/World.hpp"
 
 void HeightmapChunk::generate() {
-	m_density = m_heightmap.terrain().density(m_x, m_y);
+	if (m_heightmap.isNether()) {
+		m_density = m_heightmap.netherTerrain().density(m_x, m_y);
+		m_blocks = m_heightmap.netherTerrain().surface(m_x, m_y, m_density);
+	}
+	else {
+		m_climate = m_heightmap.terrain().climate().sample(m_x * 16, m_y * 16);
+		m_density = m_heightmap.terrain().density(m_x, m_y, m_climate);
+		m_blocks = m_heightmap.terrain().surface(m_x, m_y, m_climate, m_density);
+	}
+	retro::Caves::carve(m_heightmap.terrain().seed(), m_x, m_y, m_blocks, m_heightmap.isNether());
+	refreshHeight();
+}
+
+void HeightmapChunk::refreshHeight() {
 	for (int y = 0; y < CHUNK_DEPTH; ++y) {
 		for (int x = 0; x < CHUNK_WIDTH; ++x) {
 			int height = 127;
-			while (height > 0 && densityAt(x, y, height) <= 0) --height;
+			while (height > 0 && (blockAt(x, y, height) == 0 || blockAt(x, y, height) == 9)) --height;
 			m_map[x + y * CHUNK_WIDTH] = height;
 		}
 	}
@@ -46,7 +60,7 @@ void HeightmapChunk::setLandHeight(s8 x, s8 y, s32 height) {
 	m_map[x + y * CHUNK_WIDTH] = height;
 }
 
-Heightmap::Heightmap(s32 seed) : m_terrain(seed) {}
+Heightmap::Heightmap(s32 seed, bool nether) : m_terrain(seed), m_netherTerrain(seed), m_nether(nether) {}
 
 HeightmapChunk &Heightmap::getOrCreateChunk(s32 chunkX, s32 chunkY) {
 	HeightmapChunk *chunk = nullptr;
@@ -83,4 +97,5 @@ int Heightmap::getHighestChunkAt(s32 blockX, s32 blockY) {
 void Heightmap::setSeed(s32 seed) {
 	m_chunks.clear();
 	m_terrain = retro::Terrain(seed);
+	m_netherTerrain = retro::NetherTerrain(seed);
 }
