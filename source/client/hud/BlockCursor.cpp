@@ -383,8 +383,9 @@ void BlockCursor::draw(RenderTarget &target, RenderStates states) const {
 	target.drawElements(m_vbo, m_ibo, 0, 0, states);
 
 	if (m_animationStart > 0) {
-		states.blendFuncColorSrc = BGFX_STATE_BLEND_DST_COLOR;
-		states.blendFuncColorDst = BGFX_STATE_BLEND_ZERO;
+		// refi cracks use transparent pixels, so the overlay must preserve their alpha.
+		states.blendFuncColorSrc = BGFX_STATE_BLEND_SRC_ALPHA;
+		states.blendFuncColorDst = BGFX_STATE_BLEND_INV_SRC_ALPHA;
 
 		states.texture = m_blockDestroyTexture;
 
