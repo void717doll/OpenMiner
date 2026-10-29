@@ -31,9 +31,10 @@
 #include "common/scene/component/RotationComponent.hpp"
 
 #include "client/scene/controller/AnimationController.hpp"
+#include "client/scene/component/ItemVisualComponent.hpp"
 
 void AnimationController::update(entt::registry &registry) {
-	registry.view<PositionComponent, AnimationComponent>().each([](auto, auto &position, auto &animation) {
+	registry.view<PositionComponent, AnimationComponent>(entt::exclude<ItemVisualComponent>).each([](auto, auto &position, auto &animation) {
 		for (auto &it : animation.list) {
 			if (it.type == AnimationType::Translation) {
 				float dx = it.translation.dx;
@@ -67,7 +68,7 @@ void AnimationController::update(entt::registry &registry) {
 		}
 	});
 
-	registry.view<RotationComponent, AnimationComponent>().each([](auto, auto &rotation, auto &animation) {
+	registry.view<RotationComponent, AnimationComponent>(entt::exclude<ItemVisualComponent>).each([](auto, auto &rotation, auto &animation) {
 		for (auto &it : animation.list) {
 			if (it.type == AnimationType::Rotation) {
 				rotation.quat = glm::angleAxis(glm::radians(it.rotation.angle), glm::vec3{it.rotation.axisX, it.rotation.axisY, it.rotation.axisZ}) * rotation.quat;

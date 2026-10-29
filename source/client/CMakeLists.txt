@@ -30,6 +30,7 @@ set(SOURCE_FILES
 	graphics/IndexBuffer.cpp
 	graphics/MobModel.cpp
 	graphics/ItemBillboard.cpp
+	graphics/ItemMeshBuilder.cpp
 	graphics/WieldRenderer.cpp
 	graphics/RectangleShape.cpp
 	graphics/RenderTarget.cpp

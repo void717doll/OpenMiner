@@ -29,6 +29,10 @@ inventory swaps, splitting, shift transfers, ground-item pickups, and death drop
 
 ## loot, health, and saves
 
+nearby items collect within one block of the player body horizontally after their pickup delay. pickup merges compatible stacks across the whole inventory before filling empty slots, including backpack space when the hotbar is full. full inventories leave the drop on the ground; partial pickups keep the remainder.
+
+dropped blocks and items rotate at a fixed 90 degrees per second with a small visual bob. sprites use the same opaque-edge mesh as held items, with enough ground clearance to stay above the floor. rendering interpolates the 20hz physics positions without changing collision or pickup positions.
+
 mob deaths put loot on the ground for pickup, including environmental deaths. sheep shearing also puts wool on the ground. partial pickups keep the remainder. existing health, immediate food healing, container returns, fall/drowning/lava/fire/cactus/suffocation damage, hurt immunity, and automatic respawn remain active. there is no hunger bar.
 
 accepted damage sends a separate hurt event, including fatal damage before automatic respawn. the client plays the hurt cue and briefly tilts the camera; hearts blink between the previous and current amounts after a hit. health synchronization and healing do not trigger hurt sounds. equipment breakage also has its own event, so moving or dropping a tool does not play a break sound.

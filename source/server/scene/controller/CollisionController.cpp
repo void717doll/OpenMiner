@@ -42,16 +42,23 @@ void CollisionController::update(entt::registry &registry) {
 		const auto *body = registry.try_get<PhysicalComponent>(entity);
 		if (body && body->pickupDelay) return;
 		for (auto &it : m_players) {
-			if (!it.second.isOnline() || !it.second.isReady()) continue;
+			if (!it.second.isOnline() || !it.second.isReady() || !it.second.health()) continue;
 			if (it.second.dimension() == position.dimension) {
 				DoubleBox hitbox = box + Vector3d{position.x, position.y, position.z};
 				DoubleBox playerHitbox = it.second.hitbox() + Vector3d{it.second.x(), it.second.y(), it.second.z()};
+				if (registry.all_of<ItemStack>(entity)) {
+					playerHitbox.x -= 1;
+					playerHitbox.y -= 1;
+					playerHitbox.sizeX += 2;
+					playerHitbox.sizeY += 2;
+				}
 				if (hitbox.intersects(playerHitbox)) {
 					EntityWrapper entityWrapper{entity, registry};
 
 					auto &entityCallbackContainer = Registry::getInstance().getEntityCallbackContainer(id);
 					if (entityCallbackContainer.collisionCallback.valid())
 						entityCallbackContainer.collisionCallback(entityWrapper, it.second, *m_server);
+					if (!registry.valid(entity)) break;
 				}
 			}
 		}
