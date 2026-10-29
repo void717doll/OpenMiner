@@ -29,3 +29,5 @@ all 256 manifest entries were checked for readable png data, destination coverag
 armor uses refi leather, chain, iron, gold and diamond icons and worn atlases. tnt and gravel use `alternate_textures/texture_alts`; ferns, roses and mushrooms use the main pack. imported paths and hashes are recorded in the manifest.
 
 copper ore uses the complete `high_vis_ores/mcl_copper_ore_highvis_alt.png` alternate; the main ore sprite is an overlay. its ingot and five tools use the supplied `default_mcl_core` copper textures unchanged.
+
+the armor hud uses unchanged `textures/HUD/hbarmor_icon.png` and `hbarmor_bgicon.png`, displayed at the same compact size as hearts. breaking cracks use alpha blending to preserve the transparent areas of the supplied overlay.

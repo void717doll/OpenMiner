@@ -34,6 +34,7 @@
 #include "client/hud/DebugProfilerWindow.hpp"
 #include "client/hud/Hotbar.hpp"
 #include "client/hud/HeartBar.hpp"
+#include "client/hud/ArmorBar.hpp"
 #include "client/hud/Minimap.hpp"
 #include "client/graphics/Shader.hpp"
 #include "client/graphics/View.hpp"
@@ -80,6 +81,7 @@ class HUD : public Transformable, public Drawable {
 
 		Text m_fpsText;
 		HeartBar m_hearts;
+		ArmorBar m_armor;
 
 		Minimap m_minimap;
 

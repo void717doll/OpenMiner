@@ -71,6 +71,7 @@ set(SOURCE_FILES
 	hud/DebugProfilerWindow.cpp
 	hud/HUD.cpp
 	hud/HeartBar.cpp
+	hud/ArmorBar.cpp
 	hud/Hotbar.cpp
 	hud/Minimap.cpp
 
@@ -174,6 +175,7 @@ set(HEADER_FILES
 	hud/DebugProfilerWindow.hpp
 	hud/HUD.hpp
 	hud/HeartBar.hpp
+	hud/ArmorBar.hpp
 	hud/Hotbar.hpp
 	hud/Minimap.hpp
 

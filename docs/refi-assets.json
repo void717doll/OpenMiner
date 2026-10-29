@@ -4687,6 +4687,36 @@
         16,
         16
       ]
+    },
+    {
+      "destination": "resources/textures/armor_full.png",
+      "source": "textures/HUD/hbarmor_icon.png",
+      "operation": "copy",
+      "source_sha256": "bc9b110b096324e0771106242fa577a63ff4c04c7b45e68fbbe1b569f395d787",
+      "output_sha256": "bc9b110b096324e0771106242fa577a63ff4c04c7b45e68fbbe1b569f395d787",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "resources/textures/armor_empty.png",
+      "source": "textures/HUD/hbarmor_bgicon.png",
+      "operation": "copy",
+      "source_sha256": "2145617f82e89c2f5a30cf498dff999bdcb43c3b9d211c1054a2fc8d7529d3ae",
+      "output_sha256": "2145617f82e89c2f5a30cf498dff999bdcb43c3b9d211c1054a2fc8d7529d3ae",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
     }
   ],
   "unchanged_engine_ui": [

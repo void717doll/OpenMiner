@@ -60,6 +60,7 @@ void HUD::setup() {
 	);
 
 	m_hearts.setPosition(m_hotbar.getPosition().x, m_hotbar.getPosition().y - hearts::hotbarOffset);
+	m_armor.setPosition(m_hotbar.getPosition().x + m_hotbar.width() - 81.f, m_hearts.getPosition().y);
 
 	m_fpsText.setPosition(Config::screenWidth / getScale().x - 36.f, 2.f);
 
@@ -99,6 +100,7 @@ void HUD::onGuiScaleChanged(const GuiScaleChangedEvent &event) {
 
 void HUD::update() {
 	m_hearts.update(m_player.health(), m_player.damageSerial());
+	m_armor.update(m_player.armorValue());
 	m_wield.update();
 	// FIXME: Shouldn't be called every tick
 	if (Config::isHotbarVisible)
@@ -139,8 +141,10 @@ void HUD::draw(RenderTarget &target, RenderStates states) const {
 	if (Config::isHotbarVisible)
 		target.draw(m_hotbar, states);
 
-	if (Config::isHotbarVisible && !m_player.isCreative())
+	if (Config::isHotbarVisible && !m_player.isCreative()) {
 		target.draw(m_hearts, states);
+		target.draw(m_armor, states);
+	}
 
 	if (Config::isFpsCounterEnabled)
 		target.draw(m_fpsText, states);
