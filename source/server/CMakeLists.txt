@@ -102,6 +102,7 @@ set(HEADER_FILES
 	world/ServerWorld.hpp
 	world/TerrainBiomeSampler.hpp
 	world/TerrainGenerator.hpp
+	world/CaveTunnels.hpp
 	world/WorldController.hpp
 	world/save/WorldSaveBackend.hpp
 	world/save/WorldSaveBasicBackend.hpp

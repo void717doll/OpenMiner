@@ -126,3 +126,19 @@ See also the roadmap for 1.0.0 [here](https://github.com/Unarelith/OpenMiner/wik
 - ThePhD ([sol2](https://github.com/ThePhD/sol2))
 - skypjack ([EnTT](https://github.com/skypjack/entt))
 
+
+## generation and regression checks
+
+decoration randomness includes the world seed, dimension, and chunk coordinates. loading a seed refreshes biome samplers and cached heightmaps. caves use seeded sphere-carved paths replayed from neighboring regions, preserving their shape across chunk boundaries. saved chunks remain unchanged; newly generated terrain can meet older terrain at visible seams.
+
+worldgen still needs staged cross-chunk decoration, parallel generation, superchunks, and the terrain-formula api. fluids, clouds, particles, custom meshes, and mobs remain unfinished.
+
+with cxxtest installed, build and run the engine checks:
+
+```sh
+cmake -S . -B build -DOM_BUILD_TESTS=ON
+cmake --build build --target openminer_tests
+ctest --test-dir build -R '^openminer_tests$' --output-on-failure
+```
+
+use `-DOM_BUILD_TESTS=OFF` for a build without cxxtest. the test filter excludes bundled dependency tests.

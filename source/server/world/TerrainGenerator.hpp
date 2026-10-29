@@ -47,7 +47,7 @@ class TerrainGenerator {
 
 		void generate(ServerChunk &chunk);
 
-		void setSeed(s32 seed) { m_caveNoise.SetSeed(seed); }
+		void setSeed(s32 seed) { m_seed = seed; m_biomeSampler.setSeed(seed); }
 
 	private:
 		void fastNoiseGeneration(ServerChunk &chunk);
@@ -57,20 +57,16 @@ class TerrainGenerator {
 		bool tryPlacePortal(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const;
 
 		void generateOres(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const;
-		void generateCavesOld(ServerChunk &chunk, s8 x, s8 y, s8 z, int h, HeightmapChunk &heightmap) const;
-		void generateCaves(ServerChunk &chunk, int x, int y, int z);
 
 		void randomWalkOrePlace(ServerChunk &chunk, int x, int y, int z, Random_t &rand, u16 oreBlock, u16 deepBlock, int size) const;
 		void oreFloodFill(ServerChunk &chunk, int x, int y, int z, u16 toReplace, u16 replaceWith, int depth, Random_t &rand) const;
-
-		static float noise2d(double x, double y, int octaves, float persistence);
-		static float noise3d_abs(double x, double y, double z, int octaves, float persistence);
 
 		TerrainBiomeSampler m_biomeSampler;
 
 		Heightmap &m_heightmap;
 
-		FastNoiseLite m_caveNoise;
+		s32 m_seed = 0;
+		u16 m_dimensionID = 0;
 };
 
 #endif // TERRAINGENERATOR_HPP_

@@ -37,8 +37,13 @@ TerrainBiomeSampler::TerrainBiomeSampler(const Dimension &dimension, s32 seed) :
 		m_paramNoises.back().SetFractalType(FastNoiseLite::FractalType_FBm);
 		m_paramNoises.back().SetFractalOctaves(5);
 		m_paramNoises.back().SetFrequency(1 / 800.0f);
-		m_paramNoises.back().SetSeed(seed + i);
+		m_paramNoises.back().SetSeed(s32(u32(seed) + i));
 	}
+}
+
+void TerrainBiomeSampler::setSeed(s32 seed) {
+	for (std::size_t i = 0; i < m_paramNoises.size(); ++i)
+		m_paramNoises[i].SetSeed(s32(u32(seed) + u32(i)));
 }
 
 u16 TerrainBiomeSampler::getBiomeIndexAt(s32 x, s32 y) {

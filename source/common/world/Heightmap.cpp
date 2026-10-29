@@ -104,6 +104,7 @@ int Heightmap::getHighestChunkAt(s32 blockX, s32 blockY) {
 }
 
 void Heightmap::setSeed(s32 seed) {
+	m_chunks.clear();
 	noise1.SetSeed(seed);
 	noise2.SetSeed(seed);
 	noise3.SetSeed(seed);

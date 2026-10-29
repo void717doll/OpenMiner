@@ -1,0 +1,80 @@
+#ifndef WORLDSYSTEMSTESTS_HPP_
+#define WORLDSYSTEMSTESTS_HPP_
+
+#include <set>
+#include <tuple>
+#include <cxxtest/TestSuite.h>
+
+#include "common/core/Registry.hpp"
+#include "common/world/WorldCollision.hpp"
+#include "common/world/Heightmap.hpp"
+#include "server/world/CaveTunnels.hpp"
+
+class WorldSystemsTests : public CxxTest::TestSuite {
+	public:
+		class TestChunk : public Chunk {
+			public:
+				TestChunk(World &world) : Chunk(0, 0, 0, world) {}
+				void update() override {}
+				void process() override {}
+		};
+		class TestWorld : public World {
+			public:
+				TestWorld() : chunk(*this) {}
+				Chunk *getChunk(int x, int y, int z) const override {
+					return x == 0 && y == 0 && z == 0 ? const_cast<TestChunk *>(&chunk) : nullptr;
+				}
+				TestChunk chunk;
+		};
+
+		void testPlacementGroups() {
+			Registry registry;
+			Registry::setInstance(registry);
+			registry.registerBlock<Block>("air");
+			Block &soil = registry.registerBlock<Block>("default:soil");
+			soil.addGroup("group:soil", 1);
+			TestWorld world;
+			world.chunk.setBlockRaw(1, 1, 0, soil.id());
+			BlockPlacementConstraints constraints;
+			BlockPlacementConstraint constraint;
+			constraint.blockOffset = {0, 0, -1};
+			constraint.blockID = "group:soil";
+			constraints.addConstraint(constraint);
+			TS_ASSERT(constraints.check(world, {1, 1, 1}));
+			TS_ASSERT(!constraints.check(world, {2, 2, 1}));
+			TS_ASSERT(!constraints.check(world, {1, 1, 0}));
+		}
+
+		void testSweptCollision() {
+			DoubleBox player{0, 0, 0, 0.5, 0.5, 1.75};
+			DoubleBox wall{2, 0, 0, 1, 1, 3};
+			TS_ASSERT_EQUALS(collision::clipAxis(player, wall, 0, 10), 1.5);
+			TS_ASSERT_EQUALS(collision::clipAxis(player, wall, 1, 10), 10);
+			DoubleBox floor{-1, -1, -1, 3, 3, 1};
+			TS_ASSERT_EQUALS(collision::clipAxis(player, floor, 2, -10), 0);
+		}
+
+		void testReseedClearsHeightmap() {
+			Heightmap reused{42};
+			reused.getHighestBlockAt(-17, 20);
+			reused.setSeed(-99);
+			Heightmap fresh{-99};
+			for (int x = -32; x < 32; ++x)
+				TS_ASSERT_EQUALS(reused.getHighestBlockAt(x, 20), fresh.getHighestBlockAt(x, 20));
+		}
+
+		void testCavesAcrossChunkBoundaries() {
+			using Cell = std::tuple<int, int, int>;
+			std::set<Cell> together, split;
+			caves::generate(2, 0, -16, 0, 0, 32, 16, 32,
+				[&](int x, int y, int z) { together.emplace(x - 16, y, z); });
+			for (int start : {-16, 0}) {
+				caves::generate(2, 0, start, 0, 0, 16, 16, 32,
+					[&](int x, int y, int z) { split.emplace(x + start, y, z); });
+			}
+			TS_ASSERT(!together.empty());
+			TS_ASSERT(together == split);
+		}
+};
+
+#endif // WORLDSYSTEMSTESTS_HPP_
