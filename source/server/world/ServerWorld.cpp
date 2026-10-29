@@ -82,7 +82,7 @@ bool ServerWorld::moveSurvivalPlayer(ServerPlayer &player, double x, double y, d
 	PlayerEnvironment environment = playerEnvironment(*this, box);
 	if (!environment.loaded) { player.survival().fallDistance = 0; return false; }
 	player.setPosition(x, y, z);
-	u16 damage = player.survival().moved(requested.z, environment.grounded, environment.water);
+	u16 damage = player.isCreative() ? 0 : player.survival().moved(requested.z, environment.grounded, environment.water);
 	if (damage) {
 		if (m_server) m_server->damagePlayer(player.clientID(), damage);
 		else player.damage(player.survival().filterDamage(damage));
@@ -93,7 +93,7 @@ bool ServerWorld::moveSurvivalPlayer(ServerPlayer &player, double x, double y, d
 void ServerWorld::updatePlayerSurvival() {
 	for (auto &entry : m_players) {
 		auto &player = entry.second;
-		if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id()) continue;
+		if (!player.isReady() || !player.isOnline() || player.isCreative() || player.dimension() != m_dimension.id()) continue;
 		DoubleBox box = player.hitbox(); box.move(player.x(), player.y(), player.z());
 		u16 damage = player.survival().tick(playerEnvironment(*this, box));
 		if (damage) {

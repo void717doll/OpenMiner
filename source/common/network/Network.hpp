@@ -79,6 +79,7 @@ namespace Network {
 
 		ItemActivated         = 0x60,
 		WorldSound            = 0x61,
+		WorldMode             = 0x62,
 
 		RegistryData          = 0x70,
 

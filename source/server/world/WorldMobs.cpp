@@ -214,6 +214,7 @@ void explode(ServerWorld &world, const Blast &blast) {
 }
 
 bool consumeFor(ServerPlayer &player, const std::string &replacement) {
+	if (player.isCreative()) return true;
 	ItemStack held = player.heldItemStack();
 	if (!held.amount()) return false;
 	if (held.amount() == 1) player.inventory().setStack(player.heldItemSlot(), 0, replacement, replacement.empty() ? 0 : 1);
@@ -345,6 +346,7 @@ void ServerWorld::updateMobs() {
 			for (auto &entry : m_players) {
 				auto &player = entry.second;
 				if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id()) continue;
+				if (player.isCreative()) continue;
 				bool following = kind == Kind::Wolf && traits.tamed && !traits.sitting && !traits.anger && player.name() == traits.owner;
 				if (!aggressive && !following) continue;
 				if (!traits.target.empty() && traits.target != player.name() && !following) continue;

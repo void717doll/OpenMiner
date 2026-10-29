@@ -48,6 +48,7 @@ bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &pl
 		return true;
 	}
 	if (m_healAmount > 0) {
+		if (player.isCreative()) return true;
 		ItemStack stack = player.heldItemStack();
 		if (stack.amount() == 0) return false;
 		u16 remaining = stack.amount() - 1;
@@ -71,7 +72,12 @@ bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &pl
 	try {
 		if (m_onItemActivated) {
 			u16 previous = world.getBlock(pos.x, pos.y, pos.z);
+			ItemStack held = player.heldItemStack();
 			m_onItemActivated(pos, block, player, world, client, server);
+			if (player.isCreative()) {
+				player.inventory().setItemStack(u16(player.heldItemSlot()), 0, held);
+				server.sendPlayerInvUpdate(client.id);
+			}
 			u16 type = getGroupValue("group:om_tool_type");
 			if (type == 3 && previous != world.getBlock(pos.x, pos.y, pos.z)) {
 				server.wearHeldItem(player, 1);

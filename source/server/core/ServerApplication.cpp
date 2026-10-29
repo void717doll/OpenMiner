@@ -68,6 +68,7 @@ bool ServerApplication::init() {
 
 	m_worldController.setServer(m_serverCommandHandler);
 	m_worldController.init(m_players, m_seed);
+	m_worldController.setCreative(m_creative);
 
 	m_scriptEngine.luaCore().setRegistry(&m_registry);
 

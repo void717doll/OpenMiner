@@ -50,6 +50,7 @@ class ServerApplication {
 		void setWorldName(const std::string &worldName) { m_worldName = worldName; }
 		void setLogLevel(LogLevel logLevel) { m_loggerHandler.setMaxLevel(logLevel); }
 		void setSeed(s32 seed) { m_seed = seed; }
+		void setCreative(bool creative) { m_creative = creative; }
 
 	private:
 		void update();
@@ -73,6 +74,7 @@ class ServerApplication {
 		ServerCommandHandler m_serverCommandHandler{m_scriptEngine, m_server, m_worldController, m_players, m_registry};
 
 		u64 m_lastTick = 0;
+		bool m_creative = false;
 		s32 m_seed = 1337; // FIXME
 };
 

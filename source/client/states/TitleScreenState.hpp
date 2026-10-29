@@ -44,7 +44,7 @@ class TitleScreenState : public InterfaceState {
 
 		void onEvent(const SDL_Event &event) override;
 
-		void startSingleplayer(bool showLoadingState, const std::string &worldName = "", s32 seed = 1337);
+		void startSingleplayer(bool showLoadingState, const std::string &worldName = "", s32 seed = 1337, bool creative = false);
 
 	private:
 		void onGuiScaleChanged(const GuiScaleChangedEvent &event);

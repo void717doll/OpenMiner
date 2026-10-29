@@ -59,7 +59,7 @@ WorldCreationState::WorldCreationState(TitleScreenState *titleScreen, const std:
 	m_nameInput.setPadding(5, 6);
 	m_nameInput.setScale(Config::guiScale, Config::guiScale);
 	m_nameInput.setFocus(false);
-	m_nameInput.setPlaceholder("World Name");
+	m_nameInput.setPlaceholder("World Name (optional)");
 
 	if (!m_isEdition) {
 		m_seedInput.setString(originalName);
@@ -74,11 +74,25 @@ WorldCreationState::WorldCreationState(TitleScreenState *titleScreen, const std:
 		// FIXME: Find a way to retrieve original seed
 	}
 
+	m_modeButton.setScale(Config::guiScale, Config::guiScale);
+	m_modeButton.setText("mode: survival");
+	m_modeButton.setCallback([this](TextButton &button) {
+		m_creative = !m_creative;
+		button.setText(m_creative ? "mode: creative" : "mode: survival");
+	});
+
 	m_menuWidget.setScale(Config::guiScale, Config::guiScale);
 	m_menuWidget.addButton(originalName.empty() ? "Create New World" : "Save World", [this, titleScreen, originalName](TextButton &) {
 		std::string worldName = m_nameInput.string();
+		auto first = worldName.find_first_not_of(" ");
+		worldName = first == std::string::npos ? "" : worldName.substr(first, worldName.find_last_not_of(" ") - first + 1);
+		if (worldName.empty()) {
+			unsigned number = 1;
+			do { worldName = "World " + std::to_string(number++); }
+			while (fs::exists("saves/" + worldName + ".dat"));
+		}
 		if (!fs::exists("saves/" + worldName + ".dat")) {
-			if (utils::regexMatch(worldName, "^[A-Za-z0-9_]+$") && worldName[0] != '_') {
+			if (utils::regexMatch(worldName, "^[A-Za-z0-9_ ]+$") && worldName[0] != '_') {
 				if (m_isEdition) {
 					fs::copy_file("saves/" + originalName + ".dat", "saves/" + worldName  + ".dat");
 					fs::remove("saves/" + originalName + ".dat");
@@ -104,7 +118,7 @@ WorldCreationState::WorldCreationState(TitleScreenState *titleScreen, const std:
 						}
 					}
 
-					titleScreen->startSingleplayer(true, worldName, seed);
+					titleScreen->startSingleplayer(true, worldName, seed, m_creative);
 				}
 			}
 			else {
@@ -136,8 +150,10 @@ void WorldCreationState::onEvent(const SDL_Event &event) {
 	if (!m_stateStack->empty() && &m_stateStack->top() == this) {
 		m_nameInput.onEvent(event);
 
-		if (!m_isEdition)
+		if (!m_isEdition) {
 			m_seedInput.onEvent(event);
+			m_modeButton.onEvent(event);
+		}
 
 		m_menuWidget.onEvent(event);
 	}
@@ -165,6 +181,7 @@ void WorldCreationState::updateWidgetPosition() {
 	);
 
 	if (!m_isEdition) {
+		m_modeButton.setPosition(Config::screenWidth / 2.f - 75 * Config::guiScale, Config::screenHeight / 2.f + 20 * Config::guiScale);
 		m_nameInput.setPosition(
 			Config::screenWidth / 2.0f - float(m_nameInput.getBackgroundSize().x * Config::guiScale) / 2.0f,
 			Config::screenHeight / 2.0f - float(m_nameInput.getBackgroundSize().y * Config::guiScale) / 2.0f - 30 * Config::guiScale
@@ -176,6 +193,7 @@ void WorldCreationState::updateWidgetPosition() {
 		);
 	}
 	else {
+		m_modeButton.setPosition(Config::screenWidth / 2.f - 75 * Config::guiScale, Config::screenHeight / 2.f + 20 * Config::guiScale);
 		m_nameInput.setPosition(
 			Config::screenWidth / 2.0f - float(m_nameInput.getBackgroundSize().x * Config::guiScale) / 2.0f,
 			Config::screenHeight / 2.0f - float(m_nameInput.getBackgroundSize().y * Config::guiScale) / 2.0f
@@ -204,8 +222,10 @@ void WorldCreationState::draw(RenderTarget &target, RenderStates states) const {
 
 		target.draw(m_nameInput, states);
 
-		if (!m_isEdition)
+		if (!m_isEdition) {
 			target.draw(m_seedInput, states);
+			target.draw(m_modeButton, states);
+		}
 
 		target.draw(m_menuWidget, states);
 

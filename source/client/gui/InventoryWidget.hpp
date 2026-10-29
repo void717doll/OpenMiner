@@ -80,6 +80,8 @@ class InventoryWidget : public AbstractInventoryWidget {
 		RectangleShape m_selectedItemBackground{16, 16, Color::fromRGBA32(255, 255, 255, 80)};
 
 		std::string m_lastSearch;
+		u16 m_searchResultCount = 0;
+		float m_scrolling = 0;
 };
 
 #endif // INVENTORYWIDGET_HPP_

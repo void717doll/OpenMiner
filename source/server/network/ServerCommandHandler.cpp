@@ -71,6 +71,7 @@ bool canReachBlock(const ServerWorld &world, const ServerPlayer &player, int x, 
 }
 
 void ServerCommandHandler::wearHeldItem(Player &player, u16 amount) {
+	if (player.isCreative()) return;
 	int slot = player.heldItemSlot();
 	if (slot < 0 || slot >= player.inventory().width()) return;
 	auto &stack = player.inventory().getStackRef(u16(slot), 0);
@@ -227,7 +228,7 @@ void ServerCommandHandler::sendPlayerHealth(u16 clientID) const {
 
 void ServerCommandHandler::damagePlayer(u16 clientID, u16 amount) {
 	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
-	if (!player) return;
+	if (!player || player->isCreative()) return;
 	amount = player->survival().filterDamage(amount);
 	if (!amount) return;
 	amount = player->absorbDamage(amount);
@@ -285,6 +286,12 @@ void ServerCommandHandler::setupCallbacks() {
 			sendServerClosed("unable to load the local player", &client);
 			return;
 		}
+
+		client.creative = m_worldController.getWorld(0).isCreative();
+		player->setCreative(client.creative);
+		Network::Packet mode;
+		mode << Network::Command::WorldMode << client.creative;
+		client.send(mode);
 
 		// Try to find a valid spawn point (WIP)
 		if (player->isNewPlayer()) {
@@ -465,8 +472,9 @@ void ServerCommandHandler::setupCallbacks() {
 				sendPlayerInvUpdate(client.id, &client);
 				return;
 			}
-			player->inventory().setStack(player->heldItemSlot(), 0,
-				stack.amount() > 1 ? stack.item().stringID() : "", stack.amount() - 1);
+			if (!player->isCreative())
+				player->inventory().setStack(player->heldItemSlot(), 0,
+					stack.amount() > 1 ? stack.item().stringID() : "", stack.amount() - 1);
 			sendPlayerInvUpdate(client.id);
 			world.setData(x, y, z, u16(block >> 16));
 			world.setBlock(x, y, z, u16(block & 0xffff));
@@ -505,10 +513,10 @@ void ServerCommandHandler::setupCallbacks() {
 			const BlockState *blockState = world.getBlockState(x, y, z);
 			if (!packet || !blockState || !canReachBlock(world, *player, x, y, z)
 			 || !blockState->block().id() || blockState->drawType() == BlockDrawType::Liquid
-			 || !std::isfinite(blockState->hardness()) || blockState->hardness() < 0) return;
+			 || (!player->isCreative() && (!std::isfinite(blockState->hardness()) || blockState->hardness() < 0))) return;
 			world.setBlock(x, y, z, 0);
 
-			m_scriptEngine.luaCore().onEvent(LuaEventType::BlockDigged, glm::ivec3{x, y, z}, *blockState, *player, world, client, *this);
+			if (!player->isCreative()) m_scriptEngine.luaCore().onEvent(LuaEventType::BlockDigged, glm::ivec3{x, y, z}, *blockState, *player, world, client, *this);
 			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width()) {
 				auto &tool = player->inventory().getStackRef(player->heldItemSlot(), 0);
 				wearHeldItem(*player, retro::diggingWear(tool.item(), *blockState));

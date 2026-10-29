@@ -174,7 +174,7 @@ void BlockCursor::update(const Hotbar &hotbar) {
 					double height = liquid::height(eye->block(), m_world.getData(eyeX, eyeY, eyeZ), covered);
 					submerged = position.z + 1.625 < eyeZ + height;
 				}
-				timeToBreak = retro::survivalBreakTime(*m_currentBlock, currentStack.item(), submerged, m_player.onGround());
+				timeToBreak = m_player.isCreative() ? 0 : retro::survivalBreakTime(*m_currentBlock, currentStack.item(), submerged, m_player.onGround());
 
 				if (ticks >= m_animationStart && ticks >= m_nextDigSound) {
 					if (auto *sound = SoundManager::instance())

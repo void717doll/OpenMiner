@@ -90,6 +90,7 @@ void ScriptEngine::initUsertypes() {
 
 	m_lua.new_usertype<ClientInfo>("ClientInfo",
 		"id", &ClientInfo::id,
+		"creative", &ClientInfo::creative,
 		"screen_width", &ClientInfo::screenWidth,
 		"screen_height", &ClientInfo::screenHeight,
 		"gui_scale", &ClientInfo::guiScale

@@ -174,6 +174,11 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 				}
 			}
 
+			else if (marker == 0x4d4f4445 && count == 1) {
+				bool creative;
+				if (!(save >> creative)) break;
+				for (auto &world : m_worldList) world.setCreative(creative);
+			}
 			else break;
 		}
 
@@ -251,6 +256,8 @@ void WorldSaveBasicBackend::save(const std::string &name) {
 	save << u32(0x41524d52) << u16(m_playerList.size());
 	for (const auto &entry : m_playerList)
 		save << entry.first << entry.second.armor();
+
+	save << u32(0x4d4f4445) << u16(1) << (!m_worldList.empty() && m_worldList.front().isCreative());
 
 	file.write((const char *)save.getData(), save.getDataSize());
 

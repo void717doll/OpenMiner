@@ -180,6 +180,10 @@ static void addComponentCommandCallback(Network::Command command, Client &client
 }
 
 void ClientCommandHandler::setupCallbacks() {
+	m_client.setCommandCallback(Network::Command::WorldMode, [this](Network::Packet &packet) {
+		bool creative;
+		if (packet >> creative) m_player.setCreative(creative);
+	});
 	m_client.setCommandCallback(Network::Command::ServerClosed, [this](Network::Packet &packet) {
 		std::string message;
 		packet >> message;

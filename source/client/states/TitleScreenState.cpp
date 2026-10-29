@@ -104,7 +104,7 @@ void TitleScreenState::onEvent(const SDL_Event &event) {
 	}
 }
 
-void TitleScreenState::startSingleplayer(bool showLoadingState, const std::string &worldName, s32 seed) {
+void TitleScreenState::startSingleplayer(bool showLoadingState, const std::string &worldName, s32 seed, bool creative) {
 	if (worldName.empty()) {
 		m_stateStack->push<WorldSelectionState>(this);
 		return;
@@ -119,7 +119,7 @@ void TitleScreenState::startSingleplayer(bool showLoadingState, const std::strin
 		m_thread.join();
 
 	LogLevel logLevel = LoggerHandler::getInstance().maxLevel();
-	m_thread = std::thread([this, worldName, logLevel, seed] () {
+	m_thread = std::thread([this, worldName, logLevel, seed, creative] () {
 		ServerApplication app{*m_eventHandler};
 
 		if (!worldName.empty())
@@ -127,6 +127,7 @@ void TitleScreenState::startSingleplayer(bool showLoadingState, const std::strin
 
 		app.setLogLevel(logLevel);
 		app.setSeed(seed);
+		app.setCreative(creative);
 		app.run();
 	});
 }

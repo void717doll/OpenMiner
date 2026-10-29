@@ -39,6 +39,7 @@ dofile("biomes.lua")
 dofile("dimensions.lua")
 
 dofile("listeners.lua")
+dofile("creative_inventory.lua")
 dofile("inventory.lua")
 
 dofile("item_drop.lua")

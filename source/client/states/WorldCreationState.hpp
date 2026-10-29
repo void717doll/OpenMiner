@@ -54,6 +54,9 @@ class WorldCreationState : public InterfaceState {
 		TextInput m_nameInput;
 		TextInput m_seedInput;
 
+		TextButton m_modeButton{150};
+		bool m_creative = false;
+
 		MenuWidget m_menuWidget{2, 1};
 
 		Text m_errorText;

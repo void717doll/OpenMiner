@@ -41,6 +41,7 @@ class WorldController {
 		void init(PlayerList &players, s32 seed);
 
 		void clearEntities();
+		void setCreative(bool creative);
 
 		void update(bool doTick);
 

@@ -66,7 +66,7 @@ LuaGUIState::LuaGUIState(ClientCommandHandler &client, ClientPlayer &player, Cli
 
 	while (!packet.endOfPacket())
 		loadGUI(packet);
-	if (m_inventoryWidgets.count("armor_helmet")) m_playerPreview = std::make_unique<PlayerModel>(m_player);
+	if (m_inventoryWidgets.count("armor_helmet") && !m_inventoryWidgets.count("inv_catalog")) m_playerPreview = std::make_unique<PlayerModel>(m_player);
 
 	isActive = true;
 }
@@ -322,6 +322,21 @@ void LuaGUIState::loadInventoryWidget(const std::string &name, s32 x, s32 y, sf:
 		}
 	}
 
+	if (inventory == "catalog" && m_player.isCreative()) {
+		std::vector<const Item *> items;
+		for (const auto &item : Registry::getInstance().items()) {
+			if (!item->id()) continue;
+			if (item->isBlock() && Registry::getInstance().getBlockFromStringID(item->stringID()).getState(0).drawType() == BlockDrawType::Liquid) continue;
+			items.push_back(item.get());
+		}
+		std::sort(items.begin(), items.end(), [](const Item *a, const Item *b) { return a->label() < b->label(); });
+		m_inventories.emplace("_catalog", Inventory{9, u16(std::max<std::size_t>(5, (items.size() + 8) / 9))});
+		widgetInventory = &m_inventories.at("_catalog");
+		for (std::size_t i = 0; i < items.size(); ++i)
+			widgetInventory->setStack(u16(i % 9), u16(i / 9), items[i]->stringID(), items[i]->maxStackSize());
+		isReadOnly = true;
+	}
+
 	if (widgetInventory) {
 		m_inventoryWidgets.emplace(name, InventoryWidget{m_client, isReadOnly, &m_mainWidget});
 
@@ -454,7 +469,10 @@ Texture &LuaGUIState::loadTexture(const std::string &textureFilename) {
 }
 
 void LuaGUIState::centerMainWidget() {
-	float x = floorf(Config::screenWidth  / 2.0f - m_width  * Config::guiScale / 2.0f + 0.5f);
-	float y = floorf(Config::screenHeight / 2.0f - m_height * Config::guiScale / 2.0f + 0.5f);
+	float scale = std::max(1.f, std::min(float(Config::guiScale), std::floor(std::min(
+		float(Config::screenWidth - 16) / m_width, float(Config::screenHeight - 16) / m_height))));
+	m_mainWidget.setScale(scale, scale);
+	float x = floorf(Config::screenWidth / 2.f - m_width * scale / 2.f + 0.5f);
+	float y = floorf(Config::screenHeight / 2.f - m_height * scale / 2.f + 0.5f);
 	m_mainWidget.setPosition(x, y);
 }

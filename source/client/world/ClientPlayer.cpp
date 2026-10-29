@@ -102,6 +102,16 @@ float ClientPlayer::hurtEffect() const {
 	return std::sin(remaining * remaining * remaining * remaining * float(M_PI));
 }
 
+void ClientPlayer::pressJump() {
+	if (!isCreative()) return;
+	u32 now = GameClock::getInstance().getTicks();
+	if (m_lastJump && now - m_lastJump < 300) {
+		m_flying = !m_flying;
+		m_velocity.reset(0, 0, 0);
+		m_lastJump = 0;
+	} else m_lastJump = now;
+}
+
 void ClientPlayer::clearInputs() {
 	m_forwardInput = 0;
 	m_strafeInput = 0;
@@ -126,6 +136,17 @@ void ClientPlayer::simulateMovement(const ClientWorld &world) {
 	}
 	DoubleBox body = m_hitbox;
 	body.move(m_physicsPosition);
+	if (isCreative() && m_flying) {
+		double yaw = m_viewAngleH * math::DEG_TO_RAD;
+		double length = std::max(1.0, std::hypot(double(m_forwardInput), double(m_strafeInput)));
+		Vector3d requested{(std::cos(yaw) * m_forwardInput - std::sin(yaw) * m_strafeInput) * 0.5 / length,
+			(std::sin(yaw) * m_forwardInput + std::cos(yaw) * m_strafeInput) * 0.5 / length,
+			(double(m_jumpPressed) - double(m_isSneaking)) * 0.5};
+		m_physicsPosition += retro::movePlayer(world, body, requested, false, false);
+		m_velocity.reset(0, 0, 0);
+		m_onGround = false;
+		return;
+	}
 	auto environment = retro::movementEnvironment(world, body);
 	bool wasGrounded = m_onGround;
 	retro::acceleratePlayer(m_velocity, m_forwardInput, m_strafeInput, m_viewAngleH * math::DEG_TO_RAD,

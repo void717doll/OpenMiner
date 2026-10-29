@@ -77,14 +77,18 @@ class Player : public ISerializable {
 		s8 heldItemSlot() const { return m_heldItemSlot; }
 		void setHeldItemSlot(u8 heldItemSlot) { m_heldItemSlot = heldItemSlot; }
 
+		bool isCreative() const { return m_creative; }
+		void setCreative(bool creative) { m_creative = creative; if (creative) m_health = 20; }
+
 		u16 health() const { return m_health; }
 		void setHealth(u16 health) { m_health = std::min<u16>(health, 20); }
 		void heal(u16 amount) { setHealth(u16(std::min<unsigned>(20, m_health + amount))); }
-		void damage(u16 amount) { m_health = amount >= m_health ? 0 : m_health - amount; }
+		void damage(u16 amount) { if (m_creative) return; m_health = amount >= m_health ? 0 : m_health - amount; }
 
 		static void initUsertype(sol::state &lua);
 
 	protected:
+		bool m_creative = false;
 		u16 m_health = 20;
 		std::string m_name;
 

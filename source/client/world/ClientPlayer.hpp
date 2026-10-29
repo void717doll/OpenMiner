@@ -49,6 +49,7 @@ class ClientPlayer : public Player {
 		void updatePosition(const ClientWorld &world);
 
 		void clearInputs();
+		void pressJump();
 		void notifyDamage();
 		float hurtEffect() const;
 		u32 damageSerial() const { return m_damageSerial; }
@@ -68,6 +69,8 @@ class ClientPlayer : public Player {
 		bool onGround() const { return m_onGround; }
 
 	private:
+		bool m_flying = false;
+		u32 m_lastJump = 0;
 		void simulateMovement(const ClientWorld &world);
 
 		void applyViewBobbing(float &viewAngleH, float &viewAngleV, float &viewAngleRoll);

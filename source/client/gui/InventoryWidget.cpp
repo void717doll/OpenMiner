@@ -36,6 +36,7 @@ void InventoryWidget::init(Inventory &inventory, u16 offset, u16 size) {
 
 	m_offset = offset;
 	m_size = size > 0 ? size : inventory.width() * inventory.height();
+	m_searchResultCount = inventory.width() * inventory.height();
 
 	loadItemWidgets(m_offset, m_size);
 
@@ -47,19 +48,22 @@ void InventoryWidget::init(Inventory &inventory, u16 offset, u16 size) {
 }
 
 void InventoryWidget::scroll(float scrolling) {
+	m_scrolling = std::clamp(scrolling, 0.f, 1.f);
+	scrolling = m_scrolling;
 	if (m_itemWidgets.size() < m_size)
 		return;
 
-	u16 offset = u16(m_offset + std::floor((m_inventory->height() - m_size / m_inventory->width()) * scrolling) * m_inventory->width());
-	u16 size = m_size;
-
-	if (offset + size > m_inventory->width() * m_inventory->height())
-		size = u16(m_inventory->width() * m_inventory->height() - offset);
-
-	updateItemWidgets(offset, size, m_lastSearch);
+	int rows = (m_searchResultCount + m_inventoryWidth - 1) / m_inventoryWidth;
+	int extraRows = std::max(0, rows - int(m_size / m_inventoryWidth));
+	u16 offset = u16(m_offset + std::round(extraRows * scrolling) * m_inventoryWidth);
+	updateItemWidgets(offset, m_size, m_lastSearch);
 }
 
 void InventoryWidget::onEvent(const SDL_Event &event) {
+	if (event.type == SDL_MOUSEWHEEL && m_isReadOnly && m_currentItemWidget) {
+		int rows = (m_searchResultCount + m_inventoryWidth - 1) / m_inventoryWidth - m_size / m_inventoryWidth;
+		if (rows > 0) scroll(m_scrolling - float(event.wheel.y) / rows);
+	}
 	if (event.type == SDL_MOUSEMOTION) {
 		m_currentItemWidget = nullptr;
 		for (std::size_t i = 0 ; i < m_itemWidgets.size() ; ++i) {
@@ -91,6 +95,7 @@ void InventoryWidget::update() {
 
 void InventoryWidget::applySearch(const std::string &search) {
 	if (search != m_lastSearch) {
+		m_scrolling = 0;
 		updateItemWidgets(m_offset, m_size, search);
 		m_lastSearch = search;
 	}
@@ -100,7 +105,7 @@ bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractI
 	if (dest->doItemMatchFilter(itemStack->stack().item())) {
 		ItemStack stackRet = dest->receiveItemStack(itemStack, this);
 		if (stackRet.amount() != itemStack->stack().amount()) {
-			if (dest != this)
+			if (dest != this && !m_isReadOnly)
 				m_inventory->setItemStack(itemStack->x(), itemStack->y(), stackRet.amount() ? stackRet : ItemStack::Empty);
 
 			update();
@@ -113,6 +118,7 @@ bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractI
 }
 
 ItemStack InventoryWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) {
+	if (m_isReadOnly) return itemStack->stack();
 	ItemStack stack = itemStack->stack();
 	if (src == this)
 		m_inventory->clearStack(itemStack->x(), itemStack->y());
@@ -173,16 +179,15 @@ void InventoryWidget::loadItemWidgets(u16 offset, u16 size) {
 void InventoryWidget::updateItemWidgets(u16 offset, u16 size, std::string search)
 {
 	u16 itemCounter = 0;
-	for (u16 i = 0; itemCounter < size; ++i) {
-		u16 x = u16((i + offset) % m_inventory->width());
-		u16 y = u16((i + offset) / m_inventory->width());
-		if (x >= m_inventory->width() || y >= m_inventory->height())
-			break;
-
+	m_searchResultCount = 0;
+	std::transform(search.begin(), search.end(), search.begin(), [](unsigned char c) { return std::tolower(c); });
+	for (u16 i = 0; i < m_inventory->width() * m_inventory->height(); ++i) {
+		u16 x = i % m_inventory->width();
+		u16 y = i / m_inventory->width();
 		std::string label = m_inventory->getStack(x, y).item().label();
 		std::transform(label.begin(), label.end(), label.begin(), [](unsigned char c) { return std::tolower(c); });
-		std::transform(search.begin(), search.end(), search.begin(), [](unsigned char c) { return std::tolower(c); });
 		if (search.empty() || label.find(search) != std::string::npos) {
+			if (m_searchResultCount++ < offset || itemCounter >= size) continue;
 			m_itemWidgets[itemCounter].changeItem(x, y);
 			m_itemWidgets[itemCounter].update();
 

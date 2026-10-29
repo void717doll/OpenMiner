@@ -191,6 +191,10 @@ void MouseItemWidget::updateCurrentItem(ItemWidget *currentItemWidget) {
 }
 
 void MouseItemWidget::swapItems(ItemWidget &widget, bool isReadOnly) {
+	if (isReadOnly) {
+		setStack(widget.stack());
+		return;
+	}
 	ItemStack held = stack();
 	ItemStack target = widget.stack();
 	if (!held.sameItem(target) || held.item().maxStackSize() == 1) {

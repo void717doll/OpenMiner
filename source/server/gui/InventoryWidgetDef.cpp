@@ -85,7 +85,7 @@ void InventoryWidgetDef::loadInventory(const sol::table &table) {
 			else
 				logError() << "For" << m_name << ": Block position must be defined";
 		}
-		else
+		else if (m_inventory != "catalog")
 			logError() << "For" << m_name << ": Inventory source" << m_inventory << "is not valid";
 	}
 	else

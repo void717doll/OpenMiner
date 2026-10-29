@@ -132,6 +132,7 @@ void GameState::onEvent(const SDL_Event &event) {
 			}
 		}
 		else if (event.type == SDL_KEYDOWN) {
+			if (!event.key.repeat && event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Jump)) m_player.pressJump();
 			if (!event.key.repeat && event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Drop)) {
 				m_clientCommandHandler.sendPlayerDropItem();
 			}

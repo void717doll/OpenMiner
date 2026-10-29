@@ -47,6 +47,8 @@ class ServerWorld : public World {
 		ServerWorld(PlayerList &players, const Dimension &dimension, s32 seed);
 
 		void update(bool doTick);
+		bool isCreative() const { return m_creative; }
+		void setCreative(bool creative) { m_creative = creative; }
 		BlockPhysics &blockPhysics() { return m_blockPhysics; }
 		void updateMobs();
 		void updateItems();
@@ -90,6 +92,7 @@ class ServerWorld : public World {
 		static void initUsertype(sol::state &lua);
 
 	private:
+		bool m_creative = false;
 		void processSendRequests();
 
 		PlayerList &m_players;

@@ -56,3 +56,9 @@ later food, materials, and block items have been removed using the supplied beta
 right click an armor piece to equip or swap it, or use the four filtered inventory slots. shift click also equips a matching empty slot. leather, chain, iron, gold and diamond use beta protection, durability scaling, and damage remainder. armor wears when absorbing damage, drops on death with its wear intact, and saves in an optional `ARMR` trailer. the inventory renders the equipped pieces in 3d; an equipped chestplate also covers the empty first-person hand. chain armor has no survival recipe, matching the unavailable fire ingredient in this engine. shields are absent.
 
 tnt is crafted from five gunpowder and four sand. right click it with flint and steel to start the four-second fuse. blasts damage nearby players and mobs, destroy exposed blocks, drop some debris, and ignite nearby tnt with shorter fuses. terrain outside loaded chunks is untouched. the fuse and motion survive saving.
+
+## world modes
+
+blank world names use the next available `World 1`, `World 2`, and so on. new worlds default to survival. the mode button on world creation switches to creative. the choice is saved in the world file and survives renaming and reloading; existing worlds stay survival.
+
+creative grants instant block breaking, unlimited placement and item use, no tool wear, and no health damage. open the inventory to search or scroll all available items; click to copy a stack or shift-click to fill the hotbar. armor slots remain available. double-tap jump to toggle flight, hold jump to rise, and hold sneak to descend. flight still collides with terrain.

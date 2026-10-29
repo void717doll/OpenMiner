@@ -42,6 +42,7 @@ class ClientInfo {
 
 		u16 id;
 		bool isReady = false;
+		bool creative = false;
 
 		u32 previousKeyTimestamp = 0;
 

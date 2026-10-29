@@ -37,6 +37,10 @@ void WorldController::init(PlayerList &players, s32 seed) {
 	m_worldSaveBackend.reset(new WorldSaveBasicBackend{m_worldList, players});
 }
 
+void WorldController::setCreative(bool creative) {
+	for (auto &world : m_worldList) world.setCreative(creative);
+}
+
 void WorldController::clearEntities() {
 	for (auto &it : m_worldList)
 		it.scene().clear();

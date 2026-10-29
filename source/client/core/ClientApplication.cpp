@@ -105,7 +105,7 @@ bool ClientApplication::init() {
 
 	auto &titleScreen = m_stateStack.push<TitleScreenState>();
 	const Argument &world = m_argumentParser.getArgument("world");
-	if (world.isFound && utils::regexMatch(world.parameter, "^[A-Za-z0-9][A-Za-z0-9_]*$"))
+	if (world.isFound && utils::regexMatch(world.parameter, "^[A-Za-z0-9][A-Za-z0-9_ ]*$"))
 		titleScreen.startSingleplayer(true, world.parameter);
 	else if (world.isFound || m_argumentParser.getArgument("singleplayer").isFound)
 		m_stateStack.push<WorldSelectionState>(&titleScreen);
