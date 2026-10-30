@@ -25,7 +25,7 @@
 -- =====================================================================================
 --
 
-function register_tool(name, material, mining_speed, harvest_capability, harvest_level, max_damage)
+function register_tool(name, material, mining_speed, harvest_capability, harvest_level, max_damage, attack_bonus, brightness)
 	local attack_damage = 1
 	if name == "sword" then
 		attack_damage = 4 + harvest_level * 2
@@ -43,12 +43,13 @@ function register_tool(name, material, mining_speed, harvest_capability, harvest
 		tiles = material .. "_" .. name .. ".png",
 		max_stack_size = 1,
 		groups = {
+			om_item_brightness = brightness,
 			om_max_damage = max_damage,
 			om_tool_type = name == "sword" and 1 or name == "hoe" and 3 or 2,
 			om_tool_kind = name == "axe" and 1 or name == "pickaxe" and 2 or name == "shovel" and 3 or 0,
 			om_harvest_level = harvest_level,
 			om_copper_tool = material == "copper" and 1 or 0,
-			om_attack_damage = attack_damage,
+			om_attack_damage = attack_damage + (attack_bonus or 0),
 		},
 	}
 
@@ -95,11 +96,12 @@ local materials = {
 	{"iron", 6, 2, 250},
 	{"golden", 12, 0, 32},
 	{"diamond", 8, 3, 1561},
+	{"steel", 4, 3, 5000, 1, 65},
 }
 
 for _, material in ipairs(materials) do
 	for k, v in pairs(tools) do
-		register_tool(k, material[1], material[2], v, material[3], material[4])
+		register_tool(k, material[1], material[2], v, material[3], material[4], material[5], material[6])
 	end
 end
 

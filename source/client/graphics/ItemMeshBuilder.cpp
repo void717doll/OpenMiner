@@ -78,5 +78,11 @@ std::vector<Vertex> buildItemMesh(const Item &item, const TextureAtlas &atlas, c
 			vertex.color[3] = color.a;
 		}
 	}
+	u16 brightness = item.getGroupValue("group:om_item_brightness");
+	if (brightness) {
+		float multiplier = float(std::min<u16>(100, brightness)) / 100.f;
+		for (auto &vertex : vertices)
+			for (int channel = 0; channel < 3; ++channel) vertex.color[channel] *= multiplier;
+	}
 	return vertices;
 }

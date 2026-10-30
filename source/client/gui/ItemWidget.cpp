@@ -100,8 +100,11 @@ void ItemWidget::updateImage(const BlockState *blockState) {
 
 	if (blockState)
 		m_image.setColor(blockState->colorMultiplier());
-	else
-		m_image.setColor(Color::White);
+	else {
+		u16 brightness = stack().item().getGroupValue("group:om_item_brightness");
+		float multiplier = brightness ? float(std::min<u16>(100, brightness)) / 100.f : 1.f;
+		m_image.setColor({multiplier, multiplier, multiplier, 1.f});
+	}
 
 	m_isImage = true;
 }

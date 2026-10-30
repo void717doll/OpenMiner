@@ -10,7 +10,7 @@ choose survival to mine, craft, farm, and fight mobs, or creative to build with 
 - refi textures replace the old block, item, mob, and interface artwork. the inventory and hud use compact hearts, an armor bar, item names above the hotbar, and optional durability text.
 - held items use the normal right-hand pose. dropped items have ground collision, pickup delays, rotation, and bobbing.
 - ordinary blocks and items stack to 99. food, tools, and armor do not stack. food heals directly, without a hunger bar.
-- tools wear out, correct tool tiers control drops, and equipment keeps its damage through inventory moves and saves. copper comes between stone and iron.
+- tools wear out, correct tool tiers control drops, and equipment keeps its damage through inventory moves and saves. copper comes between stone and iron. dark steel tools have 5,000 durability and stone-tool mining speed.
 - armor appears on the player model. leather adds fall protection, gold adds fire protection, and chainmail adds general damage protection.
 - material sounds cover footsteps, digging, breaking, placement, and item pickups.
 
