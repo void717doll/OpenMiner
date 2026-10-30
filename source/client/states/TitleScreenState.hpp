@@ -28,12 +28,14 @@
 #define TITLESCREENSTATE_HPP_
 
 #include <thread>
+#include <memory>
 
 #include "client/gui/MenuWidget.hpp"
 #include "client/states/InterfaceState.hpp"
 
 struct GuiScaleChangedEvent;
 struct ServerOnlineEvent;
+class ServerApplication;
 
 class TitleScreenState : public InterfaceState {
 	public:
@@ -58,6 +60,7 @@ class TitleScreenState : public InterfaceState {
 		Image m_background{"texture-title_screen"};
 
 		std::thread m_thread;
+		std::shared_ptr<ServerApplication> m_serverApp;
 
 		Text m_titleText;
 		Text m_versionText;

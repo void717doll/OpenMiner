@@ -38,6 +38,12 @@ namespace fs = ghc::filesystem;
 
 ServerApplication::ServerApplication(EventHandler &eventHandler) : m_eventHandler(eventHandler) {}
 
+ServerApplication::~ServerApplication() {
+	// release lua-backed definitions before the script engine is destroyed.
+	m_worldController.clearEntities();
+	m_registry.clear();
+}
+
 bool ServerApplication::init() {
 	std::srand((unsigned int)std::time(nullptr));
 
@@ -105,8 +111,6 @@ int ServerApplication::run() {
 	ServerConfig::options.clear();
 	m_serverCommandHandler.sendServerClosed(error.empty() ? "world closed" : "world error: " + error);
 	m_server.disconnectAllClients();
-	m_worldController.clearEntities();
-	m_registry.clear();
 	return error.empty() ? 0 : 1;
 }
 

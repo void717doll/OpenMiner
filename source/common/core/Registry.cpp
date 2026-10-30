@@ -214,6 +214,11 @@ EntityCallbackContainer &Registry::getEntityCallbackContainer(const std::string 
 	return m_entityCallbacks.at(stringID);
 }
 
+EntityCallbackContainer *Registry::findEntityCallbackContainer(const std::string &stringID) {
+	auto it = m_entityCallbacks.find(stringID);
+	return it == m_entityCallbacks.end() ? nullptr : &it->second;
+}
+
 void Registry::serialize(sf::Packet &packet) const {
 	for (auto &it : m_blocks) {
 		packet << u8(DataType::Block) << *it;

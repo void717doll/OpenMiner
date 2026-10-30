@@ -42,6 +42,7 @@
 class ServerApplication {
 	public:
 		explicit ServerApplication(EventHandler &eventHandler);
+		~ServerApplication();
 
 		bool init();
 

@@ -39,6 +39,9 @@
 void CollisionController::update(entt::registry &registry) {
 	registry.view<PositionComponent, DoubleBox, std::string>().each([&](auto entity, auto &position, auto &box, auto &id) {
 		if (registry.all_of<FallingBlockComponent>(entity)) return;
+		// native projectiles handle their hits in worldmobs and have no script callbacks.
+		auto *callbacks = Registry::getInstance().findEntityCallbackContainer(id);
+		if (!callbacks || !callbacks->collisionCallback.valid()) return;
 		const auto *body = registry.try_get<PhysicalComponent>(entity);
 		if (body && body->pickupDelay) return;
 		for (auto &it : m_players) {
@@ -55,9 +58,7 @@ void CollisionController::update(entt::registry &registry) {
 				if (hitbox.intersects(playerHitbox)) {
 					EntityWrapper entityWrapper{entity, registry};
 
-					auto &entityCallbackContainer = Registry::getInstance().getEntityCallbackContainer(id);
-					if (entityCallbackContainer.collisionCallback.valid())
-						entityCallbackContainer.collisionCallback(entityWrapper, it.second, *m_server);
+					callbacks->collisionCallback(entityWrapper, it.second, *m_server);
 					if (!registry.valid(entity)) break;
 				}
 			}

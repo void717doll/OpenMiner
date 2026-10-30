@@ -110,25 +110,26 @@ void TitleScreenState::startSingleplayer(bool showLoadingState, const std::strin
 		return;
 	}
 	GameConfig::worldName = worldName;
+	if (m_thread.joinable())
+		m_thread.join();
+	m_serverApp.reset();
 
 	auto &game = m_stateStack->push<GameState>();
 
 	m_stateStack->push<ServerLoadingState>(game, showLoadingState, this);
 
-	if (m_thread.joinable())
-		m_thread.join();
-
 	LogLevel logLevel = LoggerHandler::getInstance().maxLevel();
-	m_thread = std::thread([this, worldName, logLevel, seed, creative] () {
-		ServerApplication app{*m_eventHandler};
+	// the client and mesh workers share definitions until the game state is gone.
+	m_serverApp = std::make_shared<ServerApplication>(*m_eventHandler);
+	m_thread = std::thread([app = m_serverApp, worldName, logLevel, seed, creative] () {
 
 		if (!worldName.empty())
-			app.setWorldName(worldName);
+			app->setWorldName(worldName);
 
-		app.setLogLevel(logLevel);
-		app.setSeed(seed);
-		app.setCreative(creative);
-		app.run();
+		app->setLogLevel(logLevel);
+		app->setSeed(seed);
+		app->setCreative(creative);
+		app->run();
 	});
 }
 
