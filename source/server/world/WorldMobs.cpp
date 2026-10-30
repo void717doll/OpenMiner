@@ -468,6 +468,7 @@ void ServerWorld::updateMobs() {
 		if (m_mobTick % 20 == 0) spawnNetherMobs();
 		return;
 	}
+	if (m_dimension.id() == 0 && m_mobTick % 20 == 0) spawnCaveMobs();
 	if (m_mobTick % 200 != 0) return;
 	bool night = GameTime::getTicks() % GameTime::dayLength >= 12000;
 	static const char *passive[] = {"pig", "cow", "sheep", "chicken", "wolf"};
@@ -504,6 +505,62 @@ void ServerWorld::updateMobs() {
 				if (biome != retro::Biome::Taiga && biome != retro::Biome::Forest) continue;
 			}
 			spawnMob("default:" + std::string(name), x + 0.5, y + 0.5, z);
+		}
+	}
+}
+
+void ServerWorld::spawnCaveMobs() {
+	auto &registry = m_scene.registry();
+	auto &definitions = Registry::getInstance();
+	unsigned living = 0, hostiles = 0;
+	registry.view<MobComponent, BetaMobComponent>().each([&](auto, const auto &mob, const auto &traits) {
+		if (!mob.health || projectile(traits.kind)) return;
+		++living;
+		if (mob.hostile) ++hostiles;
+	});
+	if (living >= 64 || hostiles >= 32) return;
+	static const char *names[] = {"default:zombie", "default:skeleton", "default:creeper", "default:spider"};
+	for (const auto &entry : m_players) {
+		const auto &player = entry.second;
+		if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != m_dimension.id()) continue;
+		std::uint64_t seed = std::uint64_t(std::int64_t(m_seed)) + std::uint64_t(m_mobTick) * 341873128712ULL
+			+ std::uint64_t(player.clientID()) * 132897987541ULL;
+		retro::Random random(std::int64_t(seed & ((1ULL << 48) - 1)));
+		unsigned spawned = 0;
+		// bounded attempts search loaded caves without generating more terrain.
+		for (unsigned attempt = 0; attempt < 8 && spawned < 2; ++attempt) {
+			const char *name = names[random.nextInt(4)];
+			if (!definitions.hasEntity(name)) continue;
+			auto model = definitions.getEntityFromStringID(name);
+			const auto *hitbox = definitions.entityRegistry().try_get<DoubleBox>(model);
+			if (!hitbox) continue;
+			int x = int(std::floor(player.x())) + random.nextInt(65) - 32;
+			int y = int(std::floor(player.y())) + random.nextInt(65) - 32;
+			int preferred = std::clamp(int(std::floor(player.z())) + random.nextInt(25) - 12, 1, 126);
+			int z = retro::mobCavityFloor(*this, *hitbox, x + 0.5, y + 0.5, preferred, 12);
+			if (z < 0 || z + hitbox->sizeZ >= m_heightmap.getHighestBlockAt(x, y)) continue;
+			int light = getLight(x, y, z);
+			if (light < 0 || light > 7) continue;
+			bool clear = true;
+			for (const auto &otherEntry : m_players) {
+				const auto &other = otherEntry.second;
+				if (!other.isOnline() || !other.health() || other.dimension() != m_dimension.id()) continue;
+				double dx = x + 0.5 - other.x(), dy = y + 0.5 - other.y(), dz = z - other.z();
+				if (dx * dx + dy * dy + dz * dz < 24 * 24) { clear = false; break; }
+			}
+			if (!clear) continue;
+			DoubleBox box = *hitbox; box.move(x + 0.5, y + 0.5, z);
+			registry.view<MobComponent, PositionComponent, DoubleBox>().each([&](auto entity, const auto &mob, const auto &position, const auto &localBox) {
+				if (!clear || !mob.health || projectile(traitsFor(registry, entity).kind)) return;
+				DoubleBox other = localBox; other.move(position.x, position.y, position.z);
+				if (box.intersects(other)) clear = false;
+			});
+			if (clear && spawnMob(name, x + 0.5, y + 0.5, z)) {
+				++spawned;
+				++living;
+				++hostiles;
+				if (living >= 64 || hostiles >= 32) return;
+			}
 		}
 	}
 }

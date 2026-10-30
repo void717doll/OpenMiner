@@ -127,6 +127,7 @@ class Registry : public ISerializable {
 
 		bool hasBlock(const std::string &stringID) const { return m_blocksID.find(stringID) != m_blocksID.end(); }
 		bool hasItem(const std::string &stringID) const { return m_itemsID.find(stringID) != m_itemsID.end(); }
+		bool hasEntity(const std::string &stringID) const { return m_entities.find(stringID) != m_entities.end(); }
 
 		const Block &getBlockFromStringID(const std::string &stringID);
 		const Item &getItemFromStringID(const std::string &stringID);
