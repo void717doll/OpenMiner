@@ -141,8 +141,8 @@ void HUD::draw(RenderTarget &target, RenderStates states) const {
 	if (Config::isHotbarVisible)
 		target.draw(m_hotbar, states);
 
-	if (Config::isHotbarVisible && !m_player.isCreative()) {
-		target.draw(m_hearts, states);
+	if (Config::isHotbarVisible) {
+		if (!m_player.isCreative()) target.draw(m_hearts, states);
 		target.draw(m_armor, states);
 	}
 

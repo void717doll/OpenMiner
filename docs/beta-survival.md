@@ -73,4 +73,4 @@ iron ore and iron blocks require a copper, iron or diamond pickaxe. stone and go
 
 selecting an item shows its name above the hotbar for three seconds, fading during the last second. enable `show durability` under options > interface to keep the held tool or armor's remaining and maximum durability visible. the setting is saved; food, blocks and empty slots have no durability label.
 
-armor protection appears above the right side of the hotbar, opposite the hearts. ten icons fill left to right, with a half icon for an odd protection value. the bar follows armor wear and is hidden without armor or in creative mode.
+armor protection appears above the right side of the hotbar, opposite the hearts. ten icons fill left to right, with a half icon for an odd protection value. the bar follows armor wear in survival and creative, and is hidden without armor.
