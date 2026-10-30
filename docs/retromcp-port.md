@@ -23,15 +23,15 @@ comparisons against java compiled from the supplied checkout passed:
 - 524,288 nether surface bytes and 524,288 nether carved bytes matched, including a 64-bit seed.
 - the earlier 1,350 octave samples matched exactly; 3,825 density samples differed by at most 1.14e-13.
 
-the parity claim covers base climate, density, surface, and cave generation. tree/flora/ore population, cross-chunk feature scheduling, portals, and nether fire/mushroom/spring population still use oldworld behavior or remain absent. below zero terrain continues as solid material; above the source region it is air. existing saved chunks remain unchanged; newly explored terrain can meet older terrain at seams. parallel generation, superchunks, and a public terrain-formula api remain unfinished.
+the parity claim covers base climate, density, surface, and cave generation. tree/flora/ore population, cross-chunk feature scheduling, portals, and nether fire/mushroom/spring population still use oldworld behavior or remain absent. terrain below y=0 and above the source region is air. placement is limited to y=0 through y=255; bedrock keeps the source irregular y=0 through y=4 layers. existing saved chunks remain unchanged; newly explored terrain can meet older terrain at seams. parallel generation, superchunks, and a public terrain-formula api remain unfinished.
 
 ## mobs and controls
 
 the engine registers `pig`, `zombie`, `cow`, `sheep`, `chicken`, `skeleton`, `creeper`, `spider`, `slime`, `ghast`, `pig_zombie`, `wolf`, `squid`, and mod-spawned `giant`. all spawns respect the 64-mob cap and loaded space. skeleton arrows and ghast fireballs are separate visible entities.
 
-left click attacks a visible target within three blocks. right click milks cows with an empty bucket, shears sheep, saddles pigs, and tames/heals/orders wolves. chickens lay eggs, spiders climb and leap, slimes hop and split, pig zombies retaliate together, squid swim, and creepers use a 30-tick fuse. wolves preserve their owner and sitting state. fireballs can be reflected by attacks. food heals immediately, including at full health; stew returns a bowl. old oversized stew stacks retain unconsumed portions.
+left click attacks a visible target within three blocks. right click milks cows with an empty bucket, shears sheep, saddles pigs, and tames/heals/orders wolves. chickens lay eggs, spiders climb and leap, slimes hop and split, pig zombies retaliate together, squid swim, and creepers use a 30-tick fuse. wolves preserve their owner and sitting state. fireballs can be reflected by attacks. food heals immediately, including at full health; stew returns a bowl. old oversized food stacks split on load without losing surplus.
 
-movement uses direct pursuit, obstacle jumping, and the shared swept collision solver. beta's full pathfinder, mob vocalizations, armor, riding controls, wolf sheep hunting, and lightning-charged creepers remain absent. natural spawn scheduling uses oldworld's bounded periodic attempts rather than the complete beta spawning algorithm. explosion rays use explicit resistance for common materials and approximate the remainder from hardness. sheep colors are rendered, but wool drops currently use the single white wool item.
+movement uses direct pursuit, obstacle jumping, and the shared swept collision solver. beta's full pathfinder, mob vocalizations, riding controls, wolf sheep hunting, and lightning-charged creepers remain absent. natural spawn scheduling uses oldworld's bounded periodic attempts rather than the complete beta spawning algorithm. explosion rays use explicit resistance for common materials and approximate the remainder from hardness. sheep colors are rendered, but wool drops currently use the single white wool item.
 
 model cuboids and UVs follow the supplied client source. limb motion derives from client displacement; separate head rotation, attack swings, wing timing, wolf shaking, slime squishing, ghast charge interpolation, and squid pitch are adapted or absent. refi lacks distinct charging-ghast artwork; that pose uses the normal atlas. these are not claims of identical animation.
 
@@ -55,13 +55,11 @@ inventory tooltips follow beta `GuiContainer.drawScreen`: only the trimmed item 
 
 survival disables flight, noclip, sprint, starter gifts and cheat commands. creative mode restores the item catalog, unlimited placement and flight. player movement now follows beta `EntityLiving`, `Entity`, and `MovementInputFromOptions`, including fixed physics ticks, momentum, friction, gravity, swimming, ladders, stepping, and sneaking. server position checks use the same axis ordering. the [survival inventory](beta-survival.md) records equipment durability, mining rules, loot behavior, save compatibility, verification, and remaining differences.
 
-fall, drowning, lava/burn, cactus and suffocation damage retain beta hurt immunity. food heals immediately. death drops inventory with equipment wear preserved and respawns automatically. common block hardness, tool speeds, effective-block lists, harvest tiers and weapon damage follow the supplied beta source. loot falls to the ground and partial pickups retain the remainder. water/lava, mobs, falling blocks and dropped-item movement retain the [lunarchy world physics port](lunarchy-physics.md).
+fall, drowning, lava/burn, cactus and suffocation damage retain beta hurt immunity. food heals immediately. death drops inventory with equipment wear preserved and waits for the player to choose respawn or return to the title menu. common block hardness, tool speeds, effective-block lists, harvest tiers and weapon damage follow the supplied beta source. loot falls to the ground and partial pickups retain the remainder. water/lava, mobs, falling blocks and dropped-item movement retain the [lunarchy world physics port](lunarchy-physics.md).
 
 water/lava now use queued propagation and level parameters; unsupported sand/gravel fall as saved entities. these systems follow lunarchy rather than the beta generator reference.
 
-armor protection, wear and model layers follow the supplied beta `ItemArmor`, `InventoryPlayer` and `RenderPlayer`. tnt uses the beta fuse and motion with the shared blast propagation. 99-item stacks and unstackable cookies are requested deviations.
-
-copper tools and ore add a required mining step before iron. copper and creative mode are requested additions to the beta rules.
+armor protection, wear and model layers now follow the supplied beta `ItemArmor`, `InventoryPlayer` and `RenderPlayer`. tnt uses the beta fuse and motion with the shared blast propagation. the 99-item limit, unstackable cookies, creative mode and the copper step before iron are requested deviations.
 
 ## nether population
 
@@ -78,3 +76,19 @@ cart movement now follows `~/modernmcp`'s `EntityMinecart`: movement on each hor
 track connections follow `BlockBaseRailLogic`, including curves, slopes, existing neighbor connections, and redstone selection at junctions. powered and detector rails stay straight or sloped. mineclonia's eight-rail power range and detector behavior remain in use. invalid torch and rail placements are rejected before prediction or item consumption; removing valid support still drops an attached block. redstone torches support wall mounting while preserving the lit-state bits in older saves.
 
 this covers the existing rideable cart and three rail types. container carts, furnace carts, activator rails, and automatic mob passengers are not included.
+
+## terrain and content extensions
+
+modernmcp's `MapGenRavine` now carves the canonical lower 128-block columns after beta caves. forty columns matched the source java output byte for byte. abandoned mineshaft candidates and recursive room, corridor, crossing, and stair layouts follow `MapGenMineshaft` and its component classes; twenty-two layouts matched java. population uses separate deterministic piece seeds and clips writes to the current chunk. reverse chunk generation preserved blocks and loot in the integration check.
+
+mineshafts contain timber supports, rails, webs, chests, and spider spawners. chest minecarts are represented by chests; cave spiders are represented by ordinary spiders. these are adaptations, not full modern structure parity. coral reefs populate shallow non-cold oceans. small nether brick ruins populate exposed nether shelves; they are not full fortresses. new structures and trees appear in newly generated terrain.
+
+birch and spruce shapes follow retromcp's `WorldGenForest` and `WorldGenTaiga2`. forest trees have a one-in-five birch choice; taiga trees use spruce. leaves have a one-in-twenty chance of dropping the matching sapling, while shears return leaves. leaves never drop apples. dungeon chests retain one shared one-in-a-million rare roll for an apple, golden apple, or music disc.
+
+regular and redstone torches share mineclonia's floor and wall mesh geometry, converted to the engine's vertical z axis. hand-view depth affects both held items and the empty hand; it is the only hand-view control and lives under graphics. the interface coordinate option displays minecraft-style x/y/z, with vertical height labeled y.
+
+## compressed world folders
+
+modernmcp supplies the one-folder-per-world organization. openminer keeps its own save format inside `saves/<name>/map.sqlite`; this is not an anvil or nbt save and cannot be opened by minecraft. lunarchy's sqlite chunk storage and whole-record zstandard compression are the storage reference. chunk palettes store block names, block parameters, and sparse inventories/metadata. lighting is rebuilt on load. entities, players, game mode, generation revision, bed spawn, health, score, and armor remain in the world-state record.
+
+saves use a sqlite transaction. unchanged chunks are skipped; chunks with inventories or timers are checked on each save. old flat `.dat` saves remain readable and migrate on save, retaining the original as `<name>/legacy.dat`. new worlds do not need that backup. the menu lists both formats, sorts by last-save time, and renames or deletes the whole world folder.

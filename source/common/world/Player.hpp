@@ -27,6 +27,8 @@
 #ifndef PLAYER_HPP_
 #define PLAYER_HPP_
 
+#include "common/world/PlayerStatistics.hpp"
+
 #include "common/core/Box.hpp"
 #include "common/core/ISerializable.hpp"
 #include "common/inventory/Inventory.hpp"
@@ -63,7 +65,7 @@ class Player : public ISerializable {
 		Inventory &armor() { return m_armor; }
 		const Inventory &armor() const { return m_armor; }
 		u16 armorValue() const;
-		u16 absorbDamage(u16 amount);
+		u16 absorbDamage(u16 amount, const std::string &cause = "");
 
 		void setName(const std::string &name) { m_name = name; }
 		void setPosition(double x, double y, double z) { m_x = x; m_y = y; m_z = z; }
@@ -78,10 +80,17 @@ class Player : public ISerializable {
 		void setHeldItemSlot(u8 heldItemSlot) { m_heldItemSlot = heldItemSlot; }
 		bool pickItem(const std::string &itemID);
 
+		PlayerStatistics &statistics() { return m_statistics; }
+		const PlayerStatistics &statistics() const { return m_statistics; }
+
 		bool isCreative() const { return m_creative; }
-		void setCreative(bool creative) { m_creative = creative; if (creative) m_health = 20; }
+		void setCreative(bool creative) { m_creative = creative; if (creative) m_health = 20; else m_noclip = false; }
+		bool isNoclip() const { return m_creative && m_noclip; }
+		void setNoclip(bool enabled) { m_noclip = m_creative && enabled; }
 
 		u16 health() const { return m_health; }
+		s32 score() const { return m_score; }
+		void setScore(s32 score) { m_score = score; }
 		void setHealth(u16 health) { m_health = std::min<u16>(health, 20); }
 		void heal(u16 amount) { setHealth(u16(std::min<unsigned>(20, m_health + amount))); }
 		void damage(u16 amount) { if (m_creative) return; m_health = amount >= m_health ? 0 : m_health - amount; }
@@ -89,8 +98,11 @@ class Player : public ISerializable {
 		static void initUsertype(sol::state &lua);
 
 	protected:
+		PlayerStatistics m_statistics;
 		bool m_creative = false;
+		bool m_noclip = false;
 		u16 m_health = 20;
+		s32 m_score = 0;
 		std::string m_name;
 
 		double m_x = 0;

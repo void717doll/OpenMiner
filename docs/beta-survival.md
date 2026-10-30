@@ -33,17 +33,27 @@ nearby items collect within one block of the player body horizontally after thei
 
 dropped blocks and items rotate at a fixed 90 degrees per second with a small visual bob. sprites use the same opaque-edge mesh as held items, with enough ground clearance to stay above the floor. rendering interpolates the 20hz physics positions without changing collision or pickup positions.
 
-mob deaths put loot on the ground for pickup, including environmental deaths. sheep shearing also puts wool on the ground. partial pickups keep the remainder. existing health, immediate food healing, container returns, fall/drowning/lava/fire/cactus/suffocation damage, hurt immunity, and automatic respawn remain active. there is no hunger bar.
+mob deaths put loot on the ground for pickup, including environmental deaths. sheep shearing also puts wool on the ground. partial pickups keep the remainder. existing health, immediate food healing, container returns, fall/drowning/lava/fire/cactus/suffocation damage, and hurt immunity remain active. there is no hunger bar.
 
-accepted damage sends a separate hurt event, including fatal damage before automatic respawn. the client plays the hurt cue and briefly tilts the camera; hearts blink between the previous and current amounts after a hit. health synchronization and healing do not trigger hurt sounds. equipment breakage also has its own event, so moving or dropping a tool does not play a break sound.
+accepted damage sends a separate hurt event, including fatal damage. the client plays the hurt cue and briefly tilts the camera; hearts blink between the previous and current amounts after a hit. health synchronization and healing do not trigger hurt sounds. equipment breakage also has its own event, so moving or dropping a tool does not play a break sound.
 
 undamaged stacks retain their original serialized bytes. a damaged stack writes the reserved `@oldworld:stack_damage` marker followed by the item id, amount, and damage; readers accept both forms in player inventories, containers, and item entities. older saves remain readable; older executables cannot read newly saved damaged stacks.
+
+death drops the inventory once and leaves health at zero. the death screen shows `you died!`, the score, and respawn/title-menu buttons. respawning returns to the overworld with full health and a new life score. dead players cannot move, attack, or collect drops. closing an inventory returns carried items and temporary crafting ingredients; overflow and items carried at death drop into the world. player-owned items bypass the ambient-loot cap so the cap cannot silently destroy them.
+
+the score appears at the top left as a white label and yellow value, and the death screen shows the same value. beta `EntityPlayer` starts at zero; all bundled `EntityLiving` subclasses keep `scoreValue = 0`, so the reference does not award nonzero points for mining, pickups, or ordinary mob kills. the counter follows that behavior. an optional `SCOR` save trailer preserves the current value; older saves start at zero.
+
+the pause menu stops world ticks and player movement. inventory and death screens leave the world running, matching the beta screen behavior. movement positions are sent after each physics tick: combining several ticks into one displacement could make the server reject valid paths off ledges and around corners.
+
+mob attacks send the actual health removed and the hit position. the client displays a short red model flash, a rising damage number, and a hit sound. fatal player damage adds a chat message naming the attacking mob, projectile owner, explosion source, or environmental hazard. the last five system messages remain visible for fifteen seconds.
+
+the temporary random portal generator is removed. newly generated terrain contains no automatic portals; existing saved structures remain intact.
 
 ## verification and limits
 
 800 samples from the original java movement methods matched the c++ calculations exactly for cardinal-facing walking, sneaking, diagonal input, ice, repeated jumping, water, lava, and ladders. the oracle uses a flat floor and controlled material contacts; it does not prove parity for complete worlds or arbitrary view angles. regression coverage exercises axis ordering, slab ascent accepted by the server, sneak edges, equipment breakage, legacy oversized stacks, and serialized inventory/stack boundaries.
 
-this is a survival rules port, not complete beta feature parity. beds, a death screen, sapling regrowth, weather, fire spread, liquid currents, the full beta mob pathfinder/spawner, knockback, and air/fire hud indicators remain absent or adapted. crafting and inventory messages retain the existing local-client ownership. mining animation and timing use the engine clock rather than the complete beta controller state machine. stepping camera smoothing and source-exact random drops are not ported. material footsteps and player action effects now use the [luanti sound assets](sound-assets.md). native input and visual checks still require a desktop session.
+this is a survival rules port, not complete beta feature parity. beds, sapling regrowth, weather, fire spread, liquid currents, the full beta mob pathfinder/spawner, knockback, and air/fire hud indicators remain absent or adapted. crafting and inventory messages retain the existing local-client ownership. mining animation and timing use the engine clock rather than the complete beta controller state machine. stepping camera smoothing and source-exact random drops are not ported. material footsteps and player action effects now use the [luanti sound assets](sound-assets.md). automated checks cover movement acceptance, fatal damage, death drops, score persistence, respawning, hit messages, and hazard attribution. full live gameplay and the latest native visuals still need validation.
 
 ## item limits
 
@@ -76,3 +86,19 @@ selecting an item shows its name above the hotbar for three seconds, fading duri
 armor protection appears above the right side of the hotbar, opposite the hearts. ten icons fill left to right, with a half icon for an odd protection value. the bar follows armor wear in survival and creative, and is hidden without armor.
 
 unsupported plants and plants displaced by liquids or falling blocks use the same loot rules as mining without a tool. tall grass and ferns have a one-in-eight seed drop; dead bushes drop nothing. shears still collect grass, ferns and leaves when used directly. empty drops stay empty.
+
+## farming and exploration expansion
+
+new worlds add small basalt deposits and quartz ore to the existing red nether. stone pickaxes or better harvest basalt, quartz ore, and cave crystals. netherrack smelts into nether bricks; further firing produces cracked bricks. quartz crafts into blocks, pillars, and chiseled blocks. cave stone can carry sparse moss or lichen, with small fungi, dim mycena, hanging glowworms, and rare deep crystals. four crystals and glass make a brighter lamp.
+
+wild potatoes, tomatoes, and barley provide planting material in suitable surface biomes. plant on tilled soil; water within four blocks hydrates farmland. crops need light level 9 or more, and rows grow faster than crowded squares. break mature crops to collect food and seeds, then replant. potatoes can be baked, barley makes bread, and potatoes with tomatoes make bowl-returning stew. edible items stack to one and heal immediately.
+
+bone meal now advances crops by three stages. mulch advances one stage; fertilizer advances five. four leaves or two wheat make mulch. combine mulch with bone meal or mycena powder for fertilizer. unsuccessful uses consume nothing; creative uses preserve the item.
+
+build a classic obsidian frame with a two-wide, three-high opening and ignite it with flint and steel. corner blocks are optional. right-click the portal to travel. destinations reuse an intact nearby frame or build a frame in a checked clear space with a small landing platform. travel uses an eight-to-one horizontal scale and saves a return link. a broken frame extinguishes once its surrounding chunks are loaded.
+
+new block registrations are appended so existing saves retain their numeric ids. new saves record generation revision 1; saves without that trailer retain revision 0 and do not gain the new natural decorations. existing saved blocks are preserved. lighting is rebuilt on load, so enclosed caves and the nether no longer inherit daylight from unloaded chunk boundaries. crops and hives pause away from players; active chunk and block ticking has a fixed work limit.
+
+these additions adapt the supplied refi assets to oldworld's existing systems. they are deliberate extensions to beta, with no hunger, shields, fireworks, or extra equipment tier after diamond. asset mappings and transformations are recorded in `refi-assets.json`.
+
+wild hives appear occasionally in forests. a comb surrounded by planks makes a wooden hive. hives need daylight, light level 12, and two nearby flowers; they produce one comb after roughly four minutes of active checks and hold up to three. right-click to harvest. a smoker made from four iron ingots and coal calms bees for 45 seconds and lasts 64 uses. harvesting without smoke can cause one heart of damage through normal armor and hurt immunity. comb makes honey or wax; wax and a stick make torches. each hive can advance one crop every two minutes, and overlapping hives share the same per-crop cooldown. nearby bee sprites are cosmetic and capped for rendering.

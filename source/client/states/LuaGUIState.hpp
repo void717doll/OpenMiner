@@ -66,6 +66,7 @@ class LuaGUIState : public InterfaceState {
 		Texture &loadTexture(const std::string &textureFilename);
 
 		void centerMainWidget();
+		void finishInventory();
 
 		ClientCommandHandler &m_client;
 
@@ -91,6 +92,7 @@ class LuaGUIState : public InterfaceState {
 		u16 m_height = 0;
 
 		bool m_isCentered = false;
+		bool m_isFinished = false;
 
 		s16 m_keyID = -1;
 };

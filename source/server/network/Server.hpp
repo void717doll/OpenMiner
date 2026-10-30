@@ -49,6 +49,8 @@ class Server {
 		void sendToAllClients(Network::Packet &packet) const;
 
 		bool isRunning() const { return m_isRunning; }
+		bool isPaused() const { return m_isPaused; }
+		void setPaused(bool paused) { m_isPaused = paused; }
 
 		const ServerInfo &info() const { return m_info; }
 
@@ -61,6 +63,7 @@ class Server {
 		void handleClientMessages();
 
 		bool m_isRunning = false;
+		bool m_isPaused = false;
 
 		ServerInfo m_info;
 

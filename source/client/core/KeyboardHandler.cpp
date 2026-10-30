@@ -48,6 +48,7 @@ KeyboardHandler::KeyboardHandler() {
 	addKey(GameKey::Shift,           "Shift",             SDLK_LSHIFT);
 
 	addKey(GameKey::Drop, "drop item", SDLK_q, "_Drop");
+	addKey(GameKey::Noclip, "Creative Noclip", SDLK_v, "_Noclip");
 	for (int i = 0; i < 9; ++i) {
 		std::string number = std::to_string(i + 1);
 		addKey(GameKey::Hotbar1 + i, "hotbar " + number, SDLK_1 + i, "_Hotbar" + number);

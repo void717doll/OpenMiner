@@ -27,7 +27,7 @@
 #ifndef MOUSEITEMWIDGET_HPP_
 #define MOUSEITEMWIDGET_HPP_
 
-#include "client/graphics/Sprite.hpp"
+#include "client/graphics/RectangleShape.hpp"
 #include "client/gui/ItemWidget.hpp"
 #include "client/gui/Text.hpp"
 
@@ -66,9 +66,10 @@ class MouseItemWidget : public ItemWidget {
 		ItemWidget *m_currentItemWidget = nullptr;
 		InventoryWidget *m_currentInventoryWidget = nullptr;
 
-		Sprite m_tooltipBackground{"texture-toasts", 160, 32};
+		RectangleShape m_tooltipBackground;
 		Text m_tooltipText;
-		Text m_tooltipInfoText;
+		s32 m_mouseX = 0;
+		s32 m_mouseY = 0;
 
 		bool m_isDragging = false;
 		bool m_isLeftClickDrag = false;

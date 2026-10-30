@@ -51,6 +51,7 @@ class World {
 		void setBlockState(int x, int y, int z, u16 stateID);
 
 		u16 getBlock(int x, int y, int z) const;
+		int getLight(int x, int y, int z) const;
 		void setBlock(int x, int y, int z, u16 id) const;
 		u16 getData(int x, int y, int z) const;
 		void setData(int x, int y, int z, u16 data) const;

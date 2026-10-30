@@ -38,17 +38,18 @@
 #include "client/states/WorldSelectionState.hpp"
 
 TitleScreenState::TitleScreenState() {
+	m_background.setFillColor(Color::fromRGBA32(29, 32, 29));
 	m_menuWidget.setScale(Config::guiScale, Config::guiScale);
 
-	m_menuWidget.addButton("play", [this] (TextButton &) {
+	m_menuWidget.addButton("Play", [this] (TextButton &) {
 		m_stateStack->push<WorldSelectionState>(this);
 	});
 
-	m_menuWidget.addButton("Options...", [this] (TextButton &) {
+	m_menuWidget.addButton("Options", [this] (TextButton &) {
 		m_stateStack->push<SettingsMenuState>(this);
 	});
 
-	m_menuWidget.addButton("Exit", [this] (TextButton &) {
+	m_menuWidget.addButton("Quit Game", [this] (TextButton &) {
 		m_stateStack->pop();
 	});
 
@@ -146,10 +147,7 @@ void TitleScreenState::onGuiScaleChanged(const GuiScaleChangedEvent &event) {
 }
 
 void TitleScreenState::updateWidgetPosition() {
-	m_background.setPosition(
-		roundf(Config::screenWidth / 2.0f - m_background.width() / 2.0f),
-		roundf(Config::screenHeight / 2.0f - m_background.height() / 2.0f)
-	);
+	m_background.setSize(Config::screenWidth, Config::screenHeight);
 
 	m_menuWidget.setPosition(
 		roundf(Config::screenWidth / 2.0f - m_menuWidget.getGlobalBounds().sizeX / 2.0f),

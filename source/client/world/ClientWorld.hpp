@@ -86,7 +86,7 @@ class ClientWorld : public World, public Drawable {
 
 		const Dimension *m_dimension = nullptr;
 
-		ClientScene m_scene;
+		ClientScene m_scene{this};
 
 		ChunkMap m_chunks;
 

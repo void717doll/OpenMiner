@@ -58,6 +58,7 @@ void Item::initUsertype(sol::state &lua) {
 	lua.new_usertype<Item>("Item",
 		"id", &Item::id,
 		"string_id", &Item::stringID,
+		"max_stack_size", &Item::maxStackSize,
 		"has_group", &Item::hasGroup,
 		"get_group_value", &Item::getGroupValue
 	);

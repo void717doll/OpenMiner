@@ -29,9 +29,9 @@
 #include "client/scene/controller/AnimationController.hpp"
 #include "client/scene/controller/RenderingController.hpp"
 
-ClientScene::ClientScene() {
+ClientScene::ClientScene(const World *world) : m_world(world) {
 	m_controllers.emplace_back(new AnimationController);
-	m_clientControllers.emplace_back(new RenderingController);
+	m_clientControllers.emplace_back(new RenderingController(world));
 }
 
 void ClientScene::update() {
@@ -50,4 +50,5 @@ void ClientScene::draw(RenderTarget &target, RenderStates states) const {
 
 	for (auto &controller : m_clientControllers)
 		controller->draw(m_registry, target, states);
+	if (m_world) m_particles.draw(*m_world, *m_camera, target, states);
 }

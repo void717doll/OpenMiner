@@ -69,16 +69,16 @@ void DebugOverlay::update(bool printRendererInfo) {
 
 	std::stringstream stream;
 	stream << "x: " << px << " | ";
-	stream << "y: " << py << " | ";
-	stream << "z: " << pz;
+	stream << "y: " << pz << " | ";
+	stream << "z: " << py;
 	stream << '\n';
 	stream << "rx: " << math::pmod(px, CHUNK_WIDTH) << " | ";
-	stream << "ry: " << math::pmod(py, CHUNK_DEPTH) << " | ";
-	stream << "rz: " << math::pmod(pz, CHUNK_HEIGHT);
+	stream << "ry: " << math::pmod(pz, CHUNK_HEIGHT) << " | ";
+	stream << "rz: " << math::pmod(py, CHUNK_DEPTH);
 	stream << '\n';
 	stream << "cx: " << (px & -CHUNK_WIDTH)  / CHUNK_WIDTH << " | ";
-	stream << "cy: " << (py & -CHUNK_DEPTH)  / CHUNK_DEPTH << " | ";
-	stream << "cz: " << (pz & -CHUNK_HEIGHT) / CHUNK_HEIGHT;
+	stream << "cy: " << (pz & -CHUNK_HEIGHT) / CHUNK_HEIGHT << " | ";
+	stream << "cz: " << (py & -CHUNK_DEPTH) / CHUNK_DEPTH;
 	stream << '\n';
 	stream << "dir: " << direction << " (" << m_player.cameraYaw() << ")";
 	stream << '\n';

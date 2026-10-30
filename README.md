@@ -22,7 +22,9 @@ choose survival to mine, craft, farm, and fight mobs, or creative to build with 
 - cave moss, fungi, crystals, lush cave plants, cherry trees, and a spyglass.
 - potatoes, tomatoes, barley, extra food recipes, bone meal, mulch, fertilizer, beehives, honey, and wax.
 - ocelots and bats, working buckets, beds, clocks, minecarts, powered rails, and detector rails.
-- dungeon rooms with loot chests and mob spawners, plus jukeboxes and music discs.
+- dungeon rooms with loot chests and mob spawners, plus jukeboxes with eight mineclonia music tracks.
+- ravines, abandoned mineshafts, coral reefs, nether brick ruins, and birch and spruce trees.
+- building from y=0 through y=255, a hand-view depth slider in graphics settings, and optional coordinates on the hud.
 
 ## removals
 
@@ -49,14 +51,17 @@ choose **play** to create or open a world. new worlds have a seed and a survival
 | i | inventory, crafting, and armor |
 | 1–9 or mouse wheel | select a hotbar slot |
 | q | drop one item |
-| escape | pause |
+| v | toggle noclip in creative |
+| escape | pause; statistics for the current world |
 | f11 | fullscreen |
 
-controls, sound volume, and hud options can be changed in settings.
+controls, sound volume, and hud options can be changed in settings. gamma and hand-view depth are under graphics; always-visible coordinates are under interface. pause and choose statistics to view time played, movement, combat, mining, building, crafting, and item use for this world. older worlds start counting these statistics after this update.
+
+worlds are stored in `saves/<world name>/map.sqlite`, with compressed chunks and player data in one database. the world list puts the most recently saved world first. old `.dat` worlds migrate when saved; their original file is retained as `legacy.dat` inside the world folder. that backup still occupies its original space.
 
 ## build
 
-requires git, cmake, a c++17 compiler, and the platform development libraries needed by sdl and bgfx. run from the project directory:
+requires git, cmake, pkg-config, a c++17 compiler, sqlite3 and zstd development libraries, and the platform development libraries needed by sdl and bgfx. run from the project directory:
 
 ```sh
 git submodule update --init --recursive
@@ -72,6 +77,7 @@ launch the game from the project directory so it can find its files.
 - **OpenMiner**, by Unarelith, Quentin Bazin, and its contributors: the original project and engine.
 - **Luanti** and **Lunarchy**: references for movement, block physics, held items, and sound playback.
 - **RetroMCP**: the beta 1.7.3 source reference for terrain, survival rules, mobs, and models. [port notes](docs/retromcp-port.md).
+- **ModernMCP**: references for ravines, mineshaft layouts, world height, minecarts, and save-folder organization.
 - **Mineclonia**: gameplay references, models, and sounds. [sound credits](docs/sound-assets.md).
 - **MysticTempest's REFI_Textures**: the block, item, mob, and interface textures. [texture credits](docs/refi-assets.md) and [asset inventory](docs/refi-assets.json).
 - the authors of the libraries in `external/`, including SDL, bgfx, EnTT, sol2, GLM, SFML, tinyxml2, and zlib.

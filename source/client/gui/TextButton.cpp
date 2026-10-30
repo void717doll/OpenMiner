@@ -33,9 +33,11 @@ TextButton::TextButton(u16 width, Widget *parent) : Widget(width, 20, parent) {
 	m_text.setColor(m_defaultColor);
 	m_text.setShadowColor(Color::fromRGBA32(56, 56, 56));
 
-	m_background.setClipRect(0, 66, width, 20);
-	m_hoverBackground.setClipRect(0, 86, width, 20);
-	m_disabledBackground.setClipRect(0, 46, width, 20);
+	m_background.setSize(width, 20);
+	m_hoverBackground.setSize(width, 20);
+	m_disabledBackground.setSize(width, 20);
+	m_background.setColor(Color::fromRGBA32(190, 190, 190));
+	m_disabledBackground.setColor(Color::fromRGBA32(90, 90, 90));
 }
 
 TextButton::TextButton(const CppCallback &callback, Widget *parent) : TextButton(parent) {
@@ -51,7 +53,7 @@ void TextButton::onEvent(const SDL_Event &event) {
 		else if (m_isEnabled && !m_isHovered)
 			m_text.setColor(m_defaultColor);
 	}
-	else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && m_isHovered && m_isEnabled) {
+	else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && m_isEnabled) {
 		m_isHovered = isPointInWidget(event.button.x, event.button.y);
 
 		if (m_isEnabled && m_isHovered)

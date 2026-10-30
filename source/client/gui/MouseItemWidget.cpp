@@ -25,17 +25,14 @@
  * =====================================================================================
  */
 #include "common/core/EngineConfig.hpp"
+#include "client/core/Config.hpp"
 #include "client/gui/InventoryWidget.hpp"
 #include "client/gui/MouseItemWidget.hpp"
 
 MouseItemWidget::MouseItemWidget(Widget *parent) : ItemWidget(m_inventory, 0, 0, parent) {
-	m_tooltipBackground.setColor(Color::fromRGBA32(255, 255, 255, 240));
-	m_tooltipBackground.setPosition(20, 17, 0);
-
-	m_tooltipText.setPosition(26, 24, 0);
-
-	m_tooltipInfoText.setPosition(26, 35, 0);
-	m_tooltipInfoText.setColor(Color::fromRGBA32(180, 180, 180));
+	m_tooltipBackground.setFillColor(Color::fromRGBA32(0, 0, 0, 192));
+	m_tooltipText.setColor(Color::White);
+	m_tooltipText.setShadowColor(Color::fromRGBA32(63, 63, 63));
 }
 
 void MouseItemWidget::onEvent(const SDL_Event &event) {
@@ -203,14 +200,18 @@ void MouseItemWidget::updateCurrentItem(ItemWidget *currentItemWidget) {
 			draggingBehaviour(currentItemWidget);
 
 		m_currentItemWidget = (currentItemWidget->stack().item().id()) ? currentItemWidget : nullptr;
-		m_tooltipText.setString(currentItemWidget->stack().item().label() + " [" + std::to_string(currentItemWidget->stack().item().id()) + "]");
-
-		if (currentItemWidget->stack().maxDamage())
-			m_tooltipInfoText.setString(std::to_string(currentItemWidget->stack().maxDamage() - std::min(currentItemWidget->stack().damage(), currentItemWidget->stack().maxDamage())) + " / " + std::to_string(currentItemWidget->stack().maxDamage()) + " durability");
-		else if (currentItemWidget->stack().item().hasGroup("group:om_fuel"))
-			m_tooltipInfoText.setString("Burn time: " + std::to_string(currentItemWidget->stack().item().getGroupValue("group:om_fuel")) + " ticks");
-		else
-			m_tooltipInfoText.setString("");
+		const std::string &label = currentItemWidget->stack().item().label();
+		auto start = label.find_first_not_of(" \t\r\n");
+		m_tooltipText.setString(start == std::string::npos ? "" : label.substr(start, label.find_last_not_of(" \t\r\n") - start + 1));
+		m_tooltipText.updateVertexBuffer();
+		float width = float(m_tooltipText.getSize().x);
+		float x = 22, y = -2;
+		float scaleX = m_parent->getScale().x, scaleY = m_parent->getScale().y;
+		if (m_mouseX + (x - 10 + width + 3) * scaleX > Config::screenWidth) x -= width + 24;
+		if (m_mouseY + (y - 13) * scaleY < 0) y = 22;
+		m_tooltipBackground.setPosition(x - 3, y - 3);
+		if (m_tooltipBackground.width() != width + 6) m_tooltipBackground.setSize(width + 6, 14);
+		m_tooltipText.setPosition(x, y);
 	}
 	else {
 		m_currentItemWidget = nullptr;
@@ -261,14 +262,15 @@ void MouseItemWidget::draw(RenderTarget &target, RenderStates states) const {
 
 	states.transform *= getTransform();
 
-	if (m_currentItemWidget) {
+	if (!getStack().amount() && m_currentItemWidget && !m_tooltipText.string().empty()) {
 		target.draw(m_tooltipBackground, states);
 		target.draw(m_tooltipText, states);
-		target.draw(m_tooltipInfoText, states);
 	}
 }
 
 void MouseItemWidget::updatePosition(s32 x, s32 y) {
+	m_mouseX = x;
+	m_mouseY = y;
 	float posX = (float)x - (m_parent->getPosition().x + 10 * m_parent->getScale().x);
 	float posY = (float)y - (m_parent->getPosition().y + 10 * m_parent->getScale().y);
 

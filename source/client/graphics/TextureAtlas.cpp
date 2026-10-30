@@ -39,6 +39,9 @@ void TextureAtlas::clear() {
 
 	m_textureMap.clear();
 	m_textures.clear();
+	m_clockFrames.clear();
+	m_clockFrame = 64;
+	m_clock = {};
 
 	m_isReady = false;
 }
@@ -57,9 +60,49 @@ void TextureAtlas::loadFromRegistry() {
 			std::string path = "mods/" + item->modName() + "/textures/items/";
 			for (const auto &filename : item->tiles().textureFilenames())
 				addFile(path, filename);
+			if (item->getGroupValue("group:om_clock") && item->tiles().textureFilenames().size() == 64) {
+				m_clockTexture = getTextureID(item->tiles().getTextureForFace(0));
+				for (const auto &filename : item->tiles().textureFilenames()) {
+					SDL_Surface *surface = SDL_ConvertSurfaceFormat(m_textures.at(getTextureID(filename)).get(), SDL_PIXELFORMAT_RGBA32, 0);
+					if (!surface) throw EXCEPTION("failed to read clock frame:", filename);
+					std::vector<u8> pixels(m_tileSize * m_tileSize * 4);
+					for (unsigned y = 0; y < m_tileSize; ++y)
+						std::memcpy(pixels.data() + y * m_tileSize * 4, static_cast<u8 *>(surface->pixels) + y * surface->pitch, m_tileSize * 4);
+					m_clockFrames.emplace_back(std::move(pixels));
+					SDL_FreeSurface(surface);
+				}
+			}
 		}
 	}
 	packTextures();
+}
+
+void TextureAtlas::updateClock(u64 ticks, u16 dimension) {
+	if (!m_isReady || m_clockFrames.size() != 64) return;
+	unsigned frame = m_clock.update(ticks, dimension);
+	if (frame == m_clockFrame) return;
+	m_clockFrame = frame;
+	std::vector<u8> pixels = m_clockFrames[frame];
+	u16 across = u16(m_texture.getSize().x / m_tileSize);
+	u16 x = u16((m_clockTexture % across) * m_tileSize);
+	u16 y = u16((m_clockTexture / across) * m_tileSize);
+	u16 size = m_tileSize;
+	for (u8 mip = 0; size; ++mip) {
+		m_texture.updateRegion(mip, x >> mip, y >> mip, size, size, pixels.data());
+		if (size == 1) break;
+		u16 smaller = size / 2;
+		std::vector<u8> next(smaller * smaller * 4);
+		for (unsigned py = 0; py < smaller; ++py) for (unsigned px = 0; px < smaller; ++px) {
+			for (unsigned color = 0; color < 4; ++color) {
+				unsigned total = 0;
+				for (unsigned dy = 0; dy < 2; ++dy) for (unsigned dx = 0; dx < 2; ++dx)
+					total += pixels[((py * 2 + dy) * size + px * 2 + dx) * 4 + color];
+				next[(py * smaller + px) * 4 + color] = u8(total / 4);
+			}
+		}
+		pixels = std::move(next);
+		size = smaller;
+	}
 }
 
 FloatRect TextureAtlas::getTexCoords(const std::string &filename, bool normalized) const {

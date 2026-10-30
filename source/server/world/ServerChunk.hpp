@@ -50,6 +50,7 @@ class ServerChunk : public Chunk {
 		void onBlockChanged(int x, int y, int z) override;
 		void onBlockPlaced(int x, int y, int z, const Block &block) override;
 		void onBlockDestroyed(int x, int y, int z, const Block &block) override;
+		void onBlockDataRemoved(int x, int y, int z, const BlockData &data) override;
 
 		void tick(unsigned budget = 64);
 		void initializeTickingBlocks();
@@ -57,7 +58,9 @@ class ServerChunk : public Chunk {
 		void sendData(const ClientInfo &client);
 
 		bool hasBeenModified() const { return m_hasBeenModified; }
-		void setModified(bool hasBeenModified) { m_hasBeenModified = hasBeenModified; }
+		void setModified(bool hasBeenModified) { m_hasBeenModified = hasBeenModified; if (hasBeenModified) m_needsSave = true; }
+		bool needsSave() const { return m_needsSave; }
+		void setSaved() { m_needsSave = false; }
 
 		void setReadyToSend() { m_isReadyToSend = true; }
 
@@ -67,6 +70,7 @@ class ServerChunk : public Chunk {
 		ServerWorld &m_world;
 
 		bool m_hasBeenModified = false;
+		bool m_needsSave = true;
 		bool m_isReadyToSend = false;
 
 		Random_t m_random;

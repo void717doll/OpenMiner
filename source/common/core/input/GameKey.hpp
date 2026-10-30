@@ -52,6 +52,7 @@ namespace GameKey {
 		Hotbar7,
 		Hotbar8,
 		Hotbar9,
+		Noclip,
 
 		KeyCount
 	};

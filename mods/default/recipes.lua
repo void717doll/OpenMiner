@@ -39,7 +39,7 @@ mod:crafting_recipe {
 	},
 
 	keys = {
-		['#'] = "default:oak_planks",
+		['#'] = "group:default_planks",
 		['|'] = "default:stick",
 	}
 }
@@ -58,7 +58,7 @@ mod:crafting_recipe {
 	},
 
 	keys = {
-		['#'] = "default:oak_planks",
+		['#'] = "group:default_planks",
 		['|'] = "default:stick",
 	}
 }
@@ -77,7 +77,7 @@ mod:crafting_recipe {
 	},
 
 	keys = {
-		['#'] = "default:oak_planks",
+		['#'] = "group:default_planks",
 		['|'] = "default:stick",
 	}
 }
@@ -96,7 +96,7 @@ mod:crafting_recipe {
 	},
 
 	keys = {
-		['#'] = "default:oak_planks",
+		['#'] = "group:default_planks",
 		['|'] = "default:stick",
 	}
 }
@@ -115,7 +115,7 @@ mod:crafting_recipe {
 	},
 
 	keys = {
-		['#'] = "default:oak_planks",
+		['#'] = "group:default_planks",
 		['|'] = "default:stick",
 	}
 }
@@ -642,7 +642,7 @@ mod:crafting_recipe {
 	pattern = {
 		"###",
 	},
-	keys = {["#"] = "default:oak_planks"}
+	keys = {["#"] = "group:default_planks"}
 }
 
 -- Bread
@@ -668,7 +668,7 @@ mod:crafting_recipe {
 		"BBB",
 		"###"
 	},
-	keys = {["#"] = "default:oak_planks", ["B"] = "default:book_normal"}
+	keys = {["#"] = "group:default_planks", ["B"] = "default:book_normal"}
 }
 
 -- Sandstone
@@ -863,7 +863,7 @@ mod:crafting_recipe {
 		"# #",
 		" # "
 	},
-	keys = {["#"] = "default:oak_planks"}
+	keys = {["#"] = "group:default_planks"}
 }
 
 -- Bucket

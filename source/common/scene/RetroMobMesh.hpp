@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "common/world/RetroRandom.hpp"
+#include "common/scene/MinecloniaFaunaMesh.hpp"
+#include "common/scene/MinecloniaExtraFaunaMesh.hpp"
 
 namespace retro {
 
@@ -69,7 +71,16 @@ inline std::vector<MobVertex> mobMesh(unsigned model, float stride = 0, float st
 		mesh.box(x,y,z,width,height,depth,px,py,pz,u,v,rx,ry,rz,inflate,mirror);
 	};
 	float swing = std::cos(stride * 0.6662f) * 1.4f * strength;
-	if (model == 1) {
+	if (model == 32) {
+		if (layer) return {};
+		box(-10,-8,-1,20,16,2,0,23,0,0,10,pi/2);
+		box(-9,-7,-1,18,14,1,0,23,0,44,10,-pi/2);
+		box(-8,-9,-1,16,8,2,-9,23,0,0,0,0,3*pi/2);
+		box(-8,-9,-1,16,8,2,9,23,0,0,0,0,pi/2);
+		box(-8,-9,-1,16,8,2,0,23,-7,0,0,0,pi);
+		box(-8,-9,-1,16,8,2,0,23,7,0,0);
+	}
+	else if (model == 1) {
 		if (layer > 1 || (layer == 1 && !(appearance & 1))) return {};
 		float inflate = layer == 1 ? 0.5f : 0;
 		box(-4,-4,-8,8,8,8,0,12,-6,0,0,0,0,0,inflate);
@@ -226,12 +237,114 @@ inline std::vector<MobVertex> mobMesh(unsigned model, float stride = 0, float st
 			}
 		}
 	}
-	else if (model == 16) {
+	else if (model == 16 || model == 22 || model == 23) {
 		if (layer) return {};
 		constexpr int order[6] = {0,1,2,0,2,3};
+		float radius = model == 16 ? 1.f : 0.125f;
+		float center = model == 16 ? 0.5f : 0;
 		for (int i : order)
-			mesh.vertices.push_back({i == 0 || i == 3 ? -1.f : 1.f,0,i < 2 ? -0.5f : 1.5f,
+			mesh.vertices.push_back({i == 0 || i == 3 ? -radius : radius,0,center + (i < 2 ? -radius : radius),
 				i == 0 || i == 3 ? 0.f : 1.f,i < 2 ? 1.f : 0.f});
+	}
+	else if (model == 17) {
+		if (layer) return {};
+		for (unsigned index : catTriangles) {
+			const auto &point = catVertices[index];
+			float x = point.x, y = point.y, z = point.z;
+			if (point.part >= 1 && point.part <= 4) {
+				bool front = point.part <= 2;
+				float py = front ? 4.f : 2.4f, pz = front ? 2.f : -2.4f;
+				float angle = (point.part == 1 || point.part == 4) ? swing : -swing;
+				float dy = y - py, dz = z - pz;
+				y = py + dy * std::cos(angle) - dz * std::sin(angle);
+				z = pz + dy * std::sin(angle) + dz * std::cos(angle);
+			}
+			else if (point.part == 5 || point.part == 6) {
+				float angle = std::sin(age * 0.08f) * 0.12f;
+				float dz = z + 2.8f;
+				x = point.x * std::cos(angle) + dz * std::sin(angle);
+				z = -2.8f - point.x * std::sin(angle) + dz * std::cos(angle);
+			}
+			if ((appearance & 1) && point.part >= 7) y -= 0.45f;
+			// mineclonia uses ten mesh units per node and an ocelot visual scale of 1.75.
+			mesh.vertices.push_back({x * 0.175f,-z * 0.175f,std::max(0.f,y * 0.175f),point.u,point.v});
+		}
+	}
+	else if (model == 18) {
+		if (layer) return {};
+		bool hanging = appearance & 1;
+		for (unsigned index : batTriangles) {
+			const auto &point = batVertices[index];
+			float x = point.x, y = point.y, z = point.z;
+			if (point.part >= 2) {
+				float side = point.part <= 3 ? 1.f : -1.f;
+				float angle = side * (hanging ? 1.35f : std::sin(age * 1.3f) * 0.9f);
+				float dx = x - side * 1.5f;
+				x = side * 1.5f + dx * std::cos(angle) + z * std::sin(angle);
+				z = -dx * std::sin(angle) + z * std::cos(angle);
+			}
+			float height = (y + 1.9022f) / 16;
+			if (hanging) { x = -x; height = 0.89f - height; }
+			mesh.vertices.push_back({x / 16,-z / 16,height,point.u,point.v});
+		}
+	}
+	else if (model == 19) {
+		if (layer) return {};
+		for (unsigned index : axolotlTriangles) {
+			const auto &point = axolotlVertices[index];
+			float x = point.x, y = point.y, z = point.z;
+			if (point.part == 1) x += std::sin(age * 0.2f) * (z - 3.f) * 0.12f;
+			else if (point.part >= 2 && point.part <= 5) {
+				float phase = point.part == 2 || point.part == 5 ? 0 : pi;
+				z += std::sin(age * 0.2f + phase) * (0.15f + strength * 0.4f);
+			}
+			else if (point.part >= 7) y += std::sin(age * 0.14f) * 0.12f;
+			// the source axolotl faces opposite to the other mineclonia models.
+			mesh.vertices.push_back({-x * 0.1f,z * 0.1f,std::max(0.f,y * 0.1f),point.u,point.v});
+		}
+	}
+	else if (model == 20) {
+		if (layer) return {};
+		float hop = std::sin(stride * 2) * strength;
+		for (unsigned index : rabbitTriangles) {
+			const auto &point = rabbitVertices[index];
+			float x = point.x, y = point.y, z = point.z;
+			if (point.part >= 1 && point.part <= 6) {
+				float py = point.part <= 2 ? 1.55f : 1.2f;
+				float pz = point.part <= 2 ? 0.8f : -1.f;
+				float angle = hop * (point.part <= 2 ? -0.5f : 0.7f);
+				float dy = y - py, dz = z - pz;
+				y = py + dy * std::cos(angle) - dz * std::sin(angle);
+				z = pz + dy * std::sin(angle) + dz * std::cos(angle);
+			}
+			mesh.vertices.push_back({x * 0.1f,-z * 0.1f,std::max(0.f,(y + 0.049665f) * 0.1f),point.u,point.v});
+		}
+	}
+	else if (model == 21) {
+		if (layer > 1 || (layer && (appearance & 1))) return {};
+		auto append = [&](const auto &vertices, const auto &triangles, bool pumpkin) {
+			for (unsigned index : triangles) {
+				const auto &point = vertices[index];
+				float x = point.x, y = point.y, z = point.z;
+				if (!pumpkin && (point.part == 2 || point.part == 3)) {
+					float side = point.part == 2 ? 1.f : -1.f;
+					float dx = x - side * 0.9f;
+					float angle = side * (std::sin(age * 0.09f) * 0.05f + swing * 0.2f);
+					x = side * 0.9f + dx * std::cos(angle) + z * std::sin(angle);
+					z = -dx * std::sin(angle) + z * std::cos(angle);
+				}
+				mesh.vertices.push_back({x * 0.3f,-z * 0.3f,(y - 0.00855f) * 0.3f,point.u,point.v});
+			}
+		};
+		if (!layer) append(snowmanVertices, snowmanTriangles, false);
+		else {
+			append(snowmanPumpkinBackVertices, snowmanPumpkinBackTriangles, true);
+			append(snowmanPumpkinDownVertices, snowmanPumpkinDownTriangles, true);
+			append(snowmanPumpkinFrontVertices, snowmanPumpkinFrontTriangles, true);
+			append(snowmanPumpkinLeftVertices, snowmanPumpkinLeftTriangles, true);
+			append(snowmanPumpkinRightVertices, snowmanPumpkinRightTriangles, true);
+			append(snowmanPumpkinUpVertices, snowmanPumpkinUpTriangles, true);
+		}
 	}
 	return mesh.vertices;
 }

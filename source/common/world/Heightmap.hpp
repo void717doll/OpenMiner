@@ -51,7 +51,7 @@ class HeightmapChunk {
 		void generate();
 		void populateNether();
 		void refreshHeight();
-		std::uint8_t blockAt(int x, int y, int z) const { return z < 0 ? 7 : z >= 128 ? 0 : m_blocks[(x * 16 + y) * 128 + z]; }
+		std::uint8_t blockAt(int x, int y, int z) const { return z < 0 || z >= 128 ? 0 : m_blocks[(x * 16 + y) * 128 + z]; }
 		retro::Biome biomeAt(int x, int y) const { return m_climate.biomes[x * 16 + y]; }
 		double temperatureAt(int x, int y) const { return m_climate.temperature[x * 16 + y]; }
 		retro::Terrain::Blocks &blocks() { return m_blocks; }

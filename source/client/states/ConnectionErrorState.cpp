@@ -46,7 +46,7 @@ ConnectionErrorState::ConnectionErrorState(const std::string &error, Application
 	m_text.setShadowEnabled(false);
 
 	m_menuWidget.setScale(Config::guiScale, Config::guiScale);
-	m_menuWidget.addButton("back", [this](TextButton &) {
+	m_menuWidget.addButton("Back", [this](TextButton &) {
 		if (m_stateStack->size() > 1) {
 			m_stateStack->pop();
 		}

@@ -126,6 +126,11 @@ void Texture::enable(u8 unit, bgfx::UniformHandle handle) const {
 	bgfx::setTexture(unit, handle, m_handle);
 }
 
+void Texture::updateRegion(u8 mip, u16 x, u16 y, u16 width, u16 height, const void *pixels) {
+	if (!bgfx::isValid(m_handle)) return;
+	bgfx::updateTexture2D(m_handle, 0, mip, x, y, width, height, bgfx::copy(pixels, u32(width) * height * 4));
+}
+
 void Texture::free() {
 	if (bgfx::isValid(m_handle)) {
 		bgfx::destroy(m_handle);

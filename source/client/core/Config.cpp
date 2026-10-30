@@ -43,6 +43,9 @@ bool Config::isFpsCounterEnabled = true;
 bool Config::isHotbarVisible = true;
 bool Config::isCrosshairVisible = true;
 bool Config::isItemDurabilityVisible = false;
+bool Config::isCoordinatesVisible = false;
+float Config::handViewZ = 0;
+float Config::gamma = 1;
 
 // Graphics
 u16 Config::renderDistance = 8;
@@ -86,6 +89,10 @@ void Config::loadConfigFromFile(const char *filename) {
 			isCrosshairVisible = lua["isCrosshairVisible"].get_or(isCrosshairVisible);
 			isItemDurabilityVisible = lua["isItemDurabilityVisible"].get_or(isItemDurabilityVisible);
 
+			isCoordinatesVisible = lua["isCoordinatesVisible"].get_or(isCoordinatesVisible);
+			handViewZ = std::clamp(lua["handViewZ"].get_or(handViewZ), -100.f, 100.f);
+			gamma = std::clamp(lua["gamma"].get_or(gamma), 0.5f, 3.f);
+
 			renderDistance = lua["renderDistance"].get_or(renderDistance);
 			ambientOcclusion = std::clamp<u8>(lua["ambientOcclusion"].get_or(ambientOcclusion), 0, 2);
 			isSmoothLightingEnabled = lua["isSmoothLightingEnabled"].get_or(isSmoothLightingEnabled);
@@ -122,6 +129,10 @@ void Config::saveConfigToFile(const char *filename) {
 	file << "isHotbarVisible = " << (isHotbarVisible ? "true" : "false") << std::endl;
 	file << "isCrosshairVisible = " << (isCrosshairVisible ? "true" : "false") << std::endl;
 	file << "isItemDurabilityVisible = " << (isItemDurabilityVisible ? "true" : "false") << std::endl;
+	file << std::endl;
+	file << "isCoordinatesVisible = " << (isCoordinatesVisible ? "true" : "false") << std::endl;
+	file << "handViewZ = " << handViewZ << std::endl;
+	file << "gamma = " << gamma << std::endl;
 	file << std::endl;
 	file << "renderDistance = " << renderDistance << std::endl;
 	file << "ambientOcclusion = " << (u16)ambientOcclusion << std::endl;

@@ -91,6 +91,7 @@ bool clearBox(const World &world, const DoubleBox &box) {
 
 void sendRide(ServerPlayer &player, bool mounted) {
 	player.setRidingMinecart(mounted);
+	if (mounted) player.setNoclip(false);
 	if (!player.client()) return;
 	Network::Packet packet;
 	packet << Network::Command::PlayerRideState << mounted << player.x() << player.y() << player.z();
@@ -384,6 +385,7 @@ void ServerWorld::updateMinecarts() {
 			rotation.isUpdated=true;
 		}
 		if (rider) {
+			rider->statistics().general[PlayerStatistics::CartCm] += u64(std::round(movement.length() * 100));
 			rider->setPosition(next.x,next.y,next.z+0.15);
 			rider->survival().fallDistance=0;
 			sendRide(*rider,true);

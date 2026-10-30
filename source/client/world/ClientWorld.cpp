@@ -28,6 +28,8 @@
 
 #include "common/core/EventHandler.hpp"
 #include "common/core/Registry.hpp"
+#include "common/core/GameTime.hpp"
+#include "common/world/Dimension.hpp"
 #include "common/event/Events.hpp"
 #include "common/resource/ResourceHandler.hpp"
 #include "common/world/Sky.hpp"
@@ -58,6 +60,7 @@ ClientWorld::ClientWorld()
 
 void ClientWorld::update(bool allowWorldReload) {
 	World::update();
+	if (m_dimension) m_textureAtlas.updateClock(GameTime::getTicks(), m_dimension->id());
 
 	// Debug values only used in DebugOverlay
 	u64 time = std::time(nullptr);
@@ -132,6 +135,7 @@ void ClientWorld::clear() {
 	m_chunksToRemove.clear();
 	m_chunks.clear();
 	m_scene.registry().clear();
+	m_scene.particles().clear();
 }
 
 void ClientWorld::changeDimension(u16 dimensionID) {

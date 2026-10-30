@@ -75,8 +75,10 @@ class Chunk : public NonCopyable {
 		virtual void onBlockChanged(int, int, int) {}
 		virtual void onBlockPlaced(int, int, int, const Block &) {}
 		virtual void onBlockDestroyed(int, int, int, const Block &) {}
+		virtual void onBlockDataRemoved(int, int, int, const BlockData &) {}
 
 		BlockData *getBlockData(int x, int y, int z) const;
+		bool hasBlockMetadata() const { return !m_blockData.empty(); }
 		BlockData *addBlockData(int x, int y, int z, u16 inventoryWidth = 0, u16 inventoryHeight = 0);
 
 		s32 x() const { return m_x; }

@@ -40,7 +40,10 @@
 
 - `u16 id()`
 - `std::string label()`
-- `ItemStack get_item_drop([Item tool])` applies normal loot rules; omit the tool for environmental breaks.
+- `ItemStack get_item_drop([Item tool])` returns the first normal drop.
+- `ItemStack[] get_item_drops([Item tool])` returns all normal drops, including crop seeds and produce; omit the tool for environmental breaks.
+- `bool is_collidable()`
+- `bool is_opaque()`
 
 ## Chunk
 
@@ -136,6 +139,11 @@
 ## ServerCommandHandler
 
 - `void send_player_change_dimension(u16 clientID, int x, int y, int z, u16 dimension, ClientInfo client)`
+- `bool use_portal(u16 clientID, int x, int y, int z)` validates a reachable frame and finds a safe destination.
+- `bool consume_held_item(Player player, u16 amount, u16 clientID)` consumes inventory in survival and synchronizes it.
+- `void wear_held_item(Player player, u16 amount)`
+- `void send_player_inv_update(u16 clientID)`
+- `void damage_player(u16 clientID, u16 amount, string cause)` uses the normal damage, armor, and death pipeline.
 
 ## ServerModLoader
 
@@ -149,9 +157,14 @@
 ## ServerWorld
 
 - `u16 dimension()`
+- `void validate_portal(int x, int y, int z)`
+- `u64 get_ticks()` returns simulation ticks at 20 per second.
+- `bool is_daytime()` is true during overworld daylight.
+- `void mark_block_modified(int x, int y, int z)` persists block metadata edits.
 
 ## World
 
+- `int get_light(int x, int y, int z)` returns the brighter of block light and daylight-adjusted skylight, or -1 for unloaded blocks.
 - `u16 get_block(int x, int y, int z)`
 - `void set_block(int x, int y, int z, u16 block)`
 - `u16 get_data(int x, int y, int z)`

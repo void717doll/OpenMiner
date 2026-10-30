@@ -29,6 +29,8 @@
 #include "common/core/ApplicationStateStack.hpp"
 #include "common/core/Debug.hpp"
 #include "common/core/GameTime.hpp"
+#include "common/core/GameClock.hpp"
+#include "client/scene/component/HurtComponent.hpp"
 #include "common/core/Registry.hpp"
 #include "common/scene/component/AnimationComponent.hpp"
 #include "common/scene/component/DrawableDef.hpp"
@@ -53,6 +55,12 @@ void ClientCommandHandler::sendPlayerInteract() {
 	m_client.send(packet);
 }
 
+void ClientCommandHandler::sendPlayerDismount() const {
+	Network::Packet packet;
+	packet << Network::Command::PlayerDismount;
+	m_client.send(packet);
+}
+
 void ClientCommandHandler::sendPlayerAttack() {
 	Network::Packet packet;
 	packet << Network::Command::PlayerAttack;
@@ -68,6 +76,24 @@ void ClientCommandHandler::sendPlayerDropItem() {
 	m_client.send(packet);
 }
 
+void ClientCommandHandler::sendPlayerRespawn() {
+	Network::Packet packet;
+	packet << Network::Command::PlayerRespawn;
+	m_client.send(packet);
+}
+
+void ClientCommandHandler::sendPlayerPause(bool paused) {
+	Network::Packet packet;
+	packet << Network::Command::PlayerPause << paused;
+	m_client.send(packet);
+}
+
+void ClientCommandHandler::sendPlayerDropStack(const ItemStack &stack) {
+	Network::Packet packet;
+	packet << Network::Command::PlayerDropStack << stack;
+	m_client.send(packet);
+}
+
 void ClientCommandHandler::sendPlayerInvUpdate() {
 	Network::Packet invPacket;
 	invPacket << Network::Command::PlayerInvUpdate;
@@ -75,7 +101,7 @@ void ClientCommandHandler::sendPlayerInvUpdate() {
 	m_client.send(invPacket);
 }
 
-void ClientCommandHandler::sendPlayerPosUpdate() {
+void ClientCommandHandler::sendPlayerPosUpdate() const {
 	const Vector3d &position = m_player.physicsPosition();
 	Network::Packet packet;
 	packet << Network::Command::PlayerPosUpdate;
@@ -150,7 +176,7 @@ void ClientCommandHandler::sendItemActivated(const glm::ivec4 &selectedBlock) {
 	packet << Network::Command::ItemActivated
 		<< s32(selectedBlock.x)
 		<< s32(selectedBlock.y)
-		<< s32(selectedBlock.z)
+		<< s32(selectedBlock.z) << s8(selectedBlock.w)
 		<< u16(Config::screenWidth) << u16(Config::screenHeight) << u8(Config::guiScale);
 	m_client.send(packet);
 }
@@ -180,9 +206,36 @@ static void addComponentCommandCallback(Network::Command command, Client &client
 }
 
 void ClientCommandHandler::setupCallbacks() {
+	m_client.setCommandCallback(Network::Command::PlayerStatistics, [this](Network::Packet &packet) {
+		m_player.statistics().read(packet);
+	});
+
 	m_client.setCommandCallback(Network::Command::WorldMode, [this](Network::Packet &packet) {
 		bool creative;
 		if (packet >> creative) m_player.setCreative(creative);
+	});
+	m_client.setCommandCallback(Network::Command::PlayerDeath, [this](Network::Packet &packet) {
+		std::string message;
+		if (packet >> message) m_player.addChatMessage(message);
+	});
+	m_client.setCommandCallback(Network::Command::PlayerMessage, [this](Network::Packet &packet) {
+		std::string message;
+		if (packet >> message) m_player.addChatMessage(message);
+	});
+	m_client.setCommandCallback(Network::Command::EntityHurt, [this](Network::Packet &packet) {
+		entt::entity id;
+		u16 damage;
+		double x, y, z;
+		if (!(packet >> id >> damage >> x >> y >> z) || !damage) return;
+		auto entity = m_entityMap.find(id);
+		if (entity != m_entityMap.end())
+			m_world.scene().registry().get_or_emplace<HurtComponent>(entity->second).until = GameClock::getInstance().getTicks() + 500;
+		m_player.showHit({x, y, z}, damage);
+		if (auto *sound = SoundManager::instance()) sound->play("player_damage", 0.35f);
+	});
+	m_client.setCommandCallback(Network::Command::PlayerScore, [this](Network::Packet &packet) {
+		s32 score;
+		if (packet >> score) m_player.setScore(score);
 	});
 	m_client.setCommandCallback(Network::Command::ServerClosed, [this](Network::Packet &packet) {
 		std::string message;
@@ -223,7 +276,11 @@ void ClientCommandHandler::setupCallbacks() {
 	m_client.setCommandCallback(Network::Command::PlayerToolBroken, [](Network::Packet &) {
 		if (auto *sound = SoundManager::instance()) sound->play("default_tool_breaks", 0.5f);
 	});
-
+	m_client.setCommandCallback(Network::Command::ParticleBurst, [this](Network::Packet &packet) {
+		u16 dimension; u8 effect; Vector3d position;
+		if (!(packet >> dimension >> effect >> position.x >> position.y >> position.z) || dimension != m_player.dimension()) return;
+		m_world.scene().particles().burst(position, effect);
+	});
 	m_client.setCommandCallback(Network::Command::WorldSound, [this](Network::Packet &packet) {
 		std::string name;
 		Vector3d position;
@@ -232,6 +289,11 @@ void ClientCommandHandler::setupCallbacks() {
 		if (!(packet >> name >> position.x >> position.y >> position.z >> dimension >> gain >> pitch)
 		 || dimension != m_player.dimension()) return;
 		if (auto *sound = SoundManager::instance()) sound->playAt(name, position, gain, pitch);
+	});
+	m_client.setCommandCallback(Network::Command::Jukebox, [this](Network::Packet &packet) {
+		u16 dimension; s32 x, y, z; u8 record;
+		if (!(packet >> dimension >> x >> y >> z >> record) || dimension != m_player.dimension()) return;
+		if (auto *sound = SoundManager::instance()) sound->playRecord(record, {x + 0.5, y + 0.5, z + 0.5});
 	});
 
 	m_client.setCommandCallback(Network::Command::BlockUpdate, [this](Network::Packet &packet) {
@@ -259,6 +321,12 @@ void ClientCommandHandler::setupCallbacks() {
 
 	});
 
+	m_client.setCommandCallback(Network::Command::PlayerRideState, [this](Network::Packet &packet) {
+		bool mounted;
+		double x, y, z;
+		if (packet >> mounted >> x >> y >> z) m_player.setRidePosition(mounted, {x, y, z});
+	});
+
 	m_client.setCommandCallback(Network::Command::PlayerPosUpdate, [this](Network::Packet &packet) {
 		double x, y, z;
 		u16 clientId;
@@ -283,6 +351,7 @@ void ClientCommandHandler::setupCallbacks() {
 		if (clientId == m_client.id()) {
 			m_player.setPosition(pos.x, pos.y, pos.z);
 			m_player.setRotation(cameraYaw, cameraPitch);
+			m_player.setRidePosition(false, pos);
 			m_player.setDimension(dimension);
 			m_player.updateCamera();
 		}
@@ -295,7 +364,8 @@ void ClientCommandHandler::setupCallbacks() {
 
 		if (clientId == m_client.id()) {
 			m_player.setDimension(dimension);
-			m_player.setPosition(x + 0.5, y + 0.5, z + 0.5);
+			if (auto *sound = SoundManager::instance()) sound->stopRecord();
+			m_player.setRidePosition(false, {x + 0.5, y + 0.5, z + 0.5});
 			m_world.clear();
 			m_world.changeDimension(dimension);
 			m_entityMap.clear();
@@ -379,4 +449,22 @@ void ClientCommandHandler::setupCallbacks() {
 	addComponentCommandCallback<RotationComponent>(Network::Command::EntityRotation, m_client, m_entityMap, m_world);
 	addComponentCommandCallback<AnimationComponent>(Network::Command::EntityAnimation, m_client, m_entityMap, m_world);
 	addComponentCommandCallback<DrawableDef>(Network::Command::EntityDrawableDef, m_client, m_entityMap, m_world);
+}
+
+void ClientCommandHandler::sendPlayerNoclip(bool enabled) {
+	Network::Packet packet;
+	packet << Network::Command::PlayerNoclip << enabled;
+	m_client.send(packet);
+}
+
+void ClientCommandHandler::requestStatistics() {
+	Network::Packet packet;
+	packet << Network::Command::PlayerStatistics;
+	m_client.send(packet);
+}
+
+void ClientCommandHandler::sendCraftedItem(const std::string &name, u16 amount) {
+	Network::Packet packet;
+	packet << Network::Command::PlayerCrafted << name << amount;
+	m_client.send(packet);
 }

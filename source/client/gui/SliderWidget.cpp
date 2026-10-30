@@ -34,14 +34,9 @@ SliderWidget::SliderWidget(u16 width, Widget *parent) : Widget(width, 20, parent
 	m_text.setColor(m_defaultTextColor);
 	m_text.setShadowColor(Color::fromRGBA32(56, 56, 56));
 
-	m_slider.setClipRect(0, 66, 8, 20);
-	m_background.setClipRect(0, 46, width, 20);
-
-	m_sliderBorder.setClipRect(200 - 2, 66, 2, 20);
-	m_backgroundBorder.setClipRect(200 - 2, 46, 2, 20);
-
-	m_sliderBorder.setPosition(8 - 2, 0);
-	m_backgroundBorder.setPosition(width - 2.f, 0);
+	m_slider.setSize(8, 20);
+	m_background.setSize(width, 20);
+	m_background.setColor(Color::fromRGBA32(90, 90, 90));
 }
 
 void SliderWidget::onEvent(const SDL_Event &event) {
@@ -104,17 +99,14 @@ void SliderWidget::updatePercentage(s32 mouseX) {
 
 void SliderWidget::updateSliderPosition() {
 	m_slider.setPosition(m_percentage * float(m_width - 8), 0.f);
-	m_sliderBorder.setPosition(m_percentage * float(m_width - 8) + 6.f, 0.f);
 }
 
 void SliderWidget::draw(RenderTarget &target, RenderStates states) const {
 	states.transform *= getTransform();
 
 	target.draw(m_background, states);
-	target.draw(m_backgroundBorder, states);
 
 	target.draw(m_slider, states);
-	target.draw(m_sliderBorder, states);
 
 	target.draw(m_text, states);
 }

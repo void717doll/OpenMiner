@@ -118,9 +118,8 @@ void ServerApplication::update() {
 	bool doTick = false;
 	if (m_lastTick < m_clock.getTicks() / 50) {
 		m_lastTick = m_clock.getTicks() / 50;
-		doTick = true;
-
-		GameTime::incrementTicks();
+		doTick = !m_server.isPaused();
+		if (doTick) GameTime::incrementTicks();
 
 	}
 

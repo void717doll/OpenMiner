@@ -29,7 +29,12 @@
 #include "common/world/World.hpp"
 #include "common/world/Dimension.hpp"
 #include "server/world/ServerChunk.hpp"
+#include "server/world/ExpansionTerrain.hpp"
+#include "server/world/DungeonTerrain.hpp"
 #include "server/world/TerrainGenerator.hpp"
+#include "server/world/MineshaftTerrain.hpp"
+#include "server/world/OceanTerrain.hpp"
+#include "common/world/BetaTreeShape.hpp"
 
 #include <array>
 
@@ -41,6 +46,13 @@ TerrainGenerator::TerrainGenerator(Heightmap &heightmap, const Dimension &dimens
 
 void TerrainGenerator::generate(ServerChunk &chunk) {
 	fastNoiseGeneration(chunk);
+	if (m_generationRevision == 1) {
+		decorateExpansionTerrain(chunk, m_heightmap, m_dimensionID, m_seed);
+		if (m_dimensionID == 0) decorateDungeonTerrain(chunk, m_heightmap, m_seed);
+	}
+	if (m_dimensionID == 0) decorateOceanTerrain(chunk, m_heightmap, m_seed);
+	if (m_dimensionID == 1) decorateNetherRuins(chunk, m_heightmap, m_seed);
+	if (m_dimensionID == 0) decorateMineshaftTerrain(chunk, m_heightmap, m_seed, m_mineshafts);
 }
 
 void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
@@ -112,31 +124,51 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 					randomWalkOrePlace(chunk, x, y, z, copperRandom, copper, biome.getDeepBlockID(), 8);
 				if (isGeneratingTopBlock && chunk.getBlock(x, y, z) == biome.getTopBlockID()) {
 					bool placedTree = tryPlaceTree(chunk, x, y, z + 1, biome, rand);
-					bool placedFlora = !placedTree && tryPlaceFlora(chunk, x, y, z + 1, biome, rand);
-					if (!placedTree && !placedFlora) tryPlacePortal(chunk, x, y, z + 1, biome, rand);
+					if (!placedTree) tryPlaceFlora(chunk, x, y, z + 1, biome, rand);
 					if (m_dimensionID == 0 && heightmap.temperatureAt(x, y) < 0.5 && !chunk.getBlock(x, y, z + 1)) {
 						auto &registry = Registry::getInstance();
 						if (registry.hasBlock("default:snow")) chunk.setBlockRaw(x, y, z + 1, registry.getBlockFromStringID("default:snow").id());
 					}
 				}
-
 			}
 		}
 	}
 }
 
 inline bool TerrainGenerator::tryPlaceTree(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const {
+	const auto &existing = Registry::getInstance().getBlock(chunk.getBlock(x, y, z)).stringID();
+	if (existing == "default:cherry_wood" || existing == "default:cherry_leaves") return true;
 	if (chunk.getBlock(x, y, z - 1) == biome.getTopBlockID()) {
 		for (const PlacementEntry::Tree &treePlacement : biome.getTrees()) {
 			if (!rand.get<bool>(treePlacement.probability))
 				continue;
 
-			const Tree &tree = Registry::getInstance().getTree(treePlacement.treeID);
+			auto &definitions = Registry::getInstance();
+			bool spruce = biome.stringID() == "default:taiga";
+			bool birch = biome.stringID() == "default:forest" && rand.get(0, 4) == 0;
+			if ((spruce || birch) && definitions.hasTree(spruce ? "default:spruce" : "default:birch")) {
+				const auto &tree = definitions.getTreeFromStringID(spruce ? "default:spruce" : "default:birch");
+				retro::Random random(rand.get(0, 0x7fffffff));
+				auto cells = retro::betaTreeShape(random, spruce);
+				for (const auto &cell : cells) {
+					auto p = cell.position + Vector3i{x, y, z};
+					u16 old = chunk.getBlock(p.x, p.y, p.z);
+					if (old && definitions.getBlock(old).getState(0).drawType() != BlockDrawType::Leaves) return false;
+				}
+				for (const auto &cell : cells) {
+					auto p = cell.position + Vector3i{x, y, z};
+					chunk.setBlockRaw(p.x, p.y, p.z, cell.log ? tree.getLogBlockID() : tree.getLeavesBlockID());
+				}
+				return true;
+			}
+			const Tree &tree = definitions.getTree(treePlacement.treeID);
 
 			// Trunk
 			int h = rand.get(tree.trunkMinHeight(), tree.trunkMaxHeight());
 			for (int i = 0; i < h; i++) {
-				chunk.setBlockRaw(x, y, z + i, tree.getLogBlockID());
+				const auto &existing = Registry::getInstance().getBlock(chunk.getBlock(x, y, z + i)).stringID();
+				if (existing != "default:cherry_wood" && existing != "default:cherry_leaves")
+					chunk.setBlockRaw(x, y, z + i, tree.getLogBlockID());
 			}
 
 			// Leaves
@@ -172,26 +204,6 @@ inline bool TerrainGenerator::tryPlaceFlora(ServerChunk &chunk, int x, int y, in
 			continue;
 
 		chunk.setBlockRaw(x, y, z, flora.blockID);
-
-		return true;
-	}
-
-	return false;
-}
-
-inline bool TerrainGenerator::tryPlacePortal(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const {
-	// FIXME: This is a temporary portal generation
-	//        This code should be replaced by a proper "feature" implementation
-	//        which will also allow making stuff like villages easier
-	if (chunk.getBlock(x, y, z - 1) == biome.getTopBlockID() && rand.get<bool>(0.0002)) {
-		for (int ix = 0 ; ix < 4 ; ++ix) {
-			for (int iz = 0 ; iz < 5 ; ++iz) {
-				if (ix == 0 || iz == 0 || ix == 3 || iz == 4)
-					chunk.setBlockRaw(x + ix, y, z + iz, biome.getPortalFrameBlockID());
-				else
-					chunk.setBlockRaw(x + ix, y, z + iz, biome.getPortalBlockID());
-			}
-		}
 
 		return true;
 	}

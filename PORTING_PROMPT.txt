@@ -1,0 +1,67 @@
+finish the beta 1.7.3 port in /home/mia/oldworld
+
+use /home/mia/retromcp/minecraft_server/src/net/minecraft/src for gameplay and /home/mia/retromcp/minecraft/src/net/minecraft/src for models and rendering behavior. use /home/mia/Downloads/refi_textures for built-in artwork. inspect the supplied sources and nearby oldworld code before editing.
+
+keep the existing c++17, lua, bgfx, registry, rendering/simulation, and save architecture. source vertical y maps to oldworld z. retain 16x16x32 engine chunks while generating the source's full 16x16x128 columns. preserve existing block/item ids by appending definitions. retain saved terrain and read existing entity records. do not change stacks or saves merely to normalize older data.
+
+split implementation into these six tasks, with three helpers active at a time:
+
+1. beta biomes and surface generation
+- port NoiseGenerator2, NoiseGeneratorOctaves2, WorldChunkManager and BiomeGenBase climate classification.
+- feed actual temperature/humidity arrays into the terrain density formula.
+- port sand, gravel, soil depth, sandstone, ice, water and bedrock surface replacement; retain non-overworld dimensions.
+- compare climate, density and surface results against java oracles made from the supplied source. report any coordinate, interpolation or decoration differences precisely.
+
+2. beta caves
+- port MapGenBase and MapGenCaves, including java random behavior and MathHelper sine lookup semantics.
+- retain the eight-chunk origin range, rooms, branching, water avoidance, lava below ten, and grass restoration.
+- operate on canonical beta block ids in full columns before mapping to registry ids and slicing into engine chunks.
+- compare complete carved columns against the original java implementation and verify vertical chunk seams and generation order.
+
+3. beta mob simulation
+- implement pig, zombie, cow, sheep, chicken, skeleton, creeper, spider, slime, ghast, zombie pigman, wolf and squid. include the registered giant as a manual spawn.
+- use source health, drops, spawn conditions and distinctive behavior: ranged attacks, visible projectiles, creeper fuse/explosion, spider climbing, slime jumping/size, aquatic and flying movement, neutral retaliation, taming, shearing, milk and egg interactions.
+- keep simulation bounded and server authoritative. preserve mob health, subtype, timers, size and ownership across saves. old mob records must load without consuming new bytes from adjacent records.
+- extend spawn commands and test combat, interactions, unloaded boundaries, death, and save/reload. distinguish source behavior from engine adaptations.
+
+4. beta mob models
+- port the actual source cuboids, UVs, mirrored limbs, overlays and relevant animations for every implemented mob.
+- show arrows, fireballs and non-block item drops. support slime/giant scale without changing old drawable records.
+- coordinate the atlas layout with the refi import task; do not map a modern skin onto incompatible beta UVs without conversion.
+
+5. built-in refi artwork
+- replace default block, item and mob artwork with matching assets from the supplied refi directory.
+- maintain an explicit source-to-destination mapping and retain the source license and attribution.
+- preserve nearest-neighbor pixels. extract existing animation frames and convert atlases only where needed by the engine. list assets with no source match; do not silently substitute unrelated art.
+- remove the old texturepacks directory, selector, command-line option, saved setting, override/fallback paths and atlas reload behavior. one built-in asset path remains, including mod-owned textures.
+
+6. heart hud
+- replace numeric health with ten textured heart slots using the supplied refi heart assets.
+- show full, half and empty states correctly for health 0 through 20, with placement aligned above the hotbar at every gui scale.
+- reuse the existing image, resource and hud code. retain health networking and persistence. avoid unrelated hud redesign.
+
+integration and delivery
+
+coordinate file ownership before parallel edits. integrate component registration, save readers, drawable versions, local message changes, material definitions and cmake centrally. keep source-specific helpers separate from live world mutation where practical.
+
+write clear lowercase comments and prose, preserving required casing in code identifiers and filenames. keep changes focused and avoid new frameworks or dependencies. provide the completed port inventory and a candid list of remaining differences.
+
+build the local game and regression target. run the engine tests explicitly, java parity comparisons, and appropriate sanitizer checks. exercise local food/combat/spawn/projectile/interaction/save behavior. inspect native hud and models when available; a build alone is not visual validation. state checks that could not run.
+
+inspect git status and diffs, stage only intended paths, inspect the staged diff, then commit logical completed changes. do not push. report changes, checks, remaining gaps and commit ids concisely.
+
+follow-up: first-person wield rendering
+
+inspect /home/mia/lunarchy/src/client/camera.cpp and wieldmesh.cpp. adapt its separate field-of-view camera, fresh depth pass, lower-right pose, swing timing, and hand/block/extruded-item selection to oldworld's bgfx renderer. use the built-in refi player skin and atlas. keep the wield pass independent of gui scale, reset held animations when paused, and verify empty hand, block, item, attack/use swing, and resized windows in the native client.
+
+follow-up: remove multiplayer
+
+remove remote joining, hosting, dedicated-server entry points, addresses/ports/usernames, peer models, and socket transports. keep the existing simulation thread, lua callbacks, serialized save records, authoritative gameplay, and one local player. replace transport with in-process queues. finish saving before leaving a world, preserve legacy player data, verify repeated world opening/closing, and compile only the packet serializer from sfml rather than its network module. the native client, tests, and documentation must describe local-only play.
+
+follow-up: beta survival
+
+remove fly/noclip/sprint controls, creative inventory, free item cloning, starter items and cheat commands. inspect beta EntityLiving, MovementInputFromOptions, ItemPickaxe, ItemTool and EnumToolMaterial. use source walking/jump/gravity/fluid physics, four-block reach, harvest tiers/tool speeds/weapon damage, ground loot with partial pickups, and environmental damage with hurt immunity. keep old saves readable. test fall/drowning/lava/cactus, inventory/drop conservation, harvest tiers and basic crafting. document remaining durability, armor, sapling, fluid/weather and hud differences.
+
+follow-up: lunarchy physics
+
+use the supplied ~/lunarchy source for ordinary movement and world physics. port collision.cpp's swept nearest-contact solver, localplayer/clientenvironment acceleration, substeps, sneak support, liquid/climbing/bounce behavior, falling.lua's unsupported-node handling, servermap.cpp's liquid transform queue and item_entity.lua's dropped-item physics. map y-up/BS10 to z-up/block units, preserve source license notices, use loaded-only bounded updates and saved falling/item components, and integrate visuals and block parameters. keep removed cheats/multiplayer absent. verify movement, seams, stepping/ceilings, object contacts, source removal, fluids, falling metadata and item conservation. distinguish supported source algorithms from missing engine contracts in the port inventory.

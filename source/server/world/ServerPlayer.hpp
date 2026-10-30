@@ -31,6 +31,7 @@
 
 #include "common/core/Debug.hpp"
 #include "common/world/Player.hpp"
+#include <optional>
 #include "server/network/ClientInfo.hpp"
 #include "server/world/PlayerSurvival.hpp"
 
@@ -48,17 +49,29 @@ class ServerPlayer : public Player {
 		bool isNewPlayer() const { return m_isNewPlayer; }
 		void setNewPlayer(bool isNewPlayer) { m_isNewPlayer = isNewPlayer; }
 
+		bool isRidingMinecart() const { return m_ridingMinecart; }
+		void setRidingMinecart(bool mounted) { m_ridingMinecart = mounted; }
+
 		bool isReady() const { return m_isReady; }
 		void setReady(bool isReady) { m_isReady = isReady; }
 		PlayerSurvivalState &survival() { return m_survival; }
 		const PlayerSurvivalState &survival() const { return m_survival; }
 		void resetSurvival() { m_survival = {}; }
+		const std::optional<Vector3i> &bedSpawn() const { return m_bedSpawn; }
+		void setBedSpawn(const Vector3i &position) { m_bedSpawn = position; }
+		void clearBedSpawn() { m_bedSpawn.reset(); }
 
 		bool isChunkLoaded(const Vector3i &chunk) const { return m_loadedChunks.find(chunk) != m_loadedChunks.end(); }
 		void addLoadedChunk(const Vector3i &chunk) { m_loadedChunks.emplace(chunk); }
 		void removeLoadedChunk(const Vector3i &chunk) { m_loadedChunks.erase(chunk); }
 		void clearLoadedChunks() { m_loadedChunks.clear(); }
 		const std::unordered_set<Vector3i> &loadedChunks() const { return m_loadedChunks; }
+
+		bool tryPortal(u64 now) {
+			if (now < m_nextPortal) return false;
+			m_nextPortal = now + 1500;
+			return true;
+		}
 
 		bool tryAttack(u64 now) {
 			if (now < m_nextAttack) return false;
@@ -72,10 +85,13 @@ class ServerPlayer : public Player {
 		std::unordered_set<Vector3i> sentChunks; // Cleared every tick
 
 	private:
+		std::optional<Vector3i> m_bedSpawn;
 		ClientInfo *m_client = nullptr;
 		u64 m_nextAttack = 0;
+		u64 m_nextPortal = 0;
 		PlayerSurvivalState m_survival;
 
+		bool m_ridingMinecart = false;
 		bool m_isNewPlayer = false;
 		bool m_isReady = false; // Is player ready to receive chunks?
 

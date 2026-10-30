@@ -24,8 +24,8 @@
  *
  * =====================================================================================
  */
-#include "common/core/GameTime.hpp"
 #include "common/world/BlockSupport.hpp"
+#include "common/core/GameTime.hpp"
 #include "common/core/Registry.hpp"
 #include "common/core/Utils.hpp"
 #include "common/scene/component/AnimationComponent.hpp"
@@ -48,7 +48,7 @@
 namespace {
 bool canReachBlock(const ServerWorld &world, const ServerPlayer &player, int x, int y, int z) {
 	const Chunk *chunk = world.getChunkAtBlockPos(x, y, z);
-	if (!player.isReady() || !chunk || !chunk->isInitialized()) return false;
+	if (!player.isReady() || !player.health() || !chunk || !chunk->isInitialized()) return false;
 	Vector3d eye{player.x(), player.y(), player.z() + 1.625};
 	Vector3d target{std::clamp(eye.x, double(x), double(x + 1)),
 		std::clamp(eye.y, double(y), double(y + 1)), std::clamp(eye.z, double(z), double(z + 1))};
@@ -71,15 +71,73 @@ bool canReachBlock(const ServerWorld &world, const ServerPlayer &player, int x, 
 }
 }
 
+void ServerCommandHandler::sendParticles(Vector3d position, u16 dimension, u8 effect) const {
+	if (effect > 2) return;
+	Network::Packet packet;
+	packet << Network::Command::ParticleBurst << dimension << effect << position.x << position.y << position.z;
+	m_server.sendToAllClients(packet);
+}
+
+bool ServerCommandHandler::consumeHeldItem(Player &player, u16 amount, u16 clientID) {
+	if (player.clientID() != clientID || !amount) return false;
+	int slot = player.heldItemSlot();
+	if (slot < 0 || slot >= player.inventory().width()) return false;
+	ItemStack stack = player.heldItemStack();
+	if (stack.amount() < amount) return false;
+	if (player.isCreative()) return true;
+	stack.setAmount(stack.amount() - amount);
+	player.inventory().setItemStack(u16(slot), 0, stack);
+	sendPlayerInvUpdate(clientID);
+	return true;
+}
+
+bool ServerCommandHandler::usePortal(u16 clientID, s32 x, s32 y, s32 z) {
+	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
+	if (!player || !player->isOnline() || !player->isReady() || !player->health() || player->dimension() > 1) return false;
+	ServerWorld &source = m_worldController.getWorld(player->dimension());
+	if (!canReachBlock(source, *player, x, y, z)) return false;
+	Vector3i origin, axis;
+	if (!source.portalFrameAt({x, y, z}, origin, axis)) return false;
+	if (!player->tryPortal(GameClock::getInstance().getTicks(true))) return false;
+	u16 targetDimension = 1 - player->dimension();
+	ServerWorld &target = m_worldController.getWorld(targetDimension);
+	double scale = targetDimension ? 0.125 : 8.0;
+	double targetX = std::floor(origin.x * scale), targetY = std::floor(origin.y * scale);
+	if (std::abs(targetX) > 1000000000 || std::abs(targetY) > 1000000000) return false;
+	Vector3i requested{int(targetX), int(targetY), origin.z};
+	BlockData *data = source.getBlockData(origin.x, origin.y, origin.z);
+	if (data && data->meta.hasInt("portal_x") && data->meta.hasInt("portal_y") && data->meta.hasInt("portal_z")) {
+		requested = {data->meta.get<int>("portal_x"), data->meta.get<int>("portal_y"), data->meta.get<int>("portal_z")};
+		if (std::abs(double(requested.x)) > 1000000000 || std::abs(double(requested.y)) > 1000000000) return false;
+	}
+	Vector3i arrival;
+	if (!target.findPortalDestination(requested, arrival)) return false;
+	auto link = [](ServerWorld &world, Vector3i position, Vector3i destination) {
+		Chunk *chunk = world.getChunkAtBlockPos(position.x, position.y, position.z);
+		BlockData *data = chunk->addBlockData(position.x & (CHUNK_WIDTH - 1), position.y & (CHUNK_DEPTH - 1), position.z & (CHUNK_HEIGHT - 1));
+		data->meta.setInt("portal_x", destination.x);
+		data->meta.setInt("portal_y", destination.y);
+		data->meta.setInt("portal_z", destination.z);
+		static_cast<ServerChunk *>(chunk)->setModified(true);
+	};
+	link(source, origin, arrival);
+	link(target, arrival, origin);
+	sendPlayerChangeDimension(clientID, arrival.x, arrival.y, arrival.z, targetDimension, player->client());
+	return true;
+}
+
 void ServerCommandHandler::wearHeldItem(Player &player, u16 amount) {
 	if (player.isCreative()) return;
 	int slot = player.heldItemSlot();
 	if (slot < 0 || slot >= player.inventory().width()) return;
 	auto &stack = player.inventory().getStackRef(u16(slot), 0);
 	u16 previous = stack.amount();
+	std::string name = stack.stringID();
+	if (amount && previous) ++player.statistics().items[name].used;
 	if (!stack.wear(amount)) return;
 	sendPlayerInvUpdate(player.clientID());
 	if (stack.amount() < previous) {
+		++player.statistics().items[name].broken;
 		Network::Packet packet;
 		packet << Network::Command::PlayerToolBroken;
 		m_server.sendToAllClients(packet);
@@ -191,6 +249,7 @@ void ServerCommandHandler::sendPlayerChangeDimension(u16 clientID, s32 x, s32 y,
 			player->setDimension(dimension);
 			player->resetSurvival();
 			player->clearLoadedChunks();
+			player->sentChunks.clear();
 		}
 		else
 			m_server.sendToAllClients(packet);
@@ -227,53 +286,133 @@ void ServerCommandHandler::sendPlayerHealth(u16 clientID) const {
 	player->client()->send(packet);
 }
 
-void ServerCommandHandler::damagePlayer(u16 clientID, u16 amount) {
+void ServerCommandHandler::sendPlayerScore(u16 clientID) const {
+	const ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
+	if (!player || !player->client()) return;
+	Network::Packet packet;
+	packet << Network::Command::PlayerScore << player->score();
+	player->client()->send(packet);
+}
+
+void ServerCommandHandler::sendEntityHurt(entt::entity entity, u16 amount, double x, double y, double z) const {
+	Network::Packet packet;
+	packet << Network::Command::EntityHurt << entity << amount << x << y << z;
+	m_server.sendToAllClients(packet);
+}
+
+void ServerCommandHandler::damagePlayer(u16 clientID, u16 amount, const std::string &cause) {
 	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
-	if (!player || player->isCreative()) return;
+	if (!player || !player->health() || player->isCreative()) return;
 	amount = player->survival().filterDamage(amount);
 	if (!amount) return;
-	amount = player->absorbDamage(amount);
+	amount = player->absorbDamage(amount, cause);
 	if (player->armor().hasChanged()) {
 		sendPlayerInvUpdate(clientID);
 		player->armor().setChanged(false);
 	}
+	u16 dealt = std::min(amount, player->health());
 	player->damage(amount);
+	player->statistics().general[PlayerStatistics::DamageTaken] += dealt;
 	Network::Packet hurt;
 	hurt << Network::Command::PlayerHurt;
 	if (player->client()) player->client()->send(hurt);
-	if (player->health() == 0) {
-		ServerWorld &world = getWorldForClient(clientID);
-		world.dropPlayerItems(*player);
-		if (player->dimension() == 1) {
-			bool found = false;
-			int originX = int(std::floor(player->x())), originY = int(std::floor(player->y()));
-			for (int radius = 0; radius <= 8 && !found; ++radius)
-				for (int dx = -radius; dx <= radius && !found; ++dx)
-					for (int dy = -radius; dy <= radius && !found; ++dy) {
-						if (std::max(std::abs(dx), std::abs(dy)) != radius) continue;
-						double x = originX + dx + 0.5, y = originY + dy + 0.5;
-						int z = retro::mobCavityFloor(world, player->hitbox(), x, y, int(std::floor(player->z())));
-						if (z < 0) continue;
-						player->setPosition(x, y, z);
-						found = true;
-					}
-			if (!found) {
-				ServerWorld &overworld = m_worldController.getWorld(0);
-				int z = overworld.heightmap().getHighestBlockAt(0, 0) + 1;
-				sendPlayerChangeDimension(clientID, 0, 0, z, 0, player->client());
-				sendPlayerChangeDimension(clientID, 0, 0, z, 0);
-			}
-		} else {
-			setPlayerPosition(clientID, 0, 0, world.heightmap().getHighestBlockAt(0, 0) + 1);
-		}
-		player->setHealth(20);
-		player->resetSurvival();
-		sendPlayerPosUpdate(clientID, true);
+	if (!player->health()) {
+		++player->statistics().general[PlayerStatistics::Deaths];
+		getWorldForClient(clientID).dropPlayerItems(*player);
+		std::string message = player->name();
+		std::string killer = cause.substr(cause.find(':') + 1);
+		std::replace(killer.begin(), killer.end(), '_', ' ');
+		if (cause.compare(0, 4, "mob:") == 0) message += " was slain by " + (killer.empty() ? "a mob" : killer);
+		else if (cause.compare(0, 6, "arrow:") == 0) message += " was shot by " + (killer.empty() ? "an arrow" : killer);
+		else if (cause.compare(0, 6, "blast:") == 0) message += " was blown up by " + (killer.empty() ? "an explosion" : killer);
+		else if (cause == "fall") message += " hit the ground too hard";
+		else if (cause == "drowning") message += " drowned";
+		else if (cause == "lava") message += " tried to swim in lava";
+		else if (cause == "fire") message += " burned to death";
+		else if (cause == "cactus") message += " was pricked to death by a cactus";
+		else if (cause == "suffocation") message += " suffocated in a wall";
+		else message += " died";
+		Network::Packet death;
+		death << Network::Command::PlayerDeath << message;
+		m_server.sendToAllClients(death);
 	}
 	sendPlayerHealth(clientID);
 }
 
+void ServerCommandHandler::sendPlayerMessage(u16 clientID, const std::string &message) const {
+	if (message.empty()) return;
+	Network::Packet packet;
+	packet << Network::Command::PlayerMessage << message;
+	const auto *player = m_players.getPlayerFromClientID(clientID);
+	if (player && player->client()) player->client()->send(packet);
+}
+
+void ServerCommandHandler::useBed(u16 clientID, s32 x, s32 y, s32 z) {
+	auto *player = m_players.getPlayerFromClientID(clientID);
+	if (!player) return;
+	auto &world = getWorldForClient(clientID);
+	if (!canReachBlock(world, *player, x, y, z)) return;
+	std::string message = world.sleepInBed(*player, {x, y, z});
+	sendPlayerMessage(clientID, message);
+	if (message == "respawn point set") sendPlayerPosUpdate(clientID, true);
+}
+
+void ServerCommandHandler::respawnPlayer(u16 clientID) {
+	ServerPlayer *player = m_players.getPlayerFromClientID(clientID);
+	if (!player || player->health()) return;
+	ServerWorld &world = m_worldController.getWorld(0);
+	int z = world.heightmap().getHighestBlockAt(0, 0) + 1;
+	Vector3d arrival{0.5, 0.5, double(z)};
+	if (player->bedSpawn() && !world.bedRespawn(*player->bedSpawn(), arrival, true)) {
+		player->clearBedSpawn();
+		sendPlayerMessage(clientID, "your bed is missing or obstructed");
+	}
+	if (player->dimension() != 0) sendPlayerChangeDimension(clientID, s32(std::floor(arrival.x)),
+		s32(std::floor(arrival.y)), s32(std::floor(arrival.z)), 0, player->client());
+	player->setPosition(arrival.x, arrival.y, arrival.z);
+	player->setHealth(20);
+	player->setScore(0);
+	player->resetSurvival();
+	sendPlayerPosUpdate(clientID, true);
+	sendPlayerHealth(clientID);
+	sendPlayerScore(clientID);
+}
+
 void ServerCommandHandler::setupCallbacks() {
+	m_server.setCommandCallback(Network::Command::PlayerStatistics, [this](ClientInfo &client, Network::Packet &) {
+		auto *player = m_players.getPlayerFromClientID(client.id);
+		if (!player) return;
+		Network::Packet answer;
+		answer << Network::Command::PlayerStatistics;
+		player->statistics().write(answer);
+		client.send(answer);
+	});
+	m_server.setCommandCallback(Network::Command::PlayerCrafted, [this](ClientInfo &client, Network::Packet &packet) {
+		std::string name;
+		u16 amount = 0;
+		auto *player = m_players.getPlayerFromClientID(client.id);
+		if (player && (packet >> name >> amount) && amount && amount <= 99 && m_registry.hasItem(name))
+			player->statistics().items[name].crafted += amount;
+	});
+
+	m_server.setCommandCallback(Network::Command::PlayerNoclip, [this](ClientInfo &client, Network::Packet &packet) {
+		bool enabled = false;
+		auto *player = m_players.getPlayerFromClientID(client.id);
+		if (player && (packet >> enabled)) player->setNoclip(enabled && !player->isRidingMinecart());
+	});
+
+	m_server.setCommandCallback(Network::Command::PlayerPause, [this](ClientInfo &, Network::Packet &packet) {
+		bool paused;
+		if (packet >> paused) m_server.setPaused(paused);
+	});
+	m_server.setCommandCallback(Network::Command::PlayerDropStack, [this](ClientInfo &client, Network::Packet &packet) {
+		ItemStack stack;
+		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
+		if (player && packet >> stack) getWorldForClient(client.id).dropPlayerStack(*player, stack);
+	});
+	m_server.setCommandCallback(Network::Command::PlayerRespawn, [this](ClientInfo &client, Network::Packet &) {
+		respawnPlayer(client.id);
+	});
 	m_server.setConnectionCallback([this](ClientInfo &client, Network::Packet &connectionPacket) {
 		std::string username;
 		connectionPacket >> username;
@@ -355,6 +494,7 @@ void ServerCommandHandler::setupCallbacks() {
 		// Send inventory
 		sendPlayerInvUpdate(client.id, &client);
 		sendPlayerHealth(client.id);
+		sendPlayerScore(client.id);
 
 		// send the local player after connection callbacks have run.
 		Network::Packet spawnPacket;
@@ -447,7 +587,7 @@ void ServerCommandHandler::setupCallbacks() {
 			ItemStack stack;
 			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width())
 				stack = player->heldItemStack();
-			bool valid = packet && previous && canReachBlock(world, *player, x, y, z) && id > 0 && id < blocks.size()
+			bool valid = packet && previous && worldBounds::contains(z) && canReachBlock(world, *player, x, y, z) && id > 0 && id < blocks.size()
 				&& stack.amount() > 0 && stack.item().isBlock() && stack.stringID() == blocks[id]->stringID();
 			if (valid) {
 				const Block &definition = *blocks[id];
@@ -455,6 +595,7 @@ void ServerCommandHandler::setupCallbacks() {
 				u16 stateID = definition.param().hasParam(BlockParam::State)
 					? definition.param().getParam(BlockParam::State, data) : 0;
 				valid = stateID < definition.states().size();
+				if (definition.stringID() == "default:bed") valid = stateID == 0;
 				if (valid) {
 					const BlockState &state = definition.getState(stateID);
 					DoubleBox playerBox = player->hitbox();
@@ -465,6 +606,11 @@ void ServerCommandHandler::setupCallbacks() {
 				valid = valid && (!previous->block().id() || previous->drawType() == BlockDrawType::Liquid
 					|| previous->drawType() == BlockDrawType::XShape)
 					&& definition.placementConstraints().check(world, {x, y, z});
+			}
+			if (valid && blocks[id]->stringID() == "default:bed") {
+				u16 data = 0;
+				valid = world.placeBed(*player, {x, y, z}, data);
+				if (valid) block = u32(id) | (u32(data) << 16);
 			}
 			if (!valid) {
 				Network::Packet correction;
@@ -480,6 +626,7 @@ void ServerCommandHandler::setupCallbacks() {
 			sendPlayerInvUpdate(client.id);
 			world.setData(x, y, z, u16(block >> 16));
 			world.setBlock(x, y, z, u16(block & 0xffff));
+			++player->statistics().items[blocks[id]->stringID()].placed;
 
 			const BlockState *blockState = world.getBlockState(x, y, z);
 			if (!blockState) return;
@@ -494,15 +641,23 @@ void ServerCommandHandler::setupCallbacks() {
 			logError() << ("Failed to place block using player " + std::to_string(client.id) + ": Player not found").c_str();
 	});
 
+	m_server.setCommandCallback(Network::Command::PlayerDismount, [this](ClientInfo &client, Network::Packet &) {
+		auto *player = m_players.getPlayerFromClientID(client.id);
+		if (player && player->isRidingMinecart()) getWorldForClient(client.id).dismountMinecart(*player);
+	});
+
 	m_server.setCommandCallback(Network::Command::PlayerInteract, [this](ClientInfo &client, Network::Packet &) {
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
-		if (player && player->isReady()) getWorldForClient(client.id).interactMob(*player);
+		if (!player || !player->isReady() || !player->health()) return;
+		auto &world = getWorldForClient(client.id);
+		if (!world.interactMinecart(*player)) world.interactMob(*player);
 	});
 
 	m_server.setCommandCallback(Network::Command::PlayerAttack, [this](ClientInfo &client, Network::Packet &) {
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
-		if (!player || !player->tryAttack(GameClock::getInstance().getTicks(true))) return;
-		getWorldForClient(client.id).attackMob(*player);
+		if (!player || !player->health() || !player->tryAttack(GameClock::getInstance().getTicks(true))) return;
+		auto &world = getWorldForClient(client.id);
+		if (!world.attackMinecart(*player)) world.attackMob(*player);
 	});
 
 	m_server.setCommandCallback(Network::Command::PlayerDigBlock, [this](ClientInfo &client, Network::Packet &packet) {
@@ -516,6 +671,7 @@ void ServerCommandHandler::setupCallbacks() {
 			if (!packet || !blockState || !canReachBlock(world, *player, x, y, z)
 			 || !blockState->block().id() || blockState->drawType() == BlockDrawType::Liquid
 			 || (!player->isCreative() && (!std::isfinite(blockState->hardness()) || blockState->hardness() < 0))) return;
+			++player->statistics().items[blockState->block().stringID()].mined;
 			world.setBlock(x, y, z, 0);
 
 			if (!player->isCreative()) m_scriptEngine.luaCore().onEvent(LuaEventType::BlockDigged, glm::ivec3{x, y, z}, *blockState, *player, world, client, *this);
@@ -550,7 +706,8 @@ void ServerCommandHandler::setupCallbacks() {
 
 	m_server.setCommandCallback(Network::Command::PlayerDropItem, [this](ClientInfo &client, Network::Packet &) {
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
-		if (player) getWorldForClient(client.id).dropHeldItem(*player);
+		if (player && getWorldForClient(client.id).dropHeldItem(*player))
+			++player->statistics().general[PlayerStatistics::Dropped];
 	});
 
 	m_server.setCommandCallback(Network::Command::PlayerReady, [this](ClientInfo &client, Network::Packet &) {
@@ -622,7 +779,8 @@ void ServerCommandHandler::setupCallbacks() {
 		ServerPlayer *player = m_players.getPlayerFromClientID(client.id);
 		if (player) {
 			s32 x, y, z;
-			packet >> x >> y >> z >> client.screenWidth >> client.screenHeight >> client.guiScale;
+			s8 face;
+			packet >> x >> y >> z >> face >> client.screenWidth >> client.screenHeight >> client.guiScale;
 
 			ServerWorld &world = getWorldForClient(client.id);
 			if (!packet || !canReachBlock(world, *player, x, y, z)) return;
@@ -634,7 +792,7 @@ void ServerCommandHandler::setupCallbacks() {
 			 || player->heldItemStack().amount() == 0 || player->heldItemStack().item().isBlock()) return;
 			const ServerItem &item = static_cast<const ServerItem &>(player->heldItemStack().item());
 			if (item.canBeActivated()) {
-				bool hasBeenActivated = item.onItemActivated({x, y, z}, block, *player, world, client, *this);
+				bool hasBeenActivated = item.onItemActivated({x, y, z}, block, *player, world, client, *this, face);
 
 				if (hasBeenActivated)
 					m_scriptEngine.luaCore().onEvent(LuaEventType::ItemActivated, glm::ivec3{x, y, z}, block, *player, world, client, *this);
@@ -674,6 +832,12 @@ inline ServerWorld &ServerCommandHandler::getWorldForClient(u16 clientID) {
 void ServerCommandHandler::initUsertype(sol::state &lua) {
 	lua.new_usertype<ServerCommandHandler>("ServerCommandHandler",
 		"send_player_change_dimension", &ServerCommandHandler::sendPlayerChangeDimension,
-		"send_player_health", &ServerCommandHandler::sendPlayerHealth
+		"send_player_health", &ServerCommandHandler::sendPlayerHealth,
+		"use_portal", &ServerCommandHandler::usePortal,
+		"use_bed", &ServerCommandHandler::useBed,
+		"consume_held_item", &ServerCommandHandler::consumeHeldItem,
+		"wear_held_item", &ServerCommandHandler::wearHeldItem,
+		"damage_player", &ServerCommandHandler::damagePlayer,
+		"send_player_inv_update", [](ServerCommandHandler &server, u16 clientID) { server.sendPlayerInvUpdate(clientID); }
 	);
 }

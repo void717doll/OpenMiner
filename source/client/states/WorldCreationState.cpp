@@ -24,6 +24,7 @@
  *
  * =====================================================================================
  */
+#include "common/world/WorldFiles.hpp"
 #include <filesystem.hpp>
 #include <random.hpp>
 
@@ -59,7 +60,7 @@ WorldCreationState::WorldCreationState(TitleScreenState *titleScreen, const std:
 	m_nameInput.setPadding(5, 6);
 	m_nameInput.setScale(Config::guiScale, Config::guiScale);
 	m_nameInput.setFocus(false);
-	m_nameInput.setPlaceholder("World Name (optional)");
+	m_nameInput.setPlaceholder("World Name (Optional)");
 
 	if (!m_isEdition) {
 		m_seedInput.setString(originalName);
@@ -75,27 +76,28 @@ WorldCreationState::WorldCreationState(TitleScreenState *titleScreen, const std:
 	}
 
 	m_modeButton.setScale(Config::guiScale, Config::guiScale);
-	m_modeButton.setText("mode: survival");
+	m_modeButton.setText("Game Mode: Survival");
 	m_modeButton.setCallback([this](TextButton &button) {
 		m_creative = !m_creative;
-		button.setText(m_creative ? "mode: creative" : "mode: survival");
+		button.setText(m_creative ? "Game Mode: Creative" : "Game Mode: Survival");
 	});
 
 	m_menuWidget.setScale(Config::guiScale, Config::guiScale);
-	m_menuWidget.addButton(originalName.empty() ? "Create New World" : "Save World", [this, titleScreen, originalName](TextButton &) {
+	m_menuWidget.addButton(originalName.empty() ? "Create New World" : "Save Changes", [this, titleScreen, originalName](TextButton &) {
 		std::string worldName = m_nameInput.string();
 		auto first = worldName.find_first_not_of(" ");
 		worldName = first == std::string::npos ? "" : worldName.substr(first, worldName.find_last_not_of(" ") - first + 1);
 		if (worldName.empty()) {
 			unsigned number = 1;
 			do { worldName = "World " + std::to_string(number++); }
-			while (fs::exists("saves/" + worldName + ".dat"));
+			while (worldFiles::exists(worldName));
 		}
-		if (!fs::exists("saves/" + worldName + ".dat")) {
+		if (!worldFiles::exists(worldName)) {
 			if (utils::regexMatch(worldName, "^[A-Za-z0-9_ ]+$") && worldName[0] != '_') {
 				if (m_isEdition) {
-					fs::copy_file("saves/" + originalName + ".dat", "saves/" + worldName  + ".dat");
-					fs::remove("saves/" + originalName + ".dat");
+					if (fs::exists(worldFiles::database(originalName)))
+						fs::rename(worldFiles::directory(originalName), worldFiles::directory(worldName));
+					else fs::rename(worldFiles::legacy(originalName), worldFiles::legacy(worldName));
 
 					m_stateStack->pop();
 

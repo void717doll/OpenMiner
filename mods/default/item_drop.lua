@@ -62,12 +62,12 @@ mod:entity {
 openminer:add_listener(Event.BlockDigged, function(pos, block, player, world, client, server)
 	local held_item = player:held_item_stack():item()
 	if not block:can_harvest(held_item) then return end
-	local drop = block:get_item_drop(held_item)
-	if drop:amount() == 0 or drop:item():id() == 0 then return end
-	mods["default"]:spawn_entity("default:item_drop", {
-		position = {pos.x + 0.5, pos.y + 0.5, pos.z + 0.5},
-		dimension = world:dimension():id(),
-		item_stack = {drop:item():string_id(), drop:amount()},
-	})
+	for _, drop in ipairs(block:get_item_drops(held_item)) do
+		mods["default"]:spawn_entity("default:item_drop", {
+			position = {pos.x + 0.5, pos.y + 0.5, pos.z + 0.5},
+			dimension = world:dimension():id(),
+			item_stack = {drop:item():string_id(), drop:amount()},
+		})
+	end
 end)
 

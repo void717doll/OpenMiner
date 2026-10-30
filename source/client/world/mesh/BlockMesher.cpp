@@ -26,6 +26,8 @@
  */
 #include "common/core/BlockGeometry.hpp"
 #include "common/world/LiquidState.hpp"
+#include "common/scene/MinecloniaLeverMesh.hpp"
+#include "common/scene/MinecloniaTorchMesh.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/world/mesh/BlockMesher.hpp"
@@ -34,9 +36,85 @@
 using namespace BlockGeometry;
 using namespace LightUtils;
 
+namespace {
+void addTorch(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job, const BlockState &state, u16 data) {
+	const auto &uv = job.textureAtlas->getTexCoords(state.tiles().getTextureForFace(0));
+	u16 rotation = state.block().param().getParam(BlockParam::Rotation, data);
+	const auto &mesh = rotation ? mineclonia::torch_wall : mineclonia::torch_floor;
+	for (const auto &point : mesh) {
+		float px = point.x - 0.5f, py = point.y - 0.5f;
+		if (rotation == 1) { float previous = px; px = py; py = -previous; }
+		if (rotation == 3) { float previous = px; px = -py; py = previous; }
+		if (rotation == 4) { px = -px; py = -py; }
+		Vertex vertex{};
+		vertex.coord3d[0] = x + px + 0.5f;
+		vertex.coord3d[1] = y + py + 0.5f;
+		vertex.coord3d[2] = z + point.z;
+		vertex.coord3d[3] = 6;
+		vertex.normal[2] = 1;
+		for (float &color : vertex.color) color = 1;
+		vertex.texCoord[0] = uv.x + point.u * uv.sizeX;
+		vertex.texCoord[1] = uv.y + point.v * uv.sizeY;
+		vertex.lightValue[0] = job.chunkData.getSunlight(x, y, z);
+		vertex.lightValue[1] = job.chunkData.getTorchlight(x, y, z);
+		vertex.ambientOcclusion = 4;
+		job.vertices[ChunkMeshLayer::Flora].push_back(vertex);
+	}
+	job.totalVertexCount += mesh.size();
+}
+
+void addLever(s8f x,s8f y,s8f z,ChunkMeshBuildingJob &job,const BlockState &state) {
+	const auto &mesh=state.id()?mineclonia::lever_on:mineclonia::lever_off;
+	for (const auto &point:mesh) {
+		const auto &uv=job.textureAtlas->getTexCoords(state.tiles().getTextureForFace(point.handle?5:0));
+		Vertex vertex{};
+		vertex.coord3d[0]=x+point.x; vertex.coord3d[1]=y+point.y; vertex.coord3d[2]=z+point.z;
+		vertex.coord3d[3]=6; vertex.normal[2]=1;
+		for(float &color:vertex.color) color=1;
+		vertex.texCoord[0]=uv.x+point.u*uv.sizeX; vertex.texCoord[1]=uv.y+point.v*uv.sizeY;
+		vertex.lightValue[0]=job.chunkData.getSunlight(x,y,z);
+		vertex.lightValue[1]=job.chunkData.getTorchlight(x,y,z);
+		vertex.ambientOcclusion=4;
+		job.vertices[ChunkMeshLayer::Flora].push_back(vertex);
+	}
+	job.totalVertexCount+=mesh.size();
+}
+void addRail(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job, const BlockState &state) {
+	const FloatRect &uv = job.textureAtlas->getTexCoords(state.tiles().getTextureForFace(0));
+	unsigned shape = state.block().getGroupValue("group:om_rail_type") ? state.id() & 7 : state.id();
+	unsigned turns = shape == 1 || shape == 2 || shape == 3 ? 1 : shape >= 6 ? shape - 6 : 0;
+	Vertex vertices[4]{};
+	constexpr float corners[4][2] = {{0,0},{1,0},{1,1},{0,1}};
+	for (unsigned i=0; i<4; ++i) {
+		float px=corners[i][0], py=corners[i][1], height=1.f/16;
+		if (shape == 2) height += px;
+		if (shape == 3) height += 1-px;
+		if (shape == 4) height += 1-py;
+		if (shape == 5) height += py;
+		auto &vertex=vertices[i];
+		vertex.coord3d[0]=x+px; vertex.coord3d[1]=y+py; vertex.coord3d[2]=z+height;
+		vertex.coord3d[3]=4;
+		vertex.normal[2]=1;
+		for (float &color:vertex.color) color=1;
+		for (unsigned turn=0; turn<turns; ++turn) { float previous=px; px=py; py=1-previous; }
+		vertex.texCoord[0]=uv.x+px*uv.sizeX;
+		vertex.texCoord[1]=uv.y+py*uv.sizeY;
+		vertex.lightValue[0]=job.chunkData.getSunlight(x,y,z);
+		vertex.lightValue[1]=job.chunkData.getTorchlight(x,y,z);
+		vertex.ambientOcclusion=4;
+	}
+	for (unsigned i:{0,1,2,0,2,3}) job.vertices[ChunkMeshLayer::Flora].push_back(vertices[i]);
+	job.totalVertexCount += 6;
+}
+}
+
+
 void BlockMesher::addBlock(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job,
                            const BlockState &blockState, u16 blockParam)
 {
+	if (blockState.drawType() == BlockDrawType::Torch) { addTorch(x, y, z, job, blockState, blockParam); return; }
+	if (blockState.drawType() == BlockDrawType::Lever) { addLever(x,y,z,job,blockState); return; }
+	if (blockState.drawType() == BlockDrawType::Rail) { addRail(x,y,z,job,blockState); return; }
 	const FloatBox &boundingBox = blockState.boundingBox();
 
 	u8f orientation = blockState.block().isRotatable()
@@ -150,7 +228,14 @@ void BlockMesher::addBlockFace(s8f x, s8f y, s8f z, s8f f, ChunkMeshBuildingJob 
 	//    U0V0 -> 3 2 <- U1V0
 	//    U0V1 -> 0 1 <- U1V1
 	float U0, V0, U1, V1;
-	if (blockState.drawType() == BlockDrawType::Cactus) {
+	if (blockState.drawType() == BlockDrawType::Campfire) {
+		// the source log sheet has a 16x4 bark strip and a 4x4 cut end.
+		U0 = 0.f;
+		U1 = f < 2 ? 0.25f : 1.f;
+		V0 = f < 2 ? 0.25f : 0.f;
+		V1 = f < 2 ? 0.5f : 0.25f;
+	}
+	else if (blockState.drawType() == BlockDrawType::Cactus) {
 		U0 = 0.f;
 		V0 = 0.f;
 		U1 = 1.f;

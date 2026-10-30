@@ -52,10 +52,12 @@ void main() {
 	vec4 color = v_color0;
 	if (v_texcoord0.x > -0.99 && v_texcoord0.y > -0.99) {
 		color = texture2DLod(u_tex, v_texcoord0, clamp(mix(u_mipLevel.x, u_mipLevel.y, v_dist / u_renderDistance.x), u_mipLevel.x, u_mipLevel.y));
-		if (blockFace > -1 && color.r == color.g && color.g == color.b) {
+		if (blockFace >= 6 || (blockFace > -1 && color.r == color.g && color.g == color.b)) {
 			color.rgb *= v_color0.rgb;
 		}
 		color.a *= v_color0.a;
+		// mob vertices use face 6 for their tint and face 7 for the hurt flash.
+		if (blockFace == 7) color.rgb = mix(color.rgb, vec3(1.0, 0.0, 0.0), 0.4);
 	}
 
 	// Very cheap "transparency": don't draw pixels with a low alpha value

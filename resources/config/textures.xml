@@ -5,15 +5,14 @@
 	<texture name="armor_full"       path="resources/textures/armor_full.png" />
 	<texture name="armor_empty"      path="resources/textures/armor_empty.png" />
 	<texture name="inventory_slot"   path="resources/textures/inventory_slot.png" />
-	<texture name="hotbar"           path="resources/textures/hotbar.png" />
-	<texture name="hotbar_selected"  path="resources/textures/hotbar_selected.png" />
 	<texture name="font"             path="resources/textures/font.png" />
 	<texture name="menu_background"  path="resources/textures/menu_background.png" />
 	<texture name="moon_phases"      path="resources/textures/moon_phases.png" />
 	<texture name="player"           path="resources/textures/player.png" />
 	<texture name="sun"              path="resources/textures/sun.png" />
-	<texture name="title_screen"     path="resources/textures/title_screen.png" />
 	<texture name="toasts"           path="resources/textures/toasts.png" />
-	<texture name="widgets"          path="resources/textures/widgets.png" />
+	<texture name="menu_button"      path="resources/textures/menu_button.png" />
+	<texture name="hotbar"           path="resources/textures/hotbar.png" />
+	<texture name="hotbar_selected"  path="resources/textures/hotbar_selected.png" />
 	<texture name="world_icon"       path="resources/textures/world_icon.png" />
 </textures>

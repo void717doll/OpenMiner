@@ -39,6 +39,9 @@ namespace Config {
 	extern bool isHotbarVisible;
 	extern bool isCrosshairVisible;
 	extern bool isItemDurabilityVisible;
+	extern bool isCoordinatesVisible;
+	extern float handViewZ;
+	extern float gamma;
 
 	// Graphics
 	extern u16 renderDistance;

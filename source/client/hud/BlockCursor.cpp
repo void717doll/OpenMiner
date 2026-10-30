@@ -292,7 +292,7 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 				u16 rotation = mount >= 0 ? u16(mount) : m_player.getOppositeDirection() & 0x3;
 				data = newBlock.param().setParam(BlockParam::Rotation, 0, rotation);
 			}
-			if (!blockHasSupport(m_world, {x, y, z}, newBlockState, data)) return;
+			if (!worldBounds::contains(z) || !blockHasSupport(m_world, {x, y, z}, newBlockState, data)) return;
 			DoubleBox playerBox = m_player.hitbox();
 			playerBox.move(m_player.x(), m_player.y(), m_player.z());
 			if (!newBlockState.isCollidable() || !collision::blockBox(newBlockState, data, x, y, z).intersects(playerBox)) {
@@ -316,8 +316,10 @@ void BlockCursor::updateVBOCoords(Vertex vertices[nFaces][nVertsPerFace], const 
 	float face, u8f orientation)
 {
 	float epsilon = 0.001f; // Prevent Z-fighting
-	glm::vec3 bottomLeft{blockState.boundingBox().x - epsilon, blockState.boundingBox().y - epsilon, blockState.boundingBox().z - epsilon};
-	glm::vec3 topRight{blockState.boundingBox().sizeX + epsilon * 2.f, blockState.boundingBox().sizeY + epsilon * 2.f, blockState.boundingBox().sizeZ + epsilon * 2.f};
+	FloatBox box = blockState.boundingBox();
+	if (blockState.drawType() == BlockDrawType::Torch) { box = torchSelectionBox(orientation); orientation = 0; }
+	glm::vec3 bottomLeft{box.x - epsilon, box.y - epsilon, box.z - epsilon};
+	glm::vec3 topRight{box.sizeX + epsilon * 2.f, box.sizeY + epsilon * 2.f, box.sizeZ + epsilon * 2.f};
 	topRight += bottomLeft;
 
 	const glm::mat3 &orientMatrix = orientMatrices[orientation];
@@ -417,6 +419,8 @@ void BlockCursor::draw(RenderTarget &target, RenderStates states) const {
 }
 
 glm::ivec4 BlockCursor::findSelectedBlock() const {
+	bool includeSources = m_player.heldItemSlot() >= 0 && m_player.heldItemSlot() < m_player.inventory().width()
+		&& m_player.heldItemStack().item().getGroupValue("group:om_bucket") == 1;
 	glm::dvec3 position{m_player.camera().getDPosition().x,
 	                    m_player.camera().getDPosition().y,
 	                    m_player.camera().getDPosition().z};
@@ -427,7 +431,7 @@ glm::ivec4 BlockCursor::findSelectedBlock() const {
 
 	// Deal with a degenerate case: camera in the middle of a block
 	const BlockState *blockState = m_world.getBlockState((int)bestX, (int)bestY, (int)bestZ);
-	if (blockState && blockState->block().id() && blockState->drawType() != BlockDrawType::Liquid) {
+	if (blockState && blockState->block().id() && (blockState->drawType() != BlockDrawType::Liquid || (includeSources && (blockState->block().stringID() == "default:water" || blockState->block().stringID() == "default:lava")))) {
 		// We're inside a node, therefore there's no face, but we still need
 		// to return a valid block. We use face 6 for that. For rightclicks,
 		// it should attempt to place the block on the same node clicked, and
@@ -445,7 +449,7 @@ glm::ivec4 BlockCursor::findSelectedBlock() const {
 		for (int y = -1; y <= 0; y++) {
 			for (int x = -1; x <= 0; x++) {
 				const BlockState *blockState = m_world.getBlockState((int)bestX + x, (int)bestY + y, (int)bestZ);
-				if (blockState && blockState->block().id() && blockState->drawType() != BlockDrawType::Liquid) {
+				if (blockState && blockState->block().id() && (blockState->drawType() != BlockDrawType::Liquid || (includeSources && (blockState->block().stringID() == "default:water" || blockState->block().stringID() == "default:lava")))) {
 					return glm::ivec4{bestX + x, bestY + y, bestZ, 6};
 				}
 			}
@@ -461,9 +465,9 @@ glm::ivec4 BlockCursor::findSelectedBlock() const {
 
 	glm::dvec3 lookAtN = glm::normalize(lookAt);
 
-	BlockCursorRaycast::rayCastToAxis(AXIS_X, position, lookAtN, maxReach, bestX, bestY, bestZ, bestFace, bestDepth, m_world);
-	BlockCursorRaycast::rayCastToAxis(AXIS_Y, position, lookAtN, maxReach, bestX, bestY, bestZ, bestFace, bestDepth, m_world);
-	BlockCursorRaycast::rayCastToAxis(AXIS_Z, position, lookAtN, maxReach, bestX, bestY, bestZ, bestFace, bestDepth, m_world);
+	BlockCursorRaycast::rayCastToAxis(AXIS_X, position, lookAtN, maxReach, bestX, bestY, bestZ, bestFace, bestDepth, m_world, includeSources);
+	BlockCursorRaycast::rayCastToAxis(AXIS_Y, position, lookAtN, maxReach, bestX, bestY, bestZ, bestFace, bestDepth, m_world, includeSources);
+	BlockCursorRaycast::rayCastToAxis(AXIS_Z, position, lookAtN, maxReach, bestX, bestY, bestZ, bestFace, bestDepth, m_world, includeSources);
 
 	return glm::ivec4{bestX, bestY, bestZ, bestFace};
 }

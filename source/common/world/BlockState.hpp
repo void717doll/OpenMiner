@@ -29,6 +29,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "common/core/Box.hpp"
 #include "common/core/IntTypes.hpp"
@@ -44,6 +45,10 @@ enum class BlockDrawType : u8 {
 	Glass   = 4,
 	Cactus  = 5,
 	BoundingBox = 6, // FIXME: Temporary
+	Rail = 7,
+	Torch = 8,
+	Lever = 9,
+	Campfire = 10,
 };
 
 #define BLOCK_ATTR_GETTER(attrName) \
@@ -98,6 +103,7 @@ class BlockState : public ISerializable {
 		}
 
 		ItemStack getItemDrop(const Item *tool = nullptr) const;
+		std::vector<ItemStack> getItemDrops(const Item *tool = nullptr) const;
 		bool canHarvest(const Item &item) const;
 
 		void setBlock(const Block *block) { m_block = block; }

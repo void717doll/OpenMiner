@@ -51,6 +51,15 @@ std::string Network::commandToString(Network::Command command) {
 		{Network::Command::PlayerDropItem, "PlayerDropItem"},
 		{Network::Command::PlayerToolBroken, "PlayerToolBroken"},
 		{Network::Command::PlayerHurt, "PlayerHurt"},
+		{Network::Command::PlayerRespawn, "PlayerRespawn"},
+		{Network::Command::PlayerScore, "PlayerScore"},
+		{Network::Command::Jukebox, "Jukebox"},
+		{Network::Command::PlayerDropStack, "PlayerDropStack"},
+		{Network::Command::PlayerPause, "PlayerPause"},
+		{Network::Command::PlayerDeath, "PlayerDeath"},
+		{Network::Command::PlayerMessage, "PlayerMessage"},
+		{Network::Command::ParticleBurst, "ParticleBurst"},
+		{Network::Command::EntityHurt, "EntityHurt"},
 		{Network::Command::PlayerReady,           "PlayerReady"},
 		{Network::Command::PlayerHealth, "PlayerHealth"},
 		{Network::Command::PlayerAttack, "PlayerAttack"},
@@ -78,6 +87,8 @@ std::string Network::commandToString(Network::Command command) {
 		{Network::Command::EntityAnimation,       "EntityAnimation"},
 		{Network::Command::EntityDrawableDef,     "EntityDrawableDef"},
 
+		{Network::Command::PlayerRideState, "PlayerRideState"},
+		{Network::Command::PlayerDismount, "PlayerDismount"},
 		{Network::Command::KeyPressed,            "KeyPressed"},
 	};
 

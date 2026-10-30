@@ -160,7 +160,10 @@ mod:item {
 mod:item {
 	id = "bone_meal",
 	name = "Bone Meal",
-	tiles = "bone_meal.png",
+	tiles = "refi_bonemeal_item.png",
+	on_item_activated = function(pos, block, player, world, client, server)
+		farming.use_fertilizer(pos, block, player, world, client, server, 2)
+	end,
 }
 
 mod:item {
@@ -224,6 +227,8 @@ mod:item {
 
 mod:item {
 	id = "bucket_empty",
+	max_stack_size = 1,
+	groups = {om_bucket = 1},
 	name = "Bucket",
 	tiles = "bucket_empty.png",
 }
@@ -248,18 +253,24 @@ mod:item {
 
 mod:item {
 	id = "bucket_lava",
+	max_stack_size = 1,
+	groups = {om_bucket = 3, om_fuel = 20000},
 	name = "Lava Bucket",
 	tiles = "bucket_lava.png",
 }
 
 mod:item {
 	id = "bucket_water",
+	max_stack_size = 1,
+	groups = {om_bucket = 2},
 	name = "Water Bucket",
 	tiles = "bucket_water.png",
 }
 
 mod:item {
 	id = "bucket_milk",
+	max_stack_size = 1,
+	groups = {om_bucket = 4},
 	name = "Milk Bucket",
 	tiles = "bucket_milk.png",
 }

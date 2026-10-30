@@ -39,6 +39,7 @@
 #include "client/graphics/Shader.hpp"
 #include "client/graphics/View.hpp"
 #include "client/graphics/WieldRenderer.hpp"
+#include "client/graphics/Image.hpp"
 
 struct GuiScaleChangedEvent;
 
@@ -54,6 +55,7 @@ class HUD : public Transformable, public Drawable {
 		void update();
 
 		void pause() { m_blockCursor.reset(); m_wield.pause(); }
+		void setSpyglass(bool active) { m_isSpyglassActive = active; }
 
 		const BlockCursor &blockCursor() const { return m_blockCursor; }
 
@@ -70,6 +72,9 @@ class HUD : public Transformable, public Drawable {
 
 		Hotbar m_hotbar;
 		WieldRenderer m_wield;
+		Texture m_spyglassTexture;
+		Image m_spyglassScope;
+		bool m_isSpyglassActive = false;
 
 		BlockCursor m_blockCursor;
 		Crosshair m_crosshair;
@@ -78,8 +83,15 @@ class HUD : public Transformable, public Drawable {
 		bool m_isDebugOverlayVisible = false;
 		bool m_printRendererInfo = false;
 
-
 		Text m_fpsText;
+		Text m_coordinatesText;
+		Text m_scoreLabel;
+		Text m_scoreValue;
+		Text m_hitText;
+		Text m_chatText;
+		RectangleShape m_chatBackground;
+		bool m_hitVisible = false;
+		bool m_chatVisible = false;
 		HeartBar m_hearts;
 		ArmorBar m_armor;
 

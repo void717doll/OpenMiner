@@ -8,7 +8,7 @@ all clips are decoded/resampled from their supplied ogg files into mono 22,050 h
 
 the existing sdl library handles audio; no extra runtime library is required. `resources/config/sounds.xml` lists groups and their variants. clips are preloaded and converted to the device format at startup. the audio callback mixes at most 24 voices without allocation, decoding, file access, or logging. local effects use stereo playback; positional block sounds use distance attenuation and left/right placement. variants and small pitch changes avoid repeating one identical sample. missing audio hardware disables playback without stopping the game.
 
-sound volume is available on the main settings page, from zero (mute) to 100 percent, and persists as `soundVolume` in `config/client.lua`. gameplay overlays and loss of focus clear/pause active effects. returning to gameplay resumes playback without replaying the paused effects.
+sound volume is available on the main settings page, from zero (mute) to 100 percent, and persists as `soundVolume` in `config/client.lua`. the pause menu and loss of focus clear/pause active effects. inventory and death overlays keep effects audible. returning from pause resumes playback without replaying paused effects.
 
 verification includes the native executable with sdl's dummy audio driver, every configured sound group, overlapping effects, pause/resume, mute, missing groups, and distance culling. dummy-device playback does not verify headphone/speaker output or subjective volume. mob calls, music, weather, and continuous ambient loops are not included in this batch.
 

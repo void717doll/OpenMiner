@@ -24,6 +24,7 @@ namespace {
 const std::array<Vector3i, 6> directions{{{0, 0, 1}, {-1, 0, 0}, {1, 0, 0}, {0, -1, 0}, {0, 1, 0}, {0, 0, -1}}};
 
 int fluidKind(const Block &block) {
+	if (block.getGroupValue("group:om_waterlogged")) return 1;
 	const auto &name = block.stringID();
 	if (name == "default:water" || name == "default:water_flowing") return 1;
 	if (name == "default:lava" || name == "default:lava_flowing") return 2;
@@ -31,7 +32,7 @@ int fluidKind(const Block &block) {
 }
 
 bool source(const Block &block) {
-	return block.stringID() == "default:water" || block.stringID() == "default:lava";
+	return block.getGroupValue("group:om_waterlogged") || block.stringID() == "default:water" || block.stringID() == "default:lava";
 }
 
 u16 fluidParam(const Block &block, u16 data) {
@@ -64,11 +65,24 @@ void BlockPhysics::enqueue(const Vector3i &position) {
 }
 
 void BlockPhysics::enqueueNeighbors(const Vector3i &position) {
+	m_world.notifyRedstone(position);
 	// the source falling-node walk visits support and sides before the block above.
 	enqueue(position + Vector3i{0, 0, -1});
 	for (int i = 1; i <= 4; ++i) enqueue(position + directions[i]);
 	enqueue(position);
 	enqueue(position + Vector3i{0, 0, 1});
+	// power can pass through one solid support block.
+	for (auto a:directions) for (auto b:directions) {
+		Vector3i neighbor=position+a+b;
+		const auto *state=m_world.getBlockState(neighbor.x,neighbor.y,neighbor.z);
+		if (state && (state->block().getGroupValue("group:om_rail_type")
+		 || state->block().getGroupValue("group:om_power_source"))) enqueue(neighbor);
+	}
+	for (int i = 1; i <= 4; ++i) for (int height : {-1, 1}) {
+		Vector3i neighbor = position + directions[i] + Vector3i{0, 0, height};
+		const auto *state = m_world.getBlockState(neighbor.x, neighbor.y, neighbor.z);
+		if (state && state->block().getGroupValue("group:om_rail")) enqueue(neighbor);
+	}
 }
 
 void BlockPhysics::seedNode(const Vector3i &position) {
@@ -76,6 +90,8 @@ void BlockPhysics::seedNode(const Vector3i &position) {
 	const Block &block = m_world.getBlockState(position.x, position.y, position.z)->block();
 	if (falls(block) && replaceable(position + Vector3i{0, 0, -1})) enqueue(position);
 	if (block.getGroupValue("group:attached_node")) enqueue(position);
+	if (block.getGroupValue("group:om_power_source") || block.getGroupValue("group:om_redstone_device")
+	 || block.stringID() == "default:tnt") m_world.queueRedstone(position);
 	int kind = fluidKind(block);
 	if (!kind) return;
 	if (!source(block)) { enqueue(position); return; }
@@ -150,7 +166,7 @@ void BlockPhysics::update(const Vector3i &position) {
 		return;
 	}
 
-	if (block.id() && !fluidKind(block)) {
+	if (block.id() && (!fluidKind(block) || block.getGroupValue("group:om_waterlogged"))) {
 		bool neighborsLoaded = std::all_of(directions.begin(), directions.end(), [&](const auto &offset) { return loaded(position + offset); });
 		if (neighborsLoaded) {
 			bool supported = blockHasSupport(m_world, position, *state,
@@ -158,15 +174,23 @@ void BlockPhysics::update(const Vector3i &position) {
 			if (!supported) { dropAttached(position); return; }
 		}
 	}
+	if (block.getGroupValue("group:om_rail")) m_world.refreshRail(position);
+	if (block.getGroupValue("group:om_rail_type")==3 || block.getGroupValue("group:om_power_source")==1
+	 || block.getGroupValue("group:om_power_source")==3) m_world.watchRailDevice(position);
 	updateFluid(position);
 }
 
 void BlockPhysics::dropAttached(const Vector3i &position) {
 	const auto *state = m_world.getBlockState(position.x, position.y, position.z);
 	if (!state || !state->block().id()) return;
-	ItemStack drop = state->getItemDrop();
-	write(position, 0);
-	if (drop.amount())
+	const auto drops = state->getItemDrops();
+	if (state->block().stringID() == "default:bed") {
+		// the partner callback needs the old half and orientation bits.
+		m_world.setBlock(position.x, position.y, position.z, 0);
+		m_world.setData(position.x, position.y, position.z, 0);
+	}
+	else write(position, 0);
+	for (const auto &drop : drops)
 		m_world.dropWorldItem({position.x + 0.5, position.y + 0.5, double(position.z)}, drop.stringID(), drop.amount());
 }
 
@@ -234,6 +258,7 @@ void BlockPhysics::updateFluid(const Vector3i &position) {
 	const auto *state = m_world.getBlockState(position.x, position.y, position.z);
 	if (!state) return;
 	const Block &block = state->block();
+	if (block.getGroupValue("group:om_waterlogged")) return;
 	int kind = fluidKind(block);
 	if (!kind && !replaceable(position)) return;
 	bool isSource = source(block);

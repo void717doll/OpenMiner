@@ -21,6 +21,7 @@ inline bool canHarvest(const BlockState &state, const Item &item) {
 	if (!(item.harvestCapability() & 1)) return false;
 
 	u16 level = item.getGroupValue("group:om_harvest_level");
+	if (level < state.block().getGroupValue("group:om_min_harvest_level")) return false;
 	const std::string &id = state.block().stringID();
 	if (id == "default:obsidian") return level == 3;
 	if (id == "default:diamond_ore" || id == "default:diamond_block"

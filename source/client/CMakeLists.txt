@@ -28,6 +28,7 @@ set(SOURCE_FILES
 	graphics/Image.cpp
 	graphics/NinePatch.cpp
 	graphics/IndexBuffer.cpp
+	graphics/ParticleRenderer.cpp
 	graphics/MobModel.cpp
 	graphics/ItemBillboard.cpp
 	graphics/ItemMeshBuilder.cpp
@@ -90,10 +91,12 @@ set(SOURCE_FILES
 
 	states/ConnectionErrorState.cpp
 	states/GameState.cpp
+	states/DeathState.cpp
 	states/InterfaceState.cpp
 	states/LuaGUIState.cpp
 	states/PauseMenuState.cpp
 	states/ServerLoadingState.cpp
+	states/StatisticsState.cpp
 	states/SettingsMenuState.cpp
 	states/TitleScreenState.cpp
 	states/WorldCreationState.cpp
@@ -132,6 +135,7 @@ set(HEADER_FILES
 	graphics/Framebuffer.hpp
 	graphics/Image.hpp
 	graphics/IndexBuffer.hpp
+	graphics/ParticleRenderer.hpp
 	graphics/MobModel.hpp
 	graphics/ItemBillboard.hpp
 	graphics/WieldRenderer.hpp
@@ -195,10 +199,12 @@ set(HEADER_FILES
 	states/ConnectionErrorState.hpp
 	states/DrawableState.hpp
 	states/GameState.hpp
+	states/DeathState.hpp
 	states/InterfaceState.hpp
 	states/LuaGUIState.hpp
 	states/PauseMenuState.hpp
 	states/ServerLoadingState.hpp
+	states/StatisticsState.hpp
 	states/SettingsMenuState.hpp
 	states/TitleScreenState.hpp
 	states/WorldCreationState.hpp

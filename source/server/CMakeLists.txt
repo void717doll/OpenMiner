@@ -48,14 +48,29 @@ set(SOURCE_FILES
 	world/ServerItem.cpp
 	world/ServerPlayer.cpp
 	world/ServerWorld.cpp
+	world/WorldPortals.cpp
+	world/DungeonTerrain.cpp
+	world/WorldDungeons.cpp
+	world/WorldJukebox.cpp
+	world/WorldBeds.cpp
+	world/WorldRailPower.cpp
+	world/WorldRedstone.cpp
+	world/WorldFauna.cpp
+	world/WorldMinecarts.cpp
 	world/WorldTnt.cpp
 	world/WorldMobs.cpp
 	world/WorldItems.cpp
+	world/BucketInteraction.cpp
 	world/BlockPhysics.cpp
+	world/LushCaves.cpp
+	world/ExpansionTerrain.cpp
 	world/TerrainBiomeSampler.cpp
 	world/TerrainGenerator.cpp
+	world/MineshaftTerrain.cpp
+	world/OceanTerrain.cpp
 	world/WorldController.cpp
 	world/save/WorldSaveBasicBackend.cpp
+	world/save/ChunkDatabase.cpp
 )
 
 set(HEADER_FILES
@@ -102,7 +117,10 @@ set(HEADER_FILES
 	world/ServerItem.hpp
 	world/ServerPlayer.hpp
 	world/PlayerSurvival.hpp
+	world/BucketInteraction.hpp
 	world/BlockPhysics.hpp
+	world/LushCaves.hpp
+	world/ExpansionTerrain.hpp
 	world/ServerWorld.hpp
 	world/TerrainBiomeSampler.hpp
 	world/TerrainGenerator.hpp
@@ -128,3 +146,8 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
 # Link options
 #------------------------------------------------------------------------------
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC ${CMAKE_PROJECT_NAME}_common)
+
+find_package(SQLite3 REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ZSTD REQUIRED IMPORTED_TARGET libzstd)
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC SQLite::SQLite3 PkgConfig::ZSTD)

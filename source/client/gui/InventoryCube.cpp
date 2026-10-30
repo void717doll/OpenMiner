@@ -26,6 +26,7 @@
  */
 #include "common/core/BlockGeometry.hpp"
 #include "common/core/EngineConfig.hpp"
+#include "common/core/Registry.hpp"
 #include "common/math/Math.hpp"
 #include "common/resource/ResourceHandler.hpp"
 #include "common/world/Block.hpp"
@@ -58,6 +59,15 @@ InventoryCube::InventoryCube(float size, bool isEntity)
 }
 
 using namespace BlockGeometry;
+
+void InventoryCube::setLight(u8 sunlight, u8 torchlight) {
+	if (m_sunlight == sunlight && m_torchlight == torchlight) return;
+	m_sunlight = sunlight;
+	m_torchlight = torchlight;
+	u16 blockID = m_blockID;
+	m_blockID = 0;
+	if (blockID) updateVertexBuffer(Registry::getInstance().getBlock(blockID), u8(m_blockState));
+}
 
 void InventoryCube::updateVertexBuffer(const Block &block, u8 state) {
 	if (!block.id() || (block.id() == m_blockID && state == m_blockState)) return;
@@ -135,8 +145,8 @@ void InventoryCube::updateVertexBuffer(const Block &block, u8 state) {
 
 			// FIXME: Find a way to get the light from the position
 			if (m_isEntity) {
-				vertices[f][v].lightValue[0] = 15;
-				vertices[f][v].lightValue[1] = 0;
+				vertices[f][v].lightValue[0] = m_sunlight;
+				vertices[f][v].lightValue[1] = m_torchlight;
 			}
 		}
 	}

@@ -26,6 +26,7 @@
  */
 #include "common/world/Heightmap.hpp"
 #include "common/world/RetroCaves.hpp"
+#include "common/world/ModernRavines.hpp"
 #include "common/world/World.hpp"
 
 void HeightmapChunk::generate() {
@@ -39,6 +40,7 @@ void HeightmapChunk::generate() {
 		m_blocks = m_heightmap.terrain().surface(m_x, m_y, m_climate, m_density);
 	}
 	retro::Caves::carve(m_heightmap.terrain().seed(), m_x, m_y, m_blocks, m_heightmap.isNether());
+	if (!m_heightmap.isNether()) modern::Ravines::carve(m_heightmap.terrain().seed(), m_x, m_y, m_blocks);
 	refreshHeight();
 }
 

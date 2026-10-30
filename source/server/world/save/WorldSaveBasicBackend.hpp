@@ -56,6 +56,7 @@ class WorldSaveBasicBackend : public WorldSaveBackend {
 		PlayerList &m_playerList;
 
 		std::unordered_map<entt::entity, entt::entity> m_entityMap;
+		std::string m_savedPath;
 };
 
 #endif // WORLDSAVEBASICBACKEND_HPP_

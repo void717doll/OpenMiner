@@ -12,7 +12,7 @@ class WorldSystemsTests : public CxxTest::TestSuite {
 	public:
 		class TestChunk : public Chunk {
 			public:
-				TestChunk(World &world) : Chunk(0, 0, 0, world) {}
+				TestChunk(World &world) : Chunk(0, 0, 0, world) { setInitialized(true); }
 				void update() override {}
 				void process() override {}
 		};

@@ -1,0 +1,39 @@
+# Jukebox mod for Mineclonia.
+
+Based on the `jdukebox` mod by Jordach. This adds a jukebox block and
+music disc. Just place a music disc in a jukebox and music starts
+to play. And that's it!
+
+## License
+
+Code licenced as GPLv3. Music under individual licenses (see abbreviations
+above). Texture license: See main Mineclonia README.md file.
+
+## Media
+
+`mcl_jukebox_track_1.ogg`: “The Evil Sister (Jordach's Mix)” by SoundHelix (CC0)
+`mcl_jukebox_track_2.ogg`: “The Energetic Rat (Jordach's Mix)” by SoundHelix (CC0)
+`mcl_jukebox_track_3.ogg`: “Eastern Feeling” by Jordach (CC0)
+`mcl_jukebox_track_4.ogg`: “Minetest” by Jordach (CC0)
+`mcl_jukebox_track_5.ogg`: "Soaring over the sea" by mactonite http://ccmixter.org/files/mactonite/65379 (CC-BY)
+`mcl_jukebox_track_6.ogg`: “Winter Feeling" by Tom Peter (CC BY-SA 3.0)
+`mcl_jukebox_track_7.ogg`: “Synthgroove (Jordach's Mix)” by HeroOfTheWinds (CC0)
+`mcl_jukebox_track_8.ogg`: “The Clueless Frog (Jordach's Mix)” by SoundHelix (CC0)
+
+Note: 9 tracks are included. 3 music disc textures are currently unused.
+
+### Sources
+
+* “Winter Feeling”: <https://opengameart.org/content/winter-feeling>
+* Other tracks: <https://github.com/Jordach/jdukebox/>
+
+additional tracks from mineclonia mcl_jukebox, converted from ogg to mono 22050 hz pcm wav:
+record_blocks.wav: "Eastern Feeling" by Jordach, CC0.
+record_far.wav: "Minetest" by Jordach, CC0.
+record_chirp.wav: "Soaring over the sea" by mactonite, CC BY (version unspecified in upstream credits), http://ccmixter.org/files/mactonite/65379
+record_strad.wav: "Winter Feeling" by Tom Peter, CC BY-SA 3.0, https://opengameart.org/content/winter-feeling
+record_mellohi.wav: "Synthgroove (Jordach's Mix)" by HeroOfTheWinds, CC0.
+record_mall.wav: "The Clueless Frog (Jordach's Mix)" by SoundHelix, CC0.
+source credits: mineclonia/mods/ITEMS/mcl_jukebox/README.md
+licenses: https://creativecommons.org/publicdomain/zero/1.0/
+https://creativecommons.org/licenses/by-sa/3.0/

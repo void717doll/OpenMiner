@@ -44,6 +44,7 @@
 #include "client/gui/ProgressBarWidget.hpp"
 #include "client/gui/ScrollBarWidget.hpp"
 #include "client/gui/TextButton.hpp"
+#include "client/network/ClientCommandHandler.hpp"
 #include "client/states/LuaGUIState.hpp"
 #include "client/world/ClientPlayer.hpp"
 #include "client/world/ClientWorld.hpp"
@@ -72,6 +73,7 @@ LuaGUIState::LuaGUIState(ClientCommandHandler &client, ClientPlayer &player, Cli
 }
 
 void LuaGUIState::onEvent(const SDL_Event &event) {
+	if (event.type == SDL_QUIT) finishInventory();
 	InterfaceState::onEvent(event);
 
 	if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED && m_isCentered)
@@ -90,6 +92,7 @@ void LuaGUIState::onEvent(const SDL_Event &event) {
 		}
 
 		if (!ignoreExit) {
+			finishInventory();
 			Mouse::setCursorGrabbed(true);
 			Mouse::setCursorVisible(false);
 			Mouse::resetToWindowCenter();
@@ -97,6 +100,7 @@ void LuaGUIState::onEvent(const SDL_Event &event) {
 			isActive = false;
 
 			m_stateStack->pop();
+			return;
 		}
 	}
 
@@ -148,6 +152,12 @@ void LuaGUIState::onEvent(const SDL_Event &event) {
 
 void LuaGUIState::update() {
 	InterfaceState::update();
+	if (!m_player.health()) {
+		finishInventory();
+		isActive = false;
+		m_stateStack->pop();
+		return;
+	}
 
 	for (auto &it : m_textInputInventories) {
 		auto inv = m_inventoryWidgets.find(it.second);
@@ -184,6 +194,28 @@ void LuaGUIState::update() {
 
 	m_mouseItemWidget.setCurrentInventoryWidget(m_currentInventoryWidget);
 	m_mouseItemWidget.updateCurrentItem(currentItemWidget);
+}
+
+void LuaGUIState::finishInventory() {
+	if (m_isFinished) return;
+	m_isFinished = true;
+	m_mouseItemWidget.stopDragging();
+	std::vector<ItemStack> drops;
+	auto release = [&](const ItemStack &stack) {
+		if (!stack.amount()) return;
+		ItemStack remaining = m_player.health() ? m_player.inventory().addItemStack(stack) : stack;
+		if (remaining.amount()) drops.push_back(remaining);
+	};
+	release(m_mouseItemWidget.getStack());
+	m_mouseItemWidget.setStack(ItemStack::Empty);
+	auto crafting = m_inventories.find("_temp");
+	if (crafting != m_inventories.end()) {
+		for (const auto &stack : crafting->second.items()) release(stack);
+		for (u16 y = 0; y < crafting->second.height(); ++y)
+			for (u16 x = 0; x < crafting->second.width(); ++x) crafting->second.clearStack(x, y);
+	}
+	m_client.sendPlayerInvUpdate();
+	for (const auto &stack : drops) m_client.sendPlayerDropStack(stack);
 }
 
 void LuaGUIState::draw(RenderTarget &target, RenderStates states) const {

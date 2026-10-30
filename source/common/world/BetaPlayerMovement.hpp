@@ -10,6 +10,7 @@ struct MovementEnvironment {
 	bool water = false;
 	bool lava = false;
 	bool ladder = false;
+	bool web = false;
 	float slipperiness = 0.6f;
 };
 
@@ -35,6 +36,12 @@ inline MovementEnvironment movementEnvironment(const World &world, const DoubleB
 					result.water |= kind == 1;
 					result.lava |= kind == 2;
 				}
+			}
+	for (int z = int(std::floor(box.z)); z < int(std::ceil(box.z + box.sizeZ)); ++z)
+		for (int y = int(std::floor(box.y)); y < int(std::ceil(box.y + box.sizeY)); ++y)
+			for (int x = int(std::floor(box.x)); x < int(std::ceil(box.x + box.sizeX)); ++x) {
+				const auto *state = world.getBlockState(x, y, z);
+				if (state && state->block().hasGroup("group:om_web")) result.web = true;
 			}
 	int x = int(std::floor(box.x + box.sizeX / 2));
 	int y = int(std::floor(box.y + box.sizeY / 2));

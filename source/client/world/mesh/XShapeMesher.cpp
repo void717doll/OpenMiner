@@ -45,6 +45,11 @@ void XShapeMesher::addCross(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job,
 		{1, 1, 1},
 	};
 
+	if (blockState.block().getGroupValue("group:om_coral_plant")) {
+		float height = blockState.block().getGroupValue("group:om_coral_fan") ? 0.4f : 0.75f;
+		for (auto &point : vertexPos) point.z *= height;
+	}
+
 	const glm::vec3 *const faceVertices[nCrossFaces][nVertsPerFace]{
 		{&vertexPos[crossVerts[0][0]], &vertexPos[crossVerts[0][1]],
 		 &vertexPos[crossVerts[0][2]], &vertexPos[crossVerts[0][3]]},

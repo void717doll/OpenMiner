@@ -36,6 +36,7 @@
 
 #include "common/core/IntTypes.hpp"
 #include "common/core/Rect.hpp"
+#include "common/world/ClockAnimation.hpp"
 #include "client/graphics/Texture.hpp"
 
 class TextureAtlas {
@@ -45,6 +46,7 @@ class TextureAtlas {
 		void clear();
 
 		void loadFromRegistry();
+		void updateClock(u64 ticks, u16 dimension);
 
 		FloatRect getTexCoords(const std::string &filename, bool normalized = true) const;
 
@@ -68,6 +70,10 @@ class TextureAtlas {
 		// Textures to pack together
 		using SurfacePtr = std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)>;
 		std::vector<SurfacePtr> m_textures;
+		std::vector<std::vector<u8>> m_clockFrames;
+		u16 m_clockTexture = 0;
+		unsigned m_clockFrame = 64;
+		ClockAnimation m_clock;
 
 		// Packed texture
 		Texture m_texture;

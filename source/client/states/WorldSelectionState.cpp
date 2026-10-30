@@ -24,6 +24,7 @@
  *
  * =====================================================================================
  */
+#include "common/world/WorldFiles.hpp"
 #include <filesystem.hpp>
 
 #include "common/core/ApplicationStateStack.hpp"
@@ -77,7 +78,7 @@ WorldSelectionState::WorldSelectionState(TitleScreenState *titleScreen)
 
 	m_menuWidget3.setScale(Config::guiScale, Config::guiScale);
 	m_menuWidget3.setHorizontalSpacing(6);
-	m_menuWidget3.addButton("Re-Create", [](TextButton &) {
+	m_menuWidget3.addButton("Recreate", [](TextButton &) {
 	}, 72).setEnabled(false);
 	m_menuWidget3.addButton("Cancel", [this](TextButton &) {
 		m_stateStack->pop();
@@ -161,24 +162,24 @@ void WorldSelectionState::updateWidgetPosition() {
 
 void WorldSelectionState::loadSaveList() {
 	if (fs::is_directory("saves")) {
-		std::vector<fs::directory_entry> files;
-
-		fs::directory_iterator dir("saves/");
-		for (const auto &entry : dir) {
-			if (entry.is_regular_file() && entry.path().filename().generic_string()[0] != '_') {
-				files.emplace_back(entry);
+		std::vector<std::pair<std::string, fs::path>> files;
+		for (const auto &entry : fs::directory_iterator("saves")) {
+			std::string name = entry.path().filename().generic_string();
+			if (name.empty() || name[0] == '_') continue;
+			if (entry.is_directory() && fs::exists(entry.path() / "map.sqlite"))
+				files.emplace_back(name, entry.path() / "map.sqlite");
+			else if (entry.is_regular_file() && entry.path().extension() == ".dat") {
+				name = entry.path().stem().generic_string();
+				if (!fs::exists(worldFiles::database(name))) files.emplace_back(name, entry.path());
 			}
 		}
-
-		std::sort(files.begin(), files.end());
-
-		for (auto &entry : files) {
-			std::string filename = entry.path().filename();
-			if (filename.substr(filename.find_last_of('.')) == ".dat") {
-				std::string saveFile = filename.substr(0, filename.find_last_of('.'));
-				std::string filesize = std::to_string((float)entry.file_size() / 1000.f / 1000.f);
-				m_worldList.addElement(saveFile, filesize.substr(0, filesize.find_first_of('.') + 3) + " MB", "");
-			}
+		std::sort(files.begin(), files.end(), [](const auto &a, const auto &b) {
+			auto first = fs::last_write_time(a.second), second = fs::last_write_time(b.second);
+			return first == second ? a.first < b.first : first > second;
+		});
+		for (const auto &entry : files) {
+			std::string size = std::to_string(float(fs::file_size(entry.second)) / 1000000.f);
+			m_worldList.addElement(entry.first, size.substr(0, size.find('.') + 3) + " MB", "");
 		}
 	}
 }

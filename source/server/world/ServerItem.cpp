@@ -30,10 +30,16 @@
 #include "common/world/World.hpp"
 #include "server/network/ServerCommandHandler.hpp"
 #include "server/world/ServerItem.hpp"
+#include "server/world/ServerBlock.hpp"
 #include "server/world/ServerPlayer.hpp"
 #include "server/world/ServerWorld.hpp"
+#include "server/world/BucketInteraction.hpp"
 
-bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &player, World &world, ClientInfo &client, ServerCommandHandler &server) const {
+bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &player, World &world, ClientInfo &client, ServerCommandHandler &server, s8 face) const {
+	if (block.stringID() == "default:campfire")
+		return static_cast<const ServerBlock &>(block).onBlockActivated(pos, static_cast<ServerPlayer &>(player), static_cast<ServerWorld &>(world), client, server);
+	if (hasGroup("group:om_minecart")) return static_cast<ServerWorld &>(world).placeMinecart(player, {pos.x, pos.y, pos.z});
+	if (hasGroup("group:om_bucket")) return useBucket(*this, pos, face, player, static_cast<ServerWorld &>(world), server);
 	if (u16 slot = getGroupValue("group:om_armor_slot")) {
 		if (slot > 4) return false;
 		ItemStack previous = player.armor().getStack(0, slot - 1);
@@ -43,7 +49,8 @@ bool ServerItem::onItemActivated(const glm::ivec3 &pos, Block &block, Player &pl
 		return true;
 	}
 	if (hasGroup("group:om_igniter")) {
-		if (!static_cast<ServerWorld &>(world).primeTnt({pos.x, pos.y, pos.z})) return false;
+		auto &serverWorld = static_cast<ServerWorld &>(world);
+		if (!serverWorld.primeTnt({pos.x, pos.y, pos.z}) && !serverWorld.ignitePortal({pos.x, pos.y, pos.z})) return false;
 		server.wearHeldItem(player, 1);
 		return true;
 	}

@@ -72,7 +72,7 @@ void ServerChunk::onBlockChanged(int x, int y, int z) {
 	const auto &block = static_cast<const ServerBlock &>(Registry::getInstance().getBlock(getBlock(x, y, z)));
 	if (block.canUpdate()) addTickingBlock(x, y, z, block);
 	else m_tickingBlocks.erase((z * depth + y) * width + x);
-	m_hasBeenModified = true;
+	setModified(true);
 	m_world.blockPhysics().enqueueNeighbors({x + m_x * width, y + m_y * depth, z + m_z * height});
 }
 
@@ -87,14 +87,23 @@ void ServerChunk::onBlockPlaced(int x, int y, int z, const Block &block) {
 
 	serverBlock.onBlockPlaced(glm::ivec3{x + m_x * CHUNK_WIDTH, y + m_y * CHUNK_DEPTH, z + m_z * CHUNK_HEIGHT}, (ServerWorld &)m_world);
 
-	m_hasBeenModified = true;
+	setModified(true);
 }
 
 void ServerChunk::onBlockDestroyed(int x, int y, int z, const Block &block) {
 	const ServerBlock &serverBlock = (ServerBlock &)block;
 	serverBlock.onBlockDestroyed(glm::ivec3{x + m_x * CHUNK_WIDTH, y + m_y * CHUNK_DEPTH, z + m_z * CHUNK_HEIGHT}, (ServerWorld &)m_world);
 
-	m_hasBeenModified = true;
+	setModified(true);
+}
+
+void ServerChunk::onBlockDataRemoved(int x, int y, int z, const BlockData &data) {
+	if (!m_isInitialized) return;
+	Vector3d position{x + m_x * width + 0.5, y + m_y * depth + 0.5, z + m_z * height + 0.5};
+	for (const ItemStack &stack : data.inventory.items()) {
+		if (stack.amount() && stack.item().id())
+			m_world.dropWorldItem(position, stack.stringID(), stack.amount(), stack.damage(), false);
+	}
 }
 
 void ServerChunk::initializeTickingBlocks() {
@@ -132,26 +141,28 @@ void ServerChunk::sendData(const ClientInfo &client) {
 	Network::Packet packet;
 	packet << Network::Command::ChunkData;
 	packet << m_x << m_y << m_z;
+	std::vector<Vector3i> metadata;
 	for (u16 z = 0 ; z < CHUNK_HEIGHT ; ++z) {
 		for (u16 y = 0 ; y < CHUNK_DEPTH ; ++y) {
 			for (u16 x = 0 ; x < CHUNK_WIDTH ; ++x) {
 				packet << data(x, y, z);
 				packet << m_lightmap.getLightDataRaw(x, y, z);
 
-				BlockData *blockData = getBlockData(x, y, z);
-				if (blockData) {
-					s32 globalX = x + m_x * CHUNK_WIDTH;
-					s32 globalY = y + m_y * CHUNK_DEPTH;
-					s32 globalZ = z + m_z * CHUNK_HEIGHT;
-
-					m_world.server()->sendBlockDataUpdate(globalX, globalY, globalZ, blockData, &client);
-					m_world.server()->sendBlockInvUpdate(globalX, globalY, globalZ, blockData->inventory, &client);
-				}
+				if (getBlockData(x, y, z)) metadata.emplace_back(x, y, z);
 			}
 		}
 	}
 
 	client.send(packet);
+	// the receiving chunk must exist before its metadata packets arrive.
+	for (const auto &position : metadata) {
+		BlockData *data = getBlockData(position.x, position.y, position.z);
+		s32 x = position.x + m_x * CHUNK_WIDTH;
+		s32 y = position.y + m_y * CHUNK_DEPTH;
+		s32 z = position.z + m_z * CHUNK_HEIGHT;
+		m_world.server()->sendBlockDataUpdate(x, y, z, data, &client);
+		m_world.server()->sendBlockInvUpdate(x, y, z, data->inventory, &client);
+	}
 
 	// logDebug() << "Chunk at" << chunk.x() << chunk.y() << chunk.z() << "sent to client";
 }

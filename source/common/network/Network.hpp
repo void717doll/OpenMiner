@@ -76,12 +76,26 @@ namespace Network {
 		EntityAnimation       = 0x54,
 		EntityDrawableDef     = 0x55,
 		EntityHitbox          = 0x56,
+		EntityHurt            = 0x57,
 
 		ItemActivated         = 0x60,
 		WorldSound            = 0x61,
 		WorldMode             = 0x62,
 
 		RegistryData          = 0x70,
+		PlayerRespawn         = 0x80,
+		PlayerScore           = 0x81,
+		PlayerDropStack       = 0x82,
+		PlayerPause           = 0x83,
+		PlayerDeath           = 0x84,
+		PlayerMessage         = 0x87,
+		ParticleBurst         = 0x88,
+		Jukebox               = 0x89,
+		PlayerNoclip          = 0x8b,
+		PlayerStatistics      = 0x8a,
+		PlayerCrafted         = 0x8c,
+		PlayerRideState       = 0x85,
+		PlayerDismount        = 0x86,
 
 
 		KeyPressed            = 0x90,

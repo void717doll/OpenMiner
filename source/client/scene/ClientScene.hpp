@@ -33,16 +33,19 @@
 #include "common/scene/Scene.hpp"
 
 #include "client/graphics/Drawable.hpp"
+#include "client/graphics/ParticleRenderer.hpp"
 #include "client/scene/controller/AbstractClientController.hpp"
 
 class Camera;
 class ClientPlayer;
+class World;
 
 class ClientScene : public Scene, public Drawable {
 	public:
-		ClientScene();
+		explicit ClientScene(const World *world = nullptr);
 
 		void update() override;
+		ParticleRenderer &particles() { return m_particles; }
 
 		void setCamera(Camera &camera) { m_camera = &camera; }
 
@@ -50,6 +53,8 @@ class ClientScene : public Scene, public Drawable {
 		void draw(RenderTarget &target, RenderStates states) const override;
 
 		Camera *m_camera = nullptr;
+		const World *m_world = nullptr;
+		mutable ParticleRenderer m_particles;
 
 		std::deque<std::unique_ptr<AbstractClientController>> m_clientControllers;
 };

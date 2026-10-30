@@ -66,6 +66,11 @@ class BlockMetadataValue {
 
 class BlockMetadata : public ISerializable {
 	public:
+		bool hasInt(const std::string &name) const {
+			auto value = m_data.find(name);
+			return value != m_data.end() && value->second.type() == BlockMetadataValue::Type::Int;
+		}
+
 		void setString(const std::string &name, const std::string &value);
 		void setInt(const std::string &name, int value);
 		void setBool(const std::string &name, bool value);

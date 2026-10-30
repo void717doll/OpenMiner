@@ -153,6 +153,10 @@ inline void LuaBlockLoader::loadDrawType(BlockState &state, const sol::table &ta
 				{"liquid", BlockDrawType::Liquid},
 				{"glass",  BlockDrawType::Glass},
 				{"cactus", BlockDrawType::Cactus},
+				{"campfire", BlockDrawType::Campfire},
+				{"rail", BlockDrawType::Rail},
+				{"lever", BlockDrawType::Lever},
+				{"torch", BlockDrawType::Torch},
 				{"boundingbox", BlockDrawType::BoundingBox}, // FIXME: Temporary
 			};
 

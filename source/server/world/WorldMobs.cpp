@@ -32,7 +32,14 @@ u32 nextRandom(MobComponent &mob) {
 
 double unitRandom(MobComponent &mob) { return double(nextRandom(mob)) / 4294967296.0; }
 
-bool projectile(Kind kind) { return kind == Kind::Arrow || kind == Kind::Fireball; }
+bool projectile(Kind kind) { return betaMobIsProjectile(kind); }
+
+bool holdingItem(ServerPlayer &player, const std::string &id) {
+	int slot = player.heldItemSlot();
+	if (slot < 0 || slot >= player.inventory().width()) return false;
+	const ItemStack &held = player.heldItemStack();
+	return held.amount() && held.stringID() == id;
+}
 
 bool liquidAt(const World &world, Vector3d point) {
 	int x = int(std::floor(point.x)), y = int(std::floor(point.y)), z = int(std::floor(point.z));
@@ -41,6 +48,13 @@ bool liquidAt(const World &world, Vector3d point) {
 	const BlockState *above = world.getBlockState(x, y, z + 1);
 	bool covered = above && liquid::kind(above->block()) == liquid::kind(state->block());
 	return point.z - z < liquid::height(state->block(), world.getData(x, y, z), covered);
+}
+
+bool waterAt(const World &world, Vector3d point) {
+	const Chunk *chunk = world.getChunkAtBlockPos(int(std::floor(point.x)), int(std::floor(point.y)), int(std::floor(point.z)));
+	if (!chunk || !chunk->isInitialized()) return false;
+	const BlockState *state = world.getBlockState(int(std::floor(point.x)), int(std::floor(point.y)), int(std::floor(point.z)));
+	return state && liquid::kind(state->block()) == 1 && liquidAt(world, point);
 }
 
 bool segmentBox(Vector3d start, Vector3d delta, const DoubleBox &box, double &distance) {
@@ -99,8 +113,11 @@ void syncAppearance(entt::registry &registry, entt::entity entity) {
 		appearance = u8((traits.anger ? 1 : 0) | (traits.tamed ? 2 : 0) | (traits.sitting ? 4 : 0));
 		appearance |= u8(std::min<u16>(20, registry.get<MobComponent>(entity).health) << 3);
 	}
+	if (traits.kind == Kind::Axolotl || traits.kind == Kind::Rabbit) appearance = traits.color;
+	if (traits.kind == Kind::SnowGolem) appearance = traits.sheared ? 1 : 0;
 	if (traits.kind == Kind::Pig) appearance = traits.saddled ? 1 : 0;
 	if (traits.kind == Kind::Ghast) appearance = traits.attackCharge > 10 ? 1 : 0;
+	if (traits.kind == Kind::Bat || traits.kind == Kind::Ocelot) appearance = traits.sitting ? 1 : 0;
 	if (visual->mobAppearance() != appearance) {
 		visual->setMobAppearance(appearance);
 		visual->isUpdated = true;
@@ -127,22 +144,26 @@ entt::entity dropItem(ServerWorld &world, Vector3d position, const std::string &
 struct Shot { Vector3d position, direction; Kind kind; entt::entity shooter; };
 struct Blast { Vector3d position; float strength; u32 seed; std::string source; };
 
-void spawnShot(ServerWorld &world, const Shot &shot) {
+bool spawnShot(ServerWorld &world, const Shot &shot) {
 	auto &registry = world.scene().registry();
 	std::size_t count = 0;
 	registry.view<BetaMobComponent>().each([&](auto, auto &traits) { if (projectile(traits.kind)) ++count; });
-	if (count >= 32) return;
+	if (count >= 32) return false;
 	entt::entity entity = registry.create();
 	auto &mob = registry.emplace<MobComponent>(entity);
+	mob.randomState = u32(entity) ^ 0x9e3779b9u;
 	mob.health = 1; mob.moveSpeed = 0; mob.attackStrength = shot.kind == Kind::Arrow ? 4 : 0;
 	auto &traits = registry.emplace<BetaMobComponent>(entity);
 	traits.kind = shot.kind;
-	traits.owner = "mob:" + std::to_string(u32(shot.shooter));
+	if (shot.shooter != entt::null) {
+		traits.owner = "mob:" + std::to_string(u32(shot.shooter));
+		traits.target = betaMobName(traitsFor(registry, shot.shooter).kind);
+	}
 	Vector3d direction = shot.direction;
 	double length = direction.length();
 	if (length < 1e-8) direction = {1, 0, 0};
 	else direction /= length;
-	traits.velocity = shot.kind == Kind::Arrow ? Vector3f(direction * 0.6) : Vector3f{0, 0, 0};
+	traits.velocity = shot.kind == Kind::Fireball ? Vector3f{0, 0, 0} : Vector3f(direction * 0.6);
 	traits.waypoint = Vector3f(direction * 0.1);
 	registry.emplace<PositionComponent>(entity, shot.position.x, shot.position.y, shot.position.z, world.dimension().id());
 	registry.emplace<NetworkComponent>(entity, entity);
@@ -150,19 +171,20 @@ void spawnShot(ServerWorld &world, const Shot &shot) {
 	registry.emplace<DoubleBox>(entity, -0.125, -0.125, -0.125, 0.25, 0.25, 0.25);
 	registry.emplace<RotationComponent>(entity);
 	registry.emplace<DrawableDef>(entity).setMobModel(u8(shot.kind));
+	return true;
 }
 
 void explode(ServerWorld &world, const Blast &blast) {
 	float reach = blast.strength * 2;
 	for (const auto &entry : world.players()) {
 		const auto &player = entry.second;
-		if (!player.isReady() || !player.isOnline() || player.dimension() != world.dimension().id()) continue;
+		if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != world.dimension().id()) continue;
 		Vector3d target{player.x(), player.y(), player.z() + 0.8};
 		double distance = (target - blast.position).length() / reach;
 		if (distance > 1 || !clearPath(world, blast.position, target)) continue;
 		double impact = 1 - distance;
 		u16 damage = u16((impact * impact + impact) * 4 * reach + 1);
-		if (world.server()) world.server()->damagePlayer(player.clientID(), damage);
+		if (world.server()) world.server()->damagePlayer(player.clientID(), damage, "blast:" + blast.source);
 	}
 	world.scene().registry().view<MobComponent, PositionComponent>().each([&](auto entity, auto &mob, auto &position) {
 		if (projectile(traitsFor(world.scene().registry(), entity).kind)) return;
@@ -205,9 +227,10 @@ void explode(ServerWorld &world, const Blast &blast) {
 		const BlockState *state = world.getBlockState(point.x, point.y, point.z);
 		if (state && state->block().stringID() == "default:tnt" && world.primeTnt(point, u16(10 + nextRandom(random) % 20))) continue;
 		if (state && unitRandom(random) < 0.3) {
-			const ItemStack stack = state->getItemDrop();
-			if (Registry::getInstance().hasItem(stack.stringID()))
-				world.dropWorldItem({point.x + 0.5, point.y + 0.5, point.z + 0.5}, stack.stringID(), stack.amount());
+			for (const ItemStack &stack : state->getItemDrops()) {
+				if (Registry::getInstance().hasItem(stack.stringID()))
+					world.dropWorldItem({point.x + 0.5, point.y + 0.5, point.z + 0.5}, stack.stringID(), stack.amount());
+			}
 		}
 		world.setBlock(point.x, point.y, point.z, 0);
 	}
@@ -225,6 +248,139 @@ bool consumeFor(ServerPlayer &player, const std::string &replacement) {
 	return true;
 }
 
+void updateAxolotl(ServerWorld &world, MobComponent &mob, BetaMobComponent &traits,
+		PositionComponent &position, const DoubleBox &localBox, RotationComponent &rotation) {
+	Vector3d origin{position.x, position.y, position.z};
+	Vector3d center = origin + Vector3d{0, 0, localBox.sizeZ * 0.5};
+	bool swimming = waterAt(world, center);
+	Vector3d difference = Vector3d(traits.waypoint) - origin;
+	if (traits.jumpTimer) --traits.jumpTimer;
+	if (!traits.jumpTimer || difference.length() < 0.4) {
+		traits.jumpTimer = 20;
+		if (swimming) {
+			for (int attempt = 0; attempt < 12; ++attempt) {
+				Vector3d candidate = origin + Vector3d{int(nextRandom(mob) % 9) - 4.0,
+					int(nextRandom(mob) % 9) - 4.0, int(nextRandom(mob) % 5) - 2.0};
+				if (waterAt(world, candidate + Vector3d{0,0,0.2}) && clearPath(world, center, candidate + Vector3d{0,0,0.2})) {
+					traits.waypoint = Vector3f(candidate); break;
+				}
+			}
+		}
+		else {
+			double nearest = 6 * 6 + 1;
+			for (int dz = -1; dz <= 1; ++dz) for (int dy = -6; dy <= 6; ++dy) for (int dx = -6; dx <= 6; ++dx) {
+				double distance = dx * dx + dy * dy + dz * dz;
+				if (distance >= nearest) continue;
+				Vector3d candidate{std::floor(origin.x) + dx + 0.5, std::floor(origin.y) + dy + 0.5, std::floor(origin.z) + dz};
+				if (waterAt(world, candidate + Vector3d{0,0,0.2}) && clearPath(world, center, candidate + Vector3d{0,0,0.2})) {
+					nearest = distance; traits.waypoint = Vector3f(candidate);
+				}
+			}
+			if (nearest > 36) traits.waypoint = Vector3f(origin + Vector3d{unitRandom(mob) * 4 - 2, unitRandom(mob) * 4 - 2, 0});
+		}
+		difference = Vector3d(traits.waypoint) - origin;
+	}
+	if (difference.x * difference.x + difference.y * difference.y > 0.01)
+		mob.yaw = float(std::atan2(difference.y, difference.x));
+	Vector3d desired{0, 0, 0};
+	if (swimming) {
+		double length = difference.length();
+		if (length > 0.1) desired = difference * (0.1 / length);
+		if (!waterAt(world, center + desired)) desired = {0, 0, 0};
+		mob.verticalSpeed = 0; traits.eggTimer = 6000;
+	}
+	else {
+		mob.verticalSpeed = std::max(-0.5f, (mob.verticalSpeed - 0.08f) * 0.98f);
+		desired = {std::cos(mob.yaw) * 0.075, std::sin(mob.yaw) * 0.075, mob.verticalSpeed};
+		if (traits.eggTimer) --traits.eggTimer;
+		else if (mob.age % 20 == 0) mob.health = mob.health <= 2 ? 0 : mob.health - 2;
+	}
+	DoubleBox box = localBox; box.move(position.x, position.y, position.z);
+	Vector3d movement = collision::move(world, box, desired);
+	traits.grounded = desired.z < 0 && movement.z > desired.z;
+	if (movement.z != desired.z) mob.verticalSpeed = 0;
+	bool blocked = std::abs(movement.x - desired.x) > 0.001 || std::abs(movement.y - desired.y) > 0.001;
+	if (blocked) {
+		traits.jumpTimer = 0;
+		if (traits.grounded) mob.verticalSpeed = 0.42f;
+	}
+	position.x += movement.x; position.y += movement.y; position.z += movement.z;
+	position.isUpdated = position.isUpdated || !movement.isZero();
+	rotation.quat = glm::angleAxis(mob.yaw + float(M_PI / 2), glm::vec3(0,0,1)); rotation.isUpdated = true;
+}
+
+bool opaqueCeiling(const World &world, int x, int y, int z) {
+	const BlockState *state = world.getBlockState(x, y, z);
+	if (!state || !state->block().id() || !state->isCollidable() || state->drawType() != BlockDrawType::Solid) return false;
+	DoubleBox box = collision::blockBox(*state, world.getData(x, y, z), x, y, z);
+	return box.sizeX == 1 && box.sizeY == 1 && box.sizeZ == 1;
+}
+
+void updateBat(ServerWorld &world, MobComponent &mob, BetaMobComponent &traits,
+		PositionComponent &position, const DoubleBox &localBox, RotationComponent &rotation) {
+	Vector3d origin{position.x, position.y, position.z};
+	int x = int(std::floor(position.x)), y = int(std::floor(position.y));
+	int ceiling = int(std::ceil(position.z + localBox.sizeZ - 0.001));
+	bool supported = opaqueCeiling(world, x, y, ceiling);
+	bool startled = traits.anger > 0;
+	for (const auto &entry : world.players()) {
+		const auto &player = entry.second;
+		if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != world.dimension().id()) continue;
+		if ((Vector3d{player.x(), player.y(), player.z()} - origin).length() < 4) startled = true;
+	}
+	if (traits.sitting && (!supported || startled)) {
+		traits.sitting = false;
+		traits.jumpTimer = 60;
+		traits.velocity = {0, 0, -0.08f};
+		traits.waypoint = Vector3f(origin);
+	}
+	if (traits.jumpTimer) --traits.jumpTimer;
+	if (!traits.sitting && !startled && !traits.jumpTimer && supported
+	 && ceiling - position.z - localBox.sizeZ < 0.15 && nextRandom(mob) % 100 == 0) traits.sitting = true;
+	if (traits.sitting) {
+		position.z = ceiling - localBox.sizeZ;
+		position.isUpdated = true;
+		traits.velocity = {0, 0, 0};
+		if (nextRandom(mob) % 200 == 0) mob.yaw = float(unitRandom(mob) * 2 * M_PI);
+	}
+	else {
+		Vector3d difference = Vector3d(traits.waypoint) - origin;
+		if (difference.length() < 1 || nextRandom(mob) % 30 == 0 || !clearPath(world, origin, Vector3d(traits.waypoint))) {
+			for (int attempt = 0; attempt < 6; ++attempt) {
+				Vector3d candidate{position.x + int(nextRandom(mob) % 7) - int(nextRandom(mob) % 7),
+					position.y + int(nextRandom(mob) % 7) - int(nextRandom(mob) % 7),
+					std::max(1.0, std::min(126.0, position.z + int(nextRandom(mob) % 6) - 2))};
+				const Chunk *chunk = world.getChunkAtBlockPos(int(std::floor(candidate.x)), int(std::floor(candidate.y)), int(std::floor(candidate.z)));
+				if (chunk && chunk->isInitialized() && !liquidAt(world, candidate) && clearPath(world, origin, candidate)) {
+					traits.waypoint = Vector3f(candidate);
+					difference = candidate - origin;
+					break;
+				}
+			}
+		}
+		auto approach = [](float current, double delta, float speed) {
+			float wanted = delta > 0.05 ? speed : delta < -0.05 ? -speed : 0;
+			return current + (wanted - current) * 0.1f;
+		};
+		traits.velocity.x = approach(traits.velocity.x, difference.x, 0.25f);
+		traits.velocity.y = approach(traits.velocity.y, difference.y, 0.25f);
+		traits.velocity.z = approach(traits.velocity.z, difference.z, 0.18f);
+		DoubleBox box = localBox; box.move(position.x, position.y, position.z);
+		Vector3d desired = traits.velocity;
+		Vector3d movement = collision::move(world, box, desired, false);
+		if ((movement - desired).length() > 0.001) {
+			traits.waypoint = Vector3f(origin);
+			traits.velocity *= -0.25f;
+		}
+		position.x += movement.x; position.y += movement.y; position.z += movement.z;
+		position.isUpdated = position.isUpdated || !movement.isZero();
+		if (std::abs(movement.x) + std::abs(movement.y) > 0.001) mob.yaw = float(std::atan2(movement.y, movement.x));
+	}
+	mob.verticalSpeed = 0;
+	rotation.quat = glm::angleAxis(mob.yaw + float(M_PI / 2), glm::vec3(0, 0, 1));
+	rotation.isUpdated = true;
+}
+
 }
 
 void ServerWorld::explodeAt(const Vector3d &position, float strength, u32 seed, const std::string &source) {
@@ -234,7 +390,20 @@ void ServerWorld::explodeAt(const Vector3d &position, float strength, u32 seed, 
 	}
 }
 
-bool ServerWorld::spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize) {
+bool ServerWorld::spawnProjectile(const std::string &id, Vector3d position, Vector3d direction) {
+	Kind kind = id == "default:arrow" ? Kind::Arrow : id == "default:snowball" ? Kind::Snowball : id == "default:egg" ? Kind::Egg : betaMobKind(id);
+	if (kind != Kind::Arrow && kind != Kind::Snowball && kind != Kind::Egg) return false;
+	if (!std::isfinite(position.x) || !std::isfinite(position.y) || !std::isfinite(position.z)
+	 || !std::isfinite(direction.x) || !std::isfinite(direction.y) || !std::isfinite(direction.z) || direction.length() < 1e-8) return false;
+	int x = int(std::floor(position.x)), y = int(std::floor(position.y)), z = int(std::floor(position.z));
+	const Chunk *chunk = getChunkAtBlockPos(x, y, z);
+	const BlockState *state = getBlockState(x, y, z);
+	if (!chunk || !chunk->isInitialized() || !state || (state->block().id() && state->isCollidable())) return false;
+	return spawnShot(*this, {position, direction, kind, entt::null});
+}
+
+bool ServerWorld::spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize, entt::entity *spawned) {
+	if (spawned) *spawned = entt::null;
 	std::size_t shots = 0;
 	m_scene.registry().view<BetaMobComponent>().each([&](auto, auto &traits) { if (projectile(traits.kind)) ++shots; });
 	if (m_scene.registry().view<MobComponent>().size() >= 64 + shots) return false;
@@ -273,8 +442,16 @@ bool ServerWorld::spawnMob(const std::string &id, double x, double y, double z, 
 		u32 color = nextRandom(mob) % 100;
 		traits.color = color < 5 ? 15 : color < 10 ? 7 : color < 15 ? 8 : color < 18 ? 12 : nextRandom(mob) % 500 == 0 ? 6 : 0;
 	}
+	if (traits.kind == Kind::Axolotl) { traits.color = u8(nextRandom(mob) % 7); traits.eggTimer = 6000; }
+	if (traits.kind == Kind::Rabbit) {
+		auto biome = m_heightmap.getOrCreateChunk(int(std::floor(x / 16)), int(std::floor(y / 16))).biomeAt(int(std::floor(x)) & 15, int(std::floor(y)) & 15);
+		u32 color = nextRandom(mob) % 100;
+		traits.color = biome == retro::Biome::Desert ? 1 : biome == retro::Biome::Taiga || biome == retro::Biome::Tundra
+			? (color < 80 ? 2 : 3) : color < 50 ? 0 : color < 90 ? 4 : 5;
+	}
 	syncAppearance(registry, entity);
 	if (traits.kind == Kind::Slime) setSlimeSize(registry, entity, slimeSize, true);
+	if (spawned) *spawned = entity;
 	return true;
 }
 
@@ -284,6 +461,7 @@ void ServerWorld::updateMobs() {
 	std::vector<entt::entity> dead;
 	std::vector<Shot> shots;
 	std::vector<Blast> blasts;
+	std::vector<std::pair<Vector3d, unsigned>> hatchings;
 	registry.view<MobComponent, PositionComponent, DoubleBox, RotationComponent>().each(
 		[&](auto entity, auto &mob, auto &position, auto &localBox, auto &rotation) {
 			if (!mob.health) { dead.emplace_back(entity); return; }
@@ -305,12 +483,12 @@ void ServerWorld::updateMobs() {
 				bool hit = !clearPath(*this, origin, end);
 				for (const auto &entry : m_players) {
 					const auto &player = entry.second;
-					if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id() || player.name() == traits.owner) continue;
+					if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != m_dimension.id() || player.name() == traits.owner) continue;
 					DoubleBox box = player.hitbox(); box.move(player.x(), player.y(), player.z());
 					double t = 1;
 					if (segmentBox(origin, velocity, box, t) && clearPath(*this, origin, origin + velocity * t)) {
 						end = origin + velocity * t; hit = true;
-						if (kind == Kind::Arrow && m_server) m_server->damagePlayer(player.clientID(), 4);
+						if (kind == Kind::Arrow && m_server) m_server->damagePlayer(player.clientID(), 4, "arrow:" + traits.target);
 						break;
 					}
 				}
@@ -322,22 +500,41 @@ void ServerWorld::updateMobs() {
 					if (!segmentBox(origin, velocity, box, t)) return;
 					end = origin + velocity * t; hit = true;
 					if (kind == Kind::Arrow) otherMob.health = otherMob.health <= 4 ? 0 : otherMob.health - 4;
+					if (kind == Kind::Snowball) {
+						// source snowballs deal no damage to ordinary mobs, but still push them back.
+						DoubleBox targetBox = hitbox; targetBox.move(otherPosition.x, otherPosition.y, otherPosition.z);
+						Vector3d push = collision::move(*this, targetBox, {velocity.x * 0.4, velocity.y * 0.4, 0.1});
+						otherPosition.x += push.x; otherPosition.y += push.y; otherPosition.z += push.z;
+						otherPosition.isUpdated = true;
+					}
 				});
 				position.x = end.x; position.y = end.y; position.z = end.z; position.isUpdated = true;
 				if (hit) {
-					if (kind == Kind::Fireball) blasts.push_back({end, 1, nextRandom(mob)});
+					if (kind == Kind::Egg && (nextRandom(mob) >> 16) % 8 == 0)
+						hatchings.emplace_back(origin, (nextRandom(mob) >> 16) % 32 == 0 ? 4u : 1u);
+					if (kind == Kind::Fireball) blasts.push_back({end, 1, nextRandom(mob), traits.target});
 					dead.emplace_back(entity);
 				}
-				if (kind == Kind::Arrow) { traits.velocity *= 0.99f; traits.velocity.z -= 0.03f; }
+				if (kind != Kind::Fireball) { traits.velocity *= 0.99f; traits.velocity.z -= 0.03f; }
 				else traits.velocity = (traits.velocity + traits.waypoint) * 0.95f;
 				rotation.quat = glm::angleAxis(float(std::atan2(velocity.y, velocity.x)
 					+ (kind == Kind::Arrow ? 90 * math::DEG_TO_RAD : 0)), glm::vec3(0, 0, 1));
 				rotation.isUpdated = true;
 				return;
 			}
+			if (kind == Kind::Bat) {
+				updateBat(*this, mob, traits, position, localBox, rotation);
+				syncAppearance(registry, entity);
+				return;
+			}
+			if (kind == Kind::Axolotl) {
+				updateAxolotl(*this, mob, traits, position, localBox, rotation);
+				if (!mob.health) dead.emplace_back(entity);
+				return;
+			}
 			bool swimming = liquidAt(*this, origin + Vector3d{0, 0, localBox.sizeZ * 0.5});
 			ServerPlayer *target = nullptr;
-			double nearest = kind == Kind::Ghast ? 64 * 64 : 16 * 16;
+			double nearest = kind == Kind::Ghast ? 64 * 64 : kind == Kind::Ocelot ? 12 * 12 : kind == Kind::Rabbit ? 8 * 8 : 16 * 16;
 			bool neutral = kind == Kind::Wolf || kind == Kind::PigZombie;
 			bool sunlit = GameTime::getTicks() % GameTime::dayLength < 12000
 				&& position.z >= m_heightmap.getHighestBlockAt(int(std::floor(position.x)), int(std::floor(position.y))) + 1;
@@ -345,11 +542,16 @@ void ServerWorld::updateMobs() {
 			if (kind == Kind::Spider && sunlit && !traits.anger) aggressive = false;
 			for (auto &entry : m_players) {
 				auto &player = entry.second;
-				if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id()) continue;
-				if (player.isCreative()) continue;
+				if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != m_dimension.id()) continue;
+				if (player.isCreative() && kind != Kind::Ocelot && kind != Kind::Rabbit) continue;
 				bool following = kind == Kind::Wolf && traits.tamed && !traits.sitting && !traits.anger && player.name() == traits.owner;
+				if (kind == Kind::Rabbit) following = true;
+				if (kind == Kind::Ocelot) {
+					bool fish = holdingItem(player, "default:fish_cod_raw");
+					following = fish || !traits.tamed || traits.anger;
+				}
 				if (!aggressive && !following) continue;
-				if (!traits.target.empty() && traits.target != player.name() && !following) continue;
+				if (!traits.target.empty() && traits.target != player.name() && !following && kind != Kind::Ocelot) continue;
 				double dx = player.x() - position.x, dy = player.y() - position.y, dz = player.z() - position.z;
 				double distance = dx * dx + dy * dy + dz * dz;
 				if (distance < nearest && clearPath(*this, origin + Vector3d{0, 0, localBox.sizeZ * 0.8}, {player.x(), player.y(), player.z() + 1.5})) {
@@ -358,10 +560,89 @@ void ServerWorld::updateMobs() {
 			}
 			if (target) mob.yaw = float(std::atan2(target->y() - position.y, target->x() - position.x));
 			else if (mob.age % 60 == 1) mob.yaw = float(nextRandom(mob) % 6284) / 1000.f;
+			bool ocelotFlee = false, rabbitFlee = false, hunting = false;
+			if (kind == Kind::Ocelot) {
+				traits.sitting = false;
+				if (target) {
+					Vector3d playerPosition{target->x(), target->y(), target->z()};
+					bool fish = holdingItem(*target, "default:fish_cod_raw");
+					if (!traits.tamed && traits.target == target->name() && fish
+					 && ((playerPosition - Vector3d(traits.waypoint)).length() > 0.1
+					  || std::abs(std::remainder(target->cameraYaw() - traits.velocity.x, 360.f)) > 5
+					  || std::abs(target->cameraPitch() - traits.velocity.y) > 5)) traits.anger = 80;
+					ocelotFlee = traits.anger || (!traits.tamed && !fish);
+					if (ocelotFlee) mob.yaw += float(M_PI);
+					traits.sitting = fish && !ocelotFlee && nearest > 6.25;
+					traits.target = target->name();
+					traits.waypoint = Vector3f(playerPosition);
+					traits.velocity = {target->cameraYaw(), target->cameraPitch(), 0};
+				}
+				else {
+					traits.target.clear();
+					double preyDistance = 8 * 8;
+					entt::entity prey = entt::null;
+					registry.view<MobComponent, BetaMobComponent, PositionComponent>().each([&](auto other, auto &otherMob, auto &otherTraits, auto &otherPosition) {
+						if (otherTraits.kind != Kind::Chicken || !otherMob.health || otherPosition.dimension != position.dimension) return;
+						Vector3d delta = Vector3d{otherPosition.x, otherPosition.y, otherPosition.z} - origin;
+						double distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+						if (distance < preyDistance && clearPath(*this, origin + Vector3d{0,0,0.4}, origin + delta + Vector3d{0,0,0.2})) {
+							preyDistance = distance; prey = other;
+						}
+					});
+					if (prey != entt::null) {
+						const auto &preyPosition = registry.get<PositionComponent>(prey);
+						mob.yaw = float(std::atan2(preyPosition.y - position.y, preyPosition.x - position.x));
+						hunting = true;
+						if (preyDistance < 1 && !mob.attackCooldown) {
+							auto &preyMob = registry.get<MobComponent>(prey);
+							preyMob.health = preyMob.health <= 3 ? 0 : preyMob.health - 3;
+							mob.attackCooldown = 20;
+						}
+					}
+				}
+			}
+			if (kind == Kind::Rabbit) {
+				rabbitFlee = target && !holdingItem(*target, "default:dandelion");
+				if (rabbitFlee) mob.yaw += float(M_PI);
+				double danger = target ? nearest : 100;
+				registry.view<MobComponent, BetaMobComponent, PositionComponent>().each([&](auto other, auto &otherMob, auto &otherTraits, auto &otherPosition) {
+					if (!otherMob.health || other == entity || (!otherMob.hostile && otherTraits.kind != Kind::Wolf)) return;
+					Vector3d delta = origin - Vector3d{otherPosition.x, otherPosition.y, otherPosition.z};
+					double distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+					double radius = otherTraits.kind == Kind::Wolf ? 10 : 4;
+					if (distance < danger && distance < radius * radius && clearPath(*this, origin + Vector3d{0,0,0.3}, origin - delta + Vector3d{0,0,0.3})) {
+						danger = distance; mob.yaw = float(std::atan2(delta.y, delta.x)); rabbitFlee = true; hunting = true;
+					}
+				});
+			}
+			if (kind == Kind::SnowGolem) {
+				double closest = 100;
+				Vector3d aim;
+				registry.view<MobComponent, BetaMobComponent, PositionComponent, DoubleBox>().each([&](auto, auto &otherMob, auto &otherTraits, auto &otherPosition, auto &otherBox) {
+					if (!otherMob.health || projectile(otherTraits.kind) || (!otherMob.hostile && otherTraits.kind != Kind::PigZombie)) return;
+					Vector3d delta = Vector3d{otherPosition.x, otherPosition.y, otherPosition.z + otherBox.sizeZ * 0.6} - (origin + Vector3d{0,0,1.6});
+					double distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+					if (distance < closest && clearPath(*this, origin + Vector3d{0,0,1.6}, origin + Vector3d{0,0,1.6} + delta)) {
+						closest = distance; aim = delta; hunting = true;
+					}
+				});
+				if (hunting) {
+					mob.yaw = float(std::atan2(aim.y, aim.x));
+					if (!mob.attackCooldown) {
+						aim.z += std::sqrt(aim.x * aim.x + aim.y * aim.y) * 0.08;
+						shots.push_back({origin + Vector3d{0,0,1.6}, aim, Kind::Snowball, entity}); mob.attackCooldown = 20;
+					}
+				}
+				if (mob.age % 10 == 0) {
+					auto biome = m_heightmap.getOrCreateChunk(int(std::floor(position.x / 16)), int(std::floor(position.y / 16)))
+						.biomeAt(int(std::floor(position.x)) & 15, int(std::floor(position.y)) & 15);
+					if (swimming || m_dimension.id() == 1 || biome == retro::Biome::Desert) --mob.health;
+				}
+			}
 			bool attacksPlayer = target && aggressive && !(traits.tamed && target->name() == traits.owner);
 			if (kind == Kind::Creeper) {
 				if (advanceCreeperFuse(traits, std::sqrt(nearest), attacksPlayer)) {
-					blasts.push_back({origin, 3, nextRandom(mob)}); dead.emplace_back(entity); return;
+					blasts.push_back({origin, 3, nextRandom(mob), "creeper"}); dead.emplace_back(entity); return;
 				}
 			}
 			else if (kind == Kind::Skeleton && attacksPlayer && nearest < 100 && !mob.attackCooldown) {
@@ -384,14 +665,19 @@ void ServerWorld::updateMobs() {
 				double range = kind == Kind::Wolf ? 1.5 : kind == Kind::Slime ? traits.size * 0.6 : 2;
 				if (nearest < range * range && (kind != Kind::Slime || traits.size > 1)) {
 					mob.attackCooldown = 20;
-					if (m_server) m_server->damagePlayer(target->clientID(), kind == Kind::Wolf && traits.tamed ? 4 : mob.attackStrength);
+					if (m_server) m_server->damagePlayer(target->clientID(), kind == Kind::Wolf && traits.tamed ? 4 : mob.attackStrength, "mob:" + std::string(betaMobName(kind)));
 				}
 			}
-			bool walking = target || (mob.age % 100 < 60);
+			bool walking = target || hunting || (mob.age % 100 < 60);
+			if (kind == Kind::Ocelot && target && !ocelotFlee && nearest < 6.25) walking = false;
 			if (kind == Kind::Wolf && (traits.sitting || (traits.tamed && target && nearest < 25))) walking = false;
 			if (kind == Kind::Creeper && traits.fuse) walking = false;
+			if (kind == Kind::SnowGolem && hunting) walking = false;
+			if (kind == Kind::Rabbit && target && !rabbitFlee && nearest < 4) walking = false;
 			if (kind == Kind::Skeleton && target && nearest < 36) walking = false;
 			float speed = walking ? mob.moveSpeed * 0.2f : 0;
+			if (kind == Kind::Ocelot && walking) speed *= ocelotFlee ? 1.33f : target ? 0.6f : hunting ? 1.25f : 1.f;
+			if (kind == Kind::Rabbit && rabbitFlee) speed *= 1.8f;
 			if (kind == Kind::PigZombie && traits.anger) speed = walking ? 0.19f : 0;
 			mob.verticalSpeed = std::max(-0.5f, (mob.verticalSpeed - 0.08f) * 0.98f);
 			if (kind == Kind::Chicken && mob.verticalSpeed < 0) mob.verticalSpeed *= 0.6f;
@@ -406,6 +692,21 @@ void ServerWorld::updateMobs() {
 					}
 					if (traits.jumpTimer) desired.x = desired.y = 0;
 				}
+			}
+			if (kind == Kind::Rabbit) {
+				if (traits.grounded) {
+					desired.x = desired.y = 0;
+					if (traits.jumpTimer) --traits.jumpTimer;
+					else if (walking) {
+						Vector3d ahead = origin + Vector3d{std::cos(mob.yaw) * 0.6, std::sin(mob.yaw) * 0.6, 0.25};
+						mob.verticalSpeed = clearPath(*this, origin + Vector3d{0,0,0.25}, ahead) ? 0.3f : 0.5f;
+						desired.z = mob.verticalSpeed;
+						traits.velocity = {std::cos(mob.yaw) * speed, std::sin(mob.yaw) * speed, 0};
+						traits.jumpTimer = rabbitFlee ? 2 : 10;
+						desired.x = traits.velocity.x; desired.y = traits.velocity.y;
+					}
+				}
+				else { desired.x = traits.velocity.x; desired.y = traits.velocity.y; }
 			}
 			if ((kind == Kind::Spider || kind == Kind::Wolf) && target && nearest > 4 && nearest < 36 && traits.grounded && nextRandom(mob) % 10 == 0)
 				desired.z = mob.verticalSpeed = 0.4f;
@@ -422,12 +723,19 @@ void ServerWorld::updateMobs() {
 			if (movement.z != desired.z) mob.verticalSpeed = 0;
 			bool blocked = std::abs(movement.x - desired.x) > 0.001 || std::abs(movement.y - desired.y) > 0.001;
 			if (kind == Kind::Spider && blocked) mob.verticalSpeed = 0.2f;
-			else if (traits.grounded && blocked) mob.verticalSpeed = 0.42f;
+			else if (traits.grounded && blocked && kind != Kind::Rabbit) mob.verticalSpeed = 0.42f;
 			position.x += movement.x; position.y += movement.y; position.z += movement.z;
 			position.isUpdated = position.isUpdated || !movement.isZero();
 			rotation.quat = glm::angleAxis(mob.yaw + float(M_PI / 2), glm::vec3(0, 0, 1)); rotation.isUpdated = true;
 			if ((kind == Kind::Zombie || kind == Kind::Skeleton) && mob.age % 20 == 0 && sunlit) --mob.health;
-			if (kind == Kind::Chicken) {
+			if (kind == Kind::Chicken && traits.size == 0) {
+				if (traits.jumpTimer) --traits.jumpTimer;
+				else {
+					traits.size = 1; localBox.reset(-0.15, -0.15, 0, 0.3, 0.3, 0.4);
+					auto &visual = registry.get<DrawableDef>(entity); visual.setMobModel(u8(kind)); visual.isUpdated = true;
+				}
+			}
+			if (kind == Kind::Chicken && traits.size != 0) {
 				if (!traits.eggTimer) traits.eggTimer = 6000 + nextRandom(mob) % 6000;
 				if (--traits.eggTimer == 0) dropItem(*this, origin, "default:egg", 1);
 			}
@@ -446,7 +754,14 @@ void ServerWorld::updateMobs() {
 			auto &random = registry.get<MobComponent>(entity);
 			u16 count = u16(nextRandom(random) % 3);
 			if (traits.kind == Kind::Sheep) count = traits.sheared ? 0 : 1;
+			if (traits.kind == Kind::Chicken && traits.size == 0) count = 0;
 			if (traits.kind == Kind::Squid) count = u16(1 + nextRandom(random) % 3);
+			if (traits.kind == Kind::SnowGolem) count = u16(nextRandom(random) % 16);
+			if (traits.kind == Kind::Rabbit) {
+				count = u16(nextRandom(random) % 2);
+				dropItem(*this, {position.x, position.y, position.z}, "default:rabbit_hide", u16(nextRandom(random) % 2));
+				if (nextRandom(random) % 10 == 0) dropItem(*this, {position.x, position.y, position.z}, "default:rabbit_foot", u16(nextRandom(random) % 2));
+			}
 			if (traits.kind == Kind::Slime && traits.size > 1) count = 0;
 			dropItem(*this, {position.x, position.y, position.z}, mob.dropItem, count);
 			if (traits.kind == Kind::Skeleton)
@@ -462,6 +777,14 @@ void ServerWorld::updateMobs() {
 			}
 		}
 	}
+	for (const auto &hatching : hatchings) for (unsigned i = 0; i < hatching.second; ++i) {
+		entt::entity chick = entt::null;
+		if (spawnMob("default:chicken", hatching.first.x, hatching.first.y, hatching.first.z, 0, &chick)) {
+			auto &traits = registry.get<BetaMobComponent>(chick); traits.size = 0; traits.jumpTimer = 24000;
+			registry.get<DoubleBox>(chick).reset(-0.075, -0.075, 0, 0.15, 0.15, 0.2);
+			auto &visual = registry.get<DrawableDef>(chick); visual.setMobModel(u8(Kind::Chicken), 0.5f); visual.isUpdated = true;
+		}
+	}
 	for (const auto &shot : shots) spawnShot(*this, shot);
 	++m_mobTick;
 	if (m_dimension.id() == 1) {
@@ -473,9 +796,17 @@ void ServerWorld::updateMobs() {
 	bool night = GameTime::getTicks() % GameTime::dayLength >= 12000;
 	static const char *passive[] = {"pig", "cow", "sheep", "chicken", "wolf"};
 	static const char *hostile[] = {"zombie", "skeleton", "creeper", "spider"};
+	unsigned bats = 0, ocelots = 0, rabbits = 0, axolotls = 0;
+	registry.view<MobComponent, BetaMobComponent>().each([&](auto, auto &mob, auto &traits) {
+		if (!mob.health) return;
+		if (traits.kind == Kind::Bat) ++bats;
+		if (traits.kind == Kind::Ocelot) ++ocelots;
+		if (traits.kind == Kind::Rabbit) ++rabbits;
+		if (traits.kind == Kind::Axolotl) ++axolotls;
+	});
 	for (const auto &entry : m_players) {
 		const auto &player = entry.second;
-		if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id()) continue;
+		if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != m_dimension.id()) continue;
 		std::uint64_t spawnSeed = std::uint64_t(std::int64_t(m_seed)) + std::uint64_t(m_mobTick) * 341873128712ULL
 			+ std::uint64_t(player.clientID()) * 132897987541ULL;
 		retro::Random random(std::int64_t(spawnSeed & ((1ULL << 48) - 1)));
@@ -485,6 +816,24 @@ void ServerWorld::updateMobs() {
 		if (dx * dx + dy * dy < 24 * 24) continue;
 		if (m_dimension.id() != 0) continue;
 		int cx = int(std::floor(x / 16.0)), cy = int(std::floor(y / 16.0));
+		if (bats < 8 && random.nextInt(3) == 0) {
+			DoubleBox box{-0.25, -0.25, 0, 0.5, 0.5, 0.89};
+			int preferred = std::clamp(int(std::floor(player.z())) + random.nextInt(25) - 12, 1, SEALEVEL - 1);
+			int floor = retro::mobCavityFloor(*this, box, x + 0.5, y + 0.5, preferred, 12, SEALEVEL - 1);
+			if (floor >= 0 && floor < m_heightmap.getHighestBlockAt(x, y)) {
+				int light = getLight(x, y, floor);
+				if (light >= 0 && light <= 3 && spawnMob("default:bat", x + 0.5, y + 0.5, floor)) ++bats;
+			}
+		}
+		if (axolotls < 8) {
+			int base = std::clamp(int(std::floor(player.z())), 4, SEALEVEL - 4);
+			for (int attempt = 0; attempt < 24; ++attempt) {
+				int wz = std::clamp(base + random.nextInt(25) - 12, 1, SEALEVEL - 2);
+				if (wz + 3 >= m_heightmap.getHighestBlockAt(x, y)) continue;
+				if (waterAt(*this, {x + 0.5, y + 0.5, wz + 0.2}) && getLight(x, y, wz) <= 7
+				 && spawnMob("default:axolotl", x + 0.5, y + 0.5, wz)) { ++axolotls; break; }
+			}
+		}
 		if (random.nextInt(10) == 0 && retro::slimeChunk(m_seed, cx, cy)) {
 			u8 size = u8(1 << random.nextInt(3));
 			DoubleBox box{-0.3 * size, -0.3 * size, 0, 0.6 * size, 0.6 * size, 0.6 * size};
@@ -497,8 +846,18 @@ void ServerWorld::updateMobs() {
 			spawnMob("default:squid", x + 0.5, y + 0.5, SEALEVEL - 3.0); continue;
 		}
 		if (!ground || z <= SEALEVEL) continue;
+		if (!night && rabbits < 8 && random.nextInt(8) == 0
+		 && (ground->block().stringID() == "default:grass" || ground->block().stringID() == "default:sand")) {
+			if (spawnMob("default:rabbit", x + 0.5, y + 0.5, z)) ++rabbits;
+			continue;
+		}
 		if (night) spawnMob("default:" + std::string(hostile[(m_mobTick / 200) % 4]), x + 0.5, y + 0.5, z);
 		else if (ground->block().stringID() == "default:grass") {
+			auto biome = m_heightmap.getOrCreateChunk(cx, cy).biomeAt(x & 15, y & 15);
+			if (ocelots < 6 && (biome == retro::Biome::Forest || biome == retro::Biome::Rainforest) && random.nextInt(16) == 0) {
+				if (spawnMob("default:ocelot", x + 0.5, y + 0.5, z)) ++ocelots;
+				continue;
+			}
 			const char *name = passive[(m_mobTick / 200) % 5];
 			if (std::string(name) == "wolf") {
 				auto biome = m_heightmap.getOrCreateChunk(int(std::floor(x / 16.0)), int(std::floor(y / 16.0))).biomeAt(x & 15, y & 15);
@@ -659,6 +1018,25 @@ bool ServerWorld::interactMob(ServerPlayer &player) {
 		traits.saddled = true; handled = true;
 	}
 	else if (traits.kind == Kind::Cow && item == "default:bucket_empty") handled = consumeFor(player, "default:bucket_milk");
+	else if (traits.kind == Kind::Ocelot && item == "default:fish_cod_raw" && !traits.anger
+	 && (traits.tamed || traits.target == player.name()) && consumeFor(player, "")) {
+		if (!traits.tamed && nextRandom(mob) % 3 == 0) traits.tamed = true;
+		if (traits.tamed) mob.health = std::min<u16>(10, mob.health + 2);
+		handled = true;
+	}
+	else if (traits.kind == Kind::SnowGolem && item == "default:shears" && !traits.sheared) {
+		traits.sheared = true;
+		auto &position = registry.get<PositionComponent>(entity);
+		dropItem(*this, {position.x, position.y, position.z}, "default:pumpkin", 1);
+		if (!player.isCreative()) {
+			if (m_server) m_server->wearHeldItem(player, 1);
+			else player.inventory().getStackRef(player.heldItemSlot(), 0).wear(1);
+		}
+		handled = true;
+	}
+	else if (traits.kind == Kind::Rabbit && item == "default:dandelion" && mob.health < 3 && consumeFor(player, "")) {
+		mob.health = 3; handled = true;
+	}
 	else if (traits.kind == Kind::Sheep && item == "default:shears" && !traits.sheared) {
 		traits.sheared = true;
 		auto &position = registry.get<PositionComponent>(entity);
@@ -721,14 +1099,27 @@ void ServerWorld::dropPlayerItems(ServerPlayer &player) {
 	for (u16 y = 0; y < player.inventory().height(); ++y) {
 		for (u16 x = 0; x < player.inventory().width(); ++x) {
 			ItemStack stack = player.inventory().getStack(x, y);
-			if (stack.amount() && dropItem(*this, {player.x(), player.y(), player.z()}, stack.item().stringID(), stack.amount(), stack.damage()) != entt::null)
+			if (stack.amount() && dropItem(*this, {player.x(), player.y(), player.z()}, stack.item().stringID(), stack.amount(), stack.damage(), false) != entt::null)
 				player.inventory().clearStack(x, y);
 		}
 	}
 	if (m_server) m_server->sendPlayerInvUpdate(player.clientID());
 }
 
+bool ServerWorld::dropPlayerStack(ServerPlayer &player, const ItemStack &stack) {
+	if (!stack.amount() || stack.stringID() == BLOCK_AIR || !Registry::getInstance().hasItem(stack.stringID())) return false;
+	// carried items must not disappear when ambient loot has reached its spawn cap.
+	entt::entity entity = dropItem(*this, {player.x(), player.y(), player.z() + 1.025}, stack.stringID(), stack.amount(), stack.damage(), false);
+	if (entity == entt::null) return false;
+	double yaw = player.cameraYaw() * math::DEG_TO_RAD, pitch = player.cameraPitch() * math::DEG_TO_RAD;
+	auto &body = m_scene.registry().emplace<PhysicalComponent>(entity);
+	body.velocity = {float(std::cos(yaw) * std::cos(pitch) * 6), float(std::sin(yaw) * std::cos(pitch) * 6), float(std::sin(pitch) * 6 + 2)};
+	body.pickupDelay = 40;
+	return true;
+}
+
 bool ServerWorld::attackMob(ServerPlayer &player) {
+	if (!player.health()) return false;
 	entt::entity selected = findMobTarget(player, 3);
 	if (selected == entt::null) return false;
 	auto &registry = m_scene.registry();
@@ -739,9 +1130,10 @@ bool ServerWorld::attackMob(ServerPlayer &player) {
 	if (traits.kind == Kind::Fireball) {
 		double yaw = player.cameraYaw() * math::DEG_TO_RAD, pitch = player.cameraPitch() * math::DEG_TO_RAD;
 		traits.velocity = {float(std::cos(yaw) * std::cos(pitch)), float(std::sin(yaw) * std::cos(pitch)), float(std::sin(pitch))};
-		traits.waypoint = traits.velocity * 0.1f; traits.owner = player.name(); return true;
+		traits.waypoint = traits.velocity * 0.1f; traits.owner = player.name(); traits.target = player.name(); return true;
 	}
 	if (projectile(traits.kind)) return false;
+	if (traits.kind == Kind::Ocelot || traits.kind == Kind::Bat) { traits.anger = 100; traits.sitting = false; syncAppearance(registry, selected); }
 	if (traits.kind == Kind::Spider) { traits.anger = 400; traits.target = player.name(); }
 	if (traits.kind == Kind::PigZombie || traits.kind == Kind::Wolf) {
 		registry.view<MobComponent, PositionComponent>().each([&](auto entity, auto &otherMob, auto &otherPosition) {
@@ -762,7 +1154,14 @@ bool ServerWorld::attackMob(ServerPlayer &player) {
 		if (m_server) m_server->wearHeldItem(player, retro::attackingWear(tool.item()));
 		else tool.wear(retro::attackingWear(tool.item()));
 	}
-	mob.health = damage >= mob.health ? 0 : mob.health - damage;
+	u16 dealt = std::min(damage, mob.health);
+	mob.health -= dealt;
+	player.statistics().general[PlayerStatistics::DamageDealt] += dealt;
+	if (dealt && !mob.health) ++player.statistics().general[PlayerStatistics::MobKills];
+	if (dealt && m_server) {
+		const auto &box = registry.get<DoubleBox>(selected);
+		m_server->sendEntityHurt(selected, dealt, position.x, position.y, position.z + box.sizeZ);
+	}
 
 	return true;
 }

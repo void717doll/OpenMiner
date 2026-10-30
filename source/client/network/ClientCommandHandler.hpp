@@ -36,6 +36,7 @@
 #include <glm/glm.hpp>
 
 class Inventory;
+class ItemStack;
 
 class Camera;
 class Client;
@@ -44,11 +45,14 @@ class ClientWorld;
 
 class ClientCommandHandler {
 	public:
+		void sendPlayerNoclip(bool enabled);
+		void requestStatistics();
+		void sendCraftedItem(const std::string &name, u16 amount);
 		ClientCommandHandler(Client &client, ClientWorld &world, ClientPlayer &player)
 			: m_client(client), m_world(world), m_player(player) {}
 
 		void sendPlayerInvUpdate();
-		void sendPlayerPosUpdate();
+		void sendPlayerPosUpdate() const;
 		void sendPlayerRotUpdate();
 		void sendPlayerDigBlock(const glm::ivec4 &selectedBlock);
 		void sendPlayerPlaceBlock(s32 x, s32 y, s32 z, u32 block);
@@ -56,7 +60,11 @@ class ClientCommandHandler {
 		void sendPlayerReady();
 		void sendPlayerAttack();
 		void sendPlayerInteract();
+		void sendPlayerDismount() const;
 		void sendPlayerDropItem();
+		void sendPlayerRespawn();
+		void sendPlayerPause(bool paused);
+		void sendPlayerDropStack(const ItemStack &stack);
 		void sendPlayerChunkPosUpdate() const;
 		void sendBlockActivated(const glm::ivec4 &selectedBlock);
 		void sendBlockInvUpdate(Inventory &inventory);

@@ -40,6 +40,7 @@ class InventoryCube : public Drawable, public Transformable {
 		InventoryCube(float size = 1.0f, bool isEntity = false);
 
 		void updateVertexBuffer(const Block &block, u8 state = 0);
+		void setLight(u8 sunlight, u8 torchlight);
 
 		float size() const { return m_size; }
 
@@ -60,6 +61,8 @@ class InventoryCube : public Drawable, public Transformable {
 
 		u16 m_blockID = 0;
 		u16 m_blockState = 0;
+		u8 m_sunlight = 15;
+		u8 m_torchlight = 0;
 };
 
 #endif // INVENTORYCUBE_HPP_

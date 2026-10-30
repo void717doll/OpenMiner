@@ -1,4 +1,4 @@
--- health, dimensions, movement and drops follow the supplied beta entity classes.
+-- the original roster follows beta; later animals use the supplied mineclonia definitions.
 local definitions = {
 	{"pig", 10, 0.7, 0, "porkchop_raw", 0.9, 0.9, false},
 	{"zombie", 20, 0.5, 5, "feather", 0.6, 1.8, true},
@@ -14,6 +14,11 @@ local definitions = {
 	{"wolf", 8, 1.1, 2, "", 0.8, 0.8, false},
 	{"squid", 10, 0.2, 0, "ink_sac", 0.95, 0.95, false},
 	{"giant", 200, 0.5, 50, "", 3.6, 10.8, true},
+	{"ocelot", 10, 0.6, 3, "", 0.6, 0.7, false},
+	{"bat", 6, 0.7, 0, "", 0.5, 0.89, false},
+	{"axolotl", 14, 0.5, 2, "", 0.75, 0.42, false},
+	{"rabbit", 3, 0.6, 0, "rabbit_raw", 0.4, 0.5, false},
+	{"snow_golem", 4, 0.4, 0, "snowball", 0.7, 1.9, false},
 }
 
 for _, definition in ipairs(definitions) do

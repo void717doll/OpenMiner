@@ -30,19 +30,23 @@ inline sf::Packet &operator>>(sf::Packet &packet, MobComponent &mob) {
 // kept separate so saves containing the original mob component remain readable.
 enum class BetaMobKind : u8 {
 	Unknown, Pig, Zombie, Cow, Sheep, Chicken, Skeleton, Creeper, Spider,
-	Slime, Ghast, PigZombie, Wolf, Squid, Giant, Arrow, Fireball
+	Slime, Ghast, PigZombie, Wolf, Squid, Giant, Arrow, Fireball, Ocelot, Bat, Axolotl, Rabbit, SnowGolem, Snowball, Egg, Count
 };
+
+inline bool betaMobIsProjectile(BetaMobKind kind) {
+	return kind == BetaMobKind::Arrow || kind == BetaMobKind::Fireball || kind == BetaMobKind::Snowball || kind == BetaMobKind::Egg;
+}
 
 inline const char *betaMobName(BetaMobKind kind) {
 	static const char *names[] = {"", "pig", "zombie", "cow", "sheep", "chicken", "skeleton", "creeper",
-		"spider", "slime", "ghast", "pig_zombie", "wolf", "squid", "giant", "arrow_projectile", "fireball_projectile"};
+		"spider", "slime", "ghast", "pig_zombie", "wolf", "squid", "giant", "arrow_projectile", "fireball_projectile", "ocelot", "bat", "axolotl", "rabbit", "snow_golem", "snowball_projectile", "egg_projectile"};
 	u8 index = u8(kind);
-	return index < 17 ? names[index] : "";
+	return index < u8(BetaMobKind::Count) ? names[index] : "";
 }
 
 inline BetaMobKind betaMobKind(const std::string &name) {
 	std::string local = name.substr(name.find(':') == std::string::npos ? 0 : name.find(':') + 1);
-	for (u8 kind = 1; kind < 17; ++kind)
+	for (u8 kind = 1; kind < u8(BetaMobKind::Count); ++kind)
 		if (local == betaMobName(BetaMobKind(kind))) return BetaMobKind(kind);
 	return BetaMobKind::Unknown;
 }
@@ -77,7 +81,7 @@ inline sf::Packet &operator>>(sf::Packet &packet, BetaMobComponent &mob) {
 	packet >> kind >> mob.size >> mob.fuse >> mob.anger >> mob.eggTimer >> mob.jumpTimer
 		>> mob.attackCharge >> mob.grounded >> mob.sheared >> mob.tamed >> mob.sitting >> mob.color >> mob.saddled >> mob.owner >> mob.target
 		>> mob.velocity.x >> mob.velocity.y >> mob.velocity.z >> mob.waypoint.x >> mob.waypoint.y >> mob.waypoint.z;
-	mob.kind = kind < 17 ? BetaMobKind(kind) : BetaMobKind::Unknown;
+	mob.kind = kind < u8(BetaMobKind::Count) ? BetaMobKind(kind) : BetaMobKind::Unknown;
 	return packet;
 }
 

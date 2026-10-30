@@ -25,8 +25,14 @@
  * =====================================================================================
  */
 #include <fstream>
+#include <map>
+#include "common/world/Dimension.hpp"
+#include "common/world/WorldFiles.hpp"
+#include "server/world/save/ChunkDatabase.hpp"
 
 #include <filesystem.hpp>
+
+#include <stdexcept>
 
 #include "common/core/Debug.hpp"
 #include "common/core/GameTime.hpp"
@@ -37,6 +43,7 @@
 #include "common/scene/component/PhysicalComponent.hpp"
 #include "common/scene/component/FallingBlockComponent.hpp"
 #include "common/scene/component/TntComponent.hpp"
+#include "common/scene/component/MinecartComponent.hpp"
 #include "common/scene/component/NetworkComponent.hpp"
 #include "server/world/ServerBlock.hpp"
 #include "server/world/ServerWorld.hpp"
@@ -46,26 +53,89 @@ namespace fs = ghc::filesystem;
 
 using namespace entt::literals;
 
+namespace {
+using Overflow = std::vector<std::pair<Vector3d, ItemStack>>;
+
+sf::Packet saveChunk(const ServerChunk &chunk) {
+	auto &registry = Registry::getInstance();
+	std::map<u16, u16> palette;
+	for (int z = 0; z < CHUNK_HEIGHT; ++z) for (int y = 0; y < CHUNK_DEPTH; ++y) for (int x = 0; x < CHUNK_WIDTH; ++x)
+		palette.emplace(chunk.getBlock(x, y, z), 0);
+	sf::Packet packet;
+	packet << u8(1) << u16(palette.size());
+	u16 index = 0;
+	for (auto &entry : palette) { entry.second = index++; packet << registry.getBlock(entry.first).stringID(); }
+	u16 metadataCount = 0;
+	for (int z = 0; z < CHUNK_HEIGHT; ++z) for (int y = 0; y < CHUNK_DEPTH; ++y) for (int x = 0; x < CHUNK_WIDTH; ++x) {
+		packet << palette.at(chunk.getBlock(x, y, z)) << chunk.getData(x, y, z);
+		if (chunk.getBlockData(x, y, z)) ++metadataCount;
+	}
+	packet << metadataCount;
+	for (int z = 0; z < CHUNK_HEIGHT; ++z) for (int y = 0; y < CHUNK_DEPTH; ++y) for (int x = 0; x < CHUNK_WIDTH; ++x)
+		if (const auto *data = chunk.getBlockData(x, y, z))
+			packet << u16((z * CHUNK_DEPTH + y) * CHUNK_WIDTH + x) << data->inventory << data->meta;
+	return packet;
+}
+
+void loadChunk(sf::Packet &packet, ServerChunk &chunk, Overflow &overflow) {
+	u8 version = 0;
+	u16 size = 0;
+	packet >> version >> size;
+	if (!packet || version != 1 || !size || size > CHUNK_WIDTH * CHUNK_DEPTH * CHUNK_HEIGHT)
+		throw std::runtime_error("unsupported saved chunk");
+	auto &registry = Registry::getInstance();
+	std::vector<u16> palette(size);
+	for (auto &id : palette) {
+		std::string name; packet >> name;
+		id = registry.hasBlock(name) ? registry.getBlockFromStringID(name).id() : 0;
+	}
+	for (int z = 0; z < CHUNK_HEIGHT; ++z) for (int y = 0; y < CHUNK_DEPTH; ++y) for (int x = 0; x < CHUNK_WIDTH; ++x) {
+		u16 id = 0, data = 0;
+		if (!(packet >> id >> data) || id >= palette.size()) throw std::runtime_error("damaged chunk palette");
+		const auto &block = registry.getBlock(palette[id]);
+		if (block.param().hasParam(BlockParam::State) && block.param().getParam(BlockParam::State, data) >= block.states().size()) data = 0;
+		chunk.setDataRaw(x, y, z, u32(palette[id]) | u32(data) << 16);
+	}
+	u16 count = 0;
+	packet >> count;
+	if (!packet || count > CHUNK_WIDTH * CHUNK_DEPTH * CHUNK_HEIGHT) throw std::runtime_error("invalid chunk metadata count");
+	for (u16 i = 0; i < count; ++i) {
+		u16 pos = 0;
+		if (!(packet >> pos) || pos >= CHUNK_WIDTH * CHUNK_DEPTH * CHUNK_HEIGHT) throw std::runtime_error("invalid chunk metadata position");
+		int x = pos % CHUNK_WIDTH, y = pos / CHUNK_WIDTH % CHUNK_DEPTH, z = pos / (CHUNK_WIDTH * CHUNK_DEPTH);
+		auto *data = chunk.addBlockData(x, y, z);
+		packet >> data->inventory >> data->meta;
+		for (const auto &stack : data->inventory.normalizeStacks())
+			overflow.emplace_back(Vector3d{double(chunk.x() * CHUNK_WIDTH + x) + 0.5,
+				double(chunk.y() * CHUNK_DEPTH + y) + 0.5, double(chunk.z() * CHUNK_HEIGHT + z) + 0.5}, stack);
+	}
+	if (!packet || !packet.endOfPacket()) throw std::runtime_error("damaged saved chunk");
+	chunk.setInitialized(true);
+	chunk.setModified(true);
+	chunk.setSaved();
+}
+}
+
 void WorldSaveBasicBackend::load(const std::string &name) {
 	logInfo() << ("Loading '" + name + "'...").c_str();
 
-	std::ifstream file("saves/" + name + ".dat", std::ofstream::binary);
-
-	// Note: Registry should be saved, otherwise blocks won't match since they're stored using
-	//       their integer ID (not string ID), so we need to add a check for that
-
-	if (file.is_open()) {
-		file.seekg(0, file.end);
-		std::size_t length = file.tellg();
-		file.seekg(0, file.beg);
-
-		char *buffer = new char[length];
-		file.read(buffer, length);
-
-		Network::Packet save;
-		save.append(buffer, length);
-
-		delete[] buffer;
+	const std::string path = worldFiles::readable(name).string();
+	if (!fs::exists(path)) return;
+	std::unique_ptr<ChunkDatabase> database;
+	Network::Packet save;
+	if (ChunkDatabase::isDatabase(path)) {
+		database = std::make_unique<ChunkDatabase>(path, true);
+		save = database->readState();
+	} else {
+		std::ifstream file(path, std::ios::binary | std::ios::ate);
+		if (!file || file.tellg() <= 0) throw std::runtime_error("unable to read world save");
+		std::vector<char> buffer(static_cast<size_t>(file.tellg()));
+		file.seekg(0);
+		if (!file.read(buffer.data(), buffer.size())) throw std::runtime_error("incomplete world save");
+		save.append(buffer.data(), buffer.size());
+	}
+	for (auto &world : m_worldList) world.setGenerationRevision(0);
+	{
 
 		for (auto &world : m_worldList) {
 			std::vector<std::pair<Vector3d, ItemStack>> overflow;
@@ -73,20 +143,26 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 			s32 seed;
 			save >> chunkCount >> seed;
 
+			if (!save || chunkCount > 1000000) throw std::runtime_error("invalid world header");
 			world.setSeed(seed);
+			if (database) database->readChunks(world.dimension().id(), [&](int x, int y, int z, sf::Packet &packet) {
+				auto &chunk = world.getOrCreateChunk(x, y, z);
+				loadChunk(packet, chunk, overflow);
+				world.blockPhysics().seedChunk(chunk);
+			});
 
 			// logInfo() << "Loading dimension" << world.dimension().id() << "| Chunk count:" << chunkCount;
 
 			for (unsigned int i = 0 ; i < chunkCount ; ++i) {
 				int cx, cy, cz;
-				save >> cx >> cy >> cz;
+				if (!(save >> cx >> cy >> cz)) throw std::runtime_error("incomplete saved chunk");
 
 				ServerChunk &chunk = world.getOrCreateChunk(cx, cy, cz);
 				for (u8 z = 0 ; z < Chunk::height ; ++z) {
 					for (u8 y = 0 ; y < Chunk::depth ; ++y) {
 						for (u8 x = 0 ; x < Chunk::width ; ++x) {
-							bool hasMetadata;
-							save >> hasMetadata;
+							bool hasMetadata = false;
+							if (!(save >> hasMetadata)) throw std::runtime_error("incomplete saved block");
 
 							if (hasMetadata) {
 								BlockData *blockData = chunk.addBlockData(x, y, z);
@@ -98,7 +174,7 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 
 							u32 data;
 							u8 light;
-							save >> data >> light;
+							if (!(save >> data >> light)) throw std::runtime_error("incomplete saved block");
 							const auto &definitions = Registry::getInstance();
 							if ((data & 0xffff) >= definitions.blocks().size() || !definitions.getBlock(u16(data & 0xffff)).id())
 								data = 0;
@@ -119,20 +195,23 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 				world.dropWorldItem(entry.first, entry.second.stringID(), entry.second.amount(), entry.second.damage(), false);
 		}
 
-		u16 playerCount;
-		save >> playerCount;
+		u16 playerCount = 0;
+		if (!(save >> playerCount)) throw std::runtime_error("missing saved players");
 		for (u16 i = 0 ; i < playerCount ; ++i) {
 			std::string username;
 			save >> username;
 
 			auto &player = m_playerList.addPlayer(username, false);
+			player.clearBedSpawn();
+			player.statistics() = {};
 			player.deserialize(save);
+			if (!save) throw std::runtime_error("incomplete saved player");
 			for (const auto &stack : player.inventory().normalizeStacks())
 				if (player.dimension() < m_worldList.size()) m_worldList[player.dimension()].dropWorldItem({player.x(), player.y(), player.z() + 0.5}, stack.stringID(), stack.amount(), stack.damage(), false);
 		}
 
-		sf::Uint64 ticks;
-		save >> ticks;
+		sf::Uint64 ticks = 0;
+		if (!(save >> ticks)) throw std::runtime_error("missing saved time");
 		GameTime::setTicks(ticks);
 		while (!save.endOfPacket()) {
 			u32 marker = 0;
@@ -151,7 +230,7 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 					std::string name;
 					s32 score;
 					if (!(save >> name >> score)) break;
-					// accept the optional score trailer from newer saves.
+					if (auto *player = m_playerList.getPlayer(name)) player->setScore(score);
 				}
 			}
 			else if (marker == 0x41524d52) {
@@ -168,15 +247,43 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 					}
 				}
 			}
-
+			else if (marker == 0x42454431) {
+				for (u16 i = 0; i < count; ++i) {
+					std::string name;
+					bool hasBed;
+					s32 x, y, z;
+					if (!(save >> name >> hasBed >> x >> y >> z)) break;
+					if (auto *player = m_playerList.getPlayer(name)) {
+						if (hasBed && std::abs(double(x)) < 30000000 && std::abs(double(y)) < 30000000
+						 && std::abs(double(z)) < 30000000) player->setBedSpawn({x, y, z});
+						else player->clearBedSpawn();
+					}
+				}
+			}
+			else if (marker == 0x53544154) {
+				for (u16 i = 0; i < count; ++i) {
+					std::string name;
+					save >> name;
+					PlayerStatistics statistics;
+					statistics.read(save);
+					if (auto *player = m_playerList.getPlayer(name)) player->statistics() = std::move(statistics);
+				}
+			}
 			else if (marker == 0x4d4f4445 && count == 1) {
 				bool creative;
 				if (!(save >> creative)) break;
 				for (auto &world : m_worldList) world.setCreative(creative);
 			}
+			else if (marker == 0x47454e52 && count == m_worldList.size()) {
+				for (auto &world : m_worldList) {
+					u16 revision = 0;
+					if (!(save >> revision) || revision > 1) throw std::runtime_error("unsupported world generation revision");
+					world.setGenerationRevision(revision);
+				}
+			}
 			else break;
 		}
-
+		if (!save) throw std::runtime_error("incomplete world metadata");
 		for (auto &world : m_worldList) {
 			for (const auto &entry : world.chunks()) {
 				if (!entry.second->isInitialized()) continue;
@@ -186,7 +293,7 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 		}
 	}
 
-	// logInfo() << "Loading done.";
+	m_savedPath = database ? path : "";
 }
 
 void WorldSaveBasicBackend::save(const std::string &name) {
@@ -194,53 +301,27 @@ void WorldSaveBasicBackend::save(const std::string &name) {
 
 	fs::create_directory("saves");
 
-	std::ofstream file("saves/" + name + ".dat", std::ofstream::binary | std::ofstream::trunc);
-
+	fs::create_directories(worldFiles::directory(name));
+	const std::string path = worldFiles::database(name).string();
+	bool existing = ChunkDatabase::isDatabase(path);
+	if (fs::exists(path) && !existing) throw std::runtime_error("invalid world database; original left unchanged");
+	std::string destination = existing ? path : path + ".new";
+	if (!existing && fs::exists(destination)) fs::remove(destination);
+	std::vector<ServerChunk *> written;
+	{
+	ChunkDatabase database(destination, false);
+	database.begin();
 	Network::Packet save;
 	for (auto &world : m_worldList) {
-		// queued lighting must reach its final state before its queues are discarded.
-		bool pending = true;
-		while (pending) {
-			pending = false;
-			for (const auto &entry : world.chunks()) {
-				if (entry.second->isInitialized() && entry.second->lightmap().hasPendingUpdates()) {
-					entry.second->lightmap().updateLights(65536);
-					pending = true;
-				}
-			}
+		for (auto &entry : world.chunks()) {
+			auto &chunk = *entry.second;
+			if (!chunk.isInitialized() || !chunk.hasBeenModified()) continue;
+			if (existing && m_savedPath == path && !chunk.needsSave() && !chunk.hasBlockMetadata()) continue;
+			database.writeChunk(world.dimension().id(), chunk.x(), chunk.y(), chunk.z(), saveChunk(chunk));
+			written.push_back(&chunk);
 		}
-		Network::Packet chunks;
-		unsigned int chunkCount = 0;
-		for (auto &it : world.chunks()) {
-			if (!it.second->isInitialized() || !it.second->hasBeenModified()) continue;
-
-			const Vector3i &chunkpos = it.first;
-			const Chunk::DataArray &data = it.second->data();
-			chunks << chunkpos.x << chunkpos.y << chunkpos.z;
-
-			for (u8 z = 0 ; z < Chunk::height ; ++z) {
-				for (u8 y = 0 ; y < Chunk::depth ; ++y) {
-					for (u8 x = 0 ; x < Chunk::width ; ++x) {
-						BlockData *blockData = it.second->getBlockData(x, y, z);
-						if (blockData)
-							chunks << true << blockData->inventory << blockData->meta;
-						else
-							chunks << false;
-
-						chunks << u32(data[z][y][x])
-							<< u8(it.second->lightmap().getLightDataRaw(x, y, z));
-					}
-				}
-			}
-
-			++chunkCount;
-		}
-
-		// logInfo() << "Saving dimension" << world.dimension().id() << "| Chunk count:" << chunkCount;
-
-		save << chunkCount << world.seed();
-		save.append(chunks.getData(), chunks.getDataSize());
-
+		// the player/entity stream stays compatible with the legacy reader; chunks live in the database.
+		save << u32(0) << world.seed();
 		saveEntities(save, world);
 	}
 
@@ -255,13 +336,40 @@ void WorldSaveBasicBackend::save(const std::string &name) {
 	save << u32(0x4845414c) << u16(m_playerList.size());
 	for (const auto &entry : m_playerList)
 		save << entry.first << entry.second.health();
+	save << u32(0x53434f52) << u16(m_playerList.size());
+	for (const auto &entry : m_playerList)
+		save << entry.first << entry.second.score();
+
 	save << u32(0x41524d52) << u16(m_playerList.size());
 	for (const auto &entry : m_playerList)
 		save << entry.first << entry.second.armor();
 
 	save << u32(0x4d4f4445) << u16(1) << (!m_worldList.empty() && m_worldList.front().isCreative());
+	save << u32(0x47454e52) << u16(m_worldList.size());
+	for (const auto &world : m_worldList) save << world.generationRevision();
+	save << u32(0x42454431) << u16(m_playerList.size());
+	for (const auto &entry : m_playerList) {
+		const auto &bed = entry.second.bedSpawn();
+		Vector3i position = bed.value_or(Vector3i{0, 0, 0});
+		save << entry.first << bool(bed) << position.x << position.y << position.z;
+	}
 
-	file.write((const char *)save.getData(), save.getDataSize());
+	save << u32(0x53544154) << u16(m_playerList.size());
+	for (const auto &entry : m_playerList) {
+		save << entry.first;
+		entry.second.statistics().write(save);
+	}
+
+	database.writeState(save);
+	database.commit();
+	}
+	if (!existing) {
+		fs::rename(destination, path);
+		const auto backup = worldFiles::directory(name) / "legacy.dat";
+		if (fs::exists(worldFiles::legacy(name)) && !fs::exists(backup)) fs::rename(worldFiles::legacy(name), backup);
+	}
+	for (auto *chunk : written) chunk->setSaved();
+	m_savedPath = path;
 
 	// logInfo() << "Saving done.";
 }
@@ -276,8 +384,9 @@ void WorldSaveBasicBackend::loadEntities(sf::Packet &save, ServerWorld &world) {
 	entt::registry &registry = world.scene().registry();
 	registry.clear();
 
-	u32 entityCount;
-	save >> entityCount;
+	u32 entityCount = 0;
+	if (!(save >> entityCount) || entityCount > 1000000) throw std::runtime_error("invalid saved entity count");
+	m_entityMap.clear();
 
 	// logDebug() << "Loading" << componentCount << "components in dimension" << world.dimension().id();
 
@@ -291,8 +400,8 @@ void WorldSaveBasicBackend::loadEntities(sf::Packet &save, ServerWorld &world) {
 
 		// logDebug() << "Creating entity" << std::underlying_type_t<entt::entity>(entityID);
 
-		u32 componentCount;
-		save >> componentCount;
+		u32 componentCount = 0;
+		if (!(save >> componentCount) || componentCount > 64) throw std::runtime_error("invalid saved component count");
 
 		for (u32 i = 0 ; i < componentCount ; ++i) {
 			ComponentType type;
@@ -321,6 +430,9 @@ void WorldSaveBasicBackend::loadEntities(sf::Packet &save, ServerWorld &world) {
 			else if (type == ComponentType::FallingBlock) {
 				save >> registry.emplace<FallingBlockComponent>(entity);
 			}
+			else if (type == ComponentType::Minecart) {
+				save >> registry.emplace<MinecartComponent>(entity);
+			}
 			else if (type == ComponentType::Tnt) {
 				save >> registry.emplace<TntComponent>(entity);
 			}
@@ -337,7 +449,8 @@ void WorldSaveBasicBackend::loadEntities(sf::Packet &save, ServerWorld &world) {
 				save >> registry.emplace<std::string>(entity);
 			}
 			else
-				logWarning() << "Unknown component with type" << (int)type;
+				throw std::runtime_error("unknown saved entity component");
+			if (!save) throw std::runtime_error("incomplete saved entity");
 		}
 		const auto *stack = registry.try_get<ItemStack>(entity);
 		const auto *falling = registry.try_get<FallingBlockComponent>(entity);

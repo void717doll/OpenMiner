@@ -4,14 +4,14 @@ world artwork is imported from the supplied REFI_Textures distribution by Mystic
 
 [refi-assets.json](refi-assets.json) records every imported source path, destination, source/output dimensions, operation, and sha256 digest. destinations keep their existing names so saved registry ids and lua definitions remain stable.
 
-coverage: 111 block textures, 110 item textures, 21 mob/projectile textures, and ten engine textures. all 263 png files under the default mod and engine texture directories are accounted for, including the retained ui and debug exceptions below. the engine's magenta missing-texture checker is retained as a 16px debug placeholder rather than relabeled as refi artwork.
+coverage: 320 png files under the default mod and engine texture directories, with 314 manifest entries. unused legacy artwork and engine exceptions remain recorded; registered beta content and the requested copper tier are available in play.
 
 ## adaptations
 
-- inventory, workbench, and furnace screens share refi's `mcl_base_textures_background9.png` panel and `mcl_formspec_itemslot.png` slots. the original images are copied unchanged and sized at runtime; the crafting arrow is clipped from the supplied workbench sheet. the inventory shows only working storage and crafting slots, with no shield/offhand or decorative armor slots.
+- inventory, workbench, and furnace screens share refi's `mcl_base_textures_background9.png` panel and `mcl_formspec_itemslot.png` slots. the original images are copied unchanged and sized at runtime; the crafting arrow is clipped from the supplied workbench sheet. the inventory has four working armor slots, a 3d character preview, storage and crafting; there is no shield or offhand slot.
 - furnace fire uses the supplied foreground/background sprites. the white furnace progress arrow remains an engine ui asset. slot highlights draw behind items and stack counts. hud hearts retain their compact nine-pixel size, with a four-pixel margin below the hotbar.
-- the hotbar and selection frame use the supplied refi images directly.
 - block and item art is 16px. ore/material aliases use the corresponding refi texture, with no fallback to the removed texturepacks directory.
+- wheat seeds use the supplied loose-seed sprite, `farming_wheat_seed.png`, in place of the seed-packet icon. planted wheat keeps its separate growth-stage textures.
 - grass side overlays are composited over the supplied dirt texture. oak leaves use the supplied desaturated oak variant because the existing engine applies foliage tint.
 - zombie and zombie pigman skins use the upper 64x32 section of their supplied 64x64 atlases. slime uses nearest-neighbor reduction from 128x64 to beta's 64x32 coordinates.
 - pig saddle, sheep fur, spider eyes, and wolf variants retain their supplied 64x32 atlases. refi supplies one ghast atlas, so `ghast_shooting.png` is an explicit alias of that atlas; shooting animation changes the model rather than inventing a second skin.
@@ -20,14 +20,24 @@ coverage: 111 block textures, 110 item textures, 21 mob/projectile textures, and
 - the five vertical breaking-overlay frames are arranged horizontally, with each repeated twice to fit the existing ten-frame progression. the menu background uses the supplied dirt texture.
 - full and empty hearts are direct copies of `textures/default_mcl_core/gui_hud/heart.png` and `heart_gone.png`. half hearts use clipping of the full-heart artwork at runtime. the saddle item uses the supplied `mcl_mobitems_saddle.png`.
 
-widgets, font, title screen, recipe, world icon, toast, and the default mod's white furnace progress arrow remain engine ui assets. the six labeled block faces under `mods/default/textures/blocks/debug/` retain their original engine artwork, resized from 32px to 16px with nearest-neighbor sampling to match the block atlas. the manifest lists these debug transformations with their original hashes and dimensions, separately identifies the seven unchanged ui images, and does not attribute either group to refi.
+menu buttons and slider tracks use refi's `mcl_inventory_button9.png`, stretched with a nine-part layout that preserves the border. the hotbar and selection frame use the supplied 182x22 and 24x24 images directly. saved worlds use the supplied filled-map icon. the title screen has a plain dark background; other menus retain the refi dirt background.
+
+font, recipe, toast, and the default mod's white furnace progress arrow remain engine ui assets. the old title panorama and widget atlas remain unused files and are no longer loaded. the six labeled debug block faces retain their original engine artwork, resized from 32px to 16px with nearest-neighbor sampling. the manifest accounts for these separately from refi artwork and lists six unchanged ui files, including the two unused files.
 
 ## validation
 
-all 256 manifest entries were checked for readable png data, destination coverage, expected dimensions, and matching source/output digests where a supplied source exists. grass-side composition pixels match the supplied dirt and overlay layers. all block/item images are 16x16. all 219 unique default lua texture paths resolve, including 25 generated tool names, and both sky resource keys resolve through the texture configuration. the retained license matches the supplied file byte for byte. native rendering remains an integration check.
+all 316 manifest entries were checked for readable png data, destination coverage, expected dimensions, and matching source/output digests where a supplied source exists. grass-side composition pixels match the supplied dirt and overlay layers. all block/item images are 16x16. default lua texture paths resolve, including generated tool and armor names, and both sky resource keys resolve through the texture configuration. the retained license matches the supplied file byte for byte. native rendering remains an integration check.
 
-armor uses refi leather, chain, iron, gold and diamond icons and worn atlases. tnt and gravel use `alternate_textures/texture_alts`; ferns, roses and mushrooms use the main pack. imported paths and hashes are recorded in the manifest.
+armor uses the supplied leather, chain, iron, gold, and diamond icons and 64x32 worn atlases unchanged. tnt and gravel use `alternate_textures/texture_alts`; ferns, roses, and mushrooms use the main pack.
 
 copper ore uses the complete `high_vis_ores/mcl_copper_ore_highvis_alt.png` alternate; the main ore sprite is an overlay. its ingot and five tools use the supplied `default_mcl_core` copper textures unchanged.
 
 the armor hud uses unchanged `textures/HUD/hbarmor_icon.png` and `hbarmor_bgicon.png`, displayed at the same compact size as hearts. breaking cracks use alpha blending to preserve the transparent areas of the supplied overlay.
+
+## exploration and farming assets
+
+`mcimport_mods/nether` and `mcimport_mods/quartz` supply basalt, masonry, quartz, and ore artwork. the current red netherrack stays in place; the transparent quartz ore overlay is composited onto it. `minetest_game_mods/caverealms` supplies cave coverings, fungi, crystals, and glowworms; transparent coverings are composed with the existing stone tile. `mcimport_mods/crops`, `skyfactory/farming`, and `skyfactory/bonemeal` supply the selected crop stages, food, seeds, and fertilizers. these use the existing 16px atlas. exact sources, compositions, dimensions, and hashes are recorded in `refi-assets.json` under MysticTempest's existing cc by-sa 4.0 attribution.
+
+`minetest_game_mods/bees` supplies the hive, comb, honey, wax, smoker, and small bee sprite textures. these are unchanged copies; the bee is rendered as a small billboard around active hives.
+
+additional bundled textures cover birch and spruce wood, leaves and saplings; five live/dead coral sets; cobwebs; and mineclonia music discs. their source paths and checksums are recorded in `refi-assets.json`.

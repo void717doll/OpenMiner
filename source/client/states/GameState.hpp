@@ -42,6 +42,7 @@
 #include "client/world/ClientChunk.hpp"
 #include "client/world/ClientPlayer.hpp"
 #include "client/world/ClientWorld.hpp"
+#include "client/world/SpyglassState.hpp"
 
 class RenderTarget;
 class TextureAtlas;
@@ -68,6 +69,8 @@ class GameState : public DrawableState {
 
 	private:
 		void initShaders();
+		bool holdingSpyglass();
+		void resetSpyglass();
 
 		void onGuiScaleChanged(const GuiScaleChangedEvent &event);
 
@@ -94,6 +97,8 @@ class GameState : public DrawableState {
 
 		KeyboardHandler *m_keyboardHandler;
 		bool m_areModKeysLoaded = false;
+		bool m_paused = false;
+		SpyglassState m_spyglass;
 
 		Skybox m_skybox{m_camera, m_world};
 

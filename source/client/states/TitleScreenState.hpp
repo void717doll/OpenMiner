@@ -57,7 +57,7 @@ class TitleScreenState : public InterfaceState {
 
 		MenuWidget m_menuWidget{1, 3};
 
-		Image m_background{"texture-title_screen"};
+		RectangleShape m_background;
 
 		std::thread m_thread;
 		std::shared_ptr<ServerApplication> m_serverApp;

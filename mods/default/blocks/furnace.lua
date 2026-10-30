@@ -26,21 +26,29 @@
 --
 local modpath = mod:path()
 
+function register_furnace(def)
+local cook_ticks = def.cook_ticks or 200
+local prefix = def.texture_prefix
+local states = {}
+for frame = 1, (def.active_frames or 1) do
+	local suffix = frame == 1 and "" or "_" .. frame
+	states[frame] = {
+		is_light_source = true,
+		tiles = {prefix .. "_top.png", prefix .. "_top.png", prefix .. "_front_on" .. suffix .. ".png", prefix .. "_side.png"},
+	}
+end
+
 mod:block {
-	id = "furnace",
-	name = "Furnace",
-	tiles = {"furnace_top.png", "furnace_top.png", "furnace_front.png", "furnace_side.png"},
+	id = def.id,
+	name = def.name,
+	tiles = {prefix .. "_top.png", prefix .. "_top.png", prefix .. "_front.png", prefix .. "_side.png"},
 	is_rotatable = true,
+	groups = {om_material_stone = 1, om_light_level = 13},
 
 	hardness = 3.5,
 	harvest_requirements = Capability.Pickaxe,
 
-	states = {
-		{
-			is_light_source = true,
-			tiles = {"furnace_top.png", "furnace_top.png", "furnace_front_on.png", "furnace_side.png"},
-		},
-	},
+	states = states,
 
 	on_block_placed = function(pos, world)
 		world:add_block_data(pos.x, pos.y, pos.z, 3, 1)
@@ -61,7 +69,7 @@ mod:block {
 			block = {x = pos.x, y = pos.y, z = pos.z},
 
 			meta = "item_progress",
-			max_value = 200,
+			max_value = cook_ticks,
 
 			texture = modpath .. "/textures/gui/furnace.png",
 			clip = {x = 176, y = 14, width = 24, height = 17},
@@ -208,42 +216,62 @@ mod:block {
 		local ticks_remaining = data.meta:get_int("ticks_remaining") or 0
 		local current_burn_time = data.meta:get_int("current_burn_time") or 0
 		local item_progress = data.meta:get_int("item_progress") or 0
+		local input_id = input_stack:item():string_id()
+		if data.meta:get_string("input_id") ~= input_id then item_progress = 0 end
 
 		local recipe = openminer.registry:get_recipe(data.inventory)
 		if recipe and recipe:type() ~= "smelt" then
 			recipe = nil
 		end
+		local result
+		if def.get_result then result = def.get_result(input_stack, recipe)
+		elseif recipe then result = recipe:result() end
+		local has_room = result and result:amount() > 0 and input_stack:amount() > 0
+			and (output_stack:amount() == 0 or output_stack:item():string_id() == result:item():string_id())
+			and output_stack:amount() + result:amount() <= result:item():max_stack_size()
 
-		if ticks_remaining == 0 and recipe and fuel_stack:amount() > 0 and
-				fuel_stack:item():has_group("group:om_fuel") and
-				(output_stack:item():id() == 0 or output_stack:amount() == 0
-				or output_stack:item():id() == recipe:result():item():id()) then
-			data.inventory:set_stack(2, 0, fuel_stack:item():string_id(), fuel_stack:amount() - 1)
-			ticks_remaining = fuel_stack:item():get_group_value("group:om_fuel")
-			current_burn_time = fuel_stack:item():get_group_value("group:om_fuel")
-			world:set_block_state(pos.x, pos.y, pos.z, 1)
-		elseif ticks_remaining > 0 then
+		if ticks_remaining == 0 and has_room and fuel_stack:amount() > 0
+			and fuel_stack:item():has_group("group:om_fuel") then
+			local fuel_id = fuel_stack:item():string_id()
+			local burn_time = math.floor(fuel_stack:item():get_group_value("group:om_fuel") / (def.fuel_factor or 1))
+			if fuel_id == "default:bucket_lava" then
+				data.inventory:set_stack(2, 0, "default:bucket_empty", 1)
+			else
+				data.inventory:set_stack(2, 0, fuel_stack:amount() > 1 and fuel_id or "", fuel_stack:amount() - 1)
+			end
+			ticks_remaining = burn_time
+			current_burn_time = burn_time
+		end
+		if ticks_remaining > 0 then
 			ticks_remaining = ticks_remaining - 1
-
-			if recipe and (output_stack:item():id() == 0 or output_stack:amount() == 0
-					or output_stack:item():id() == recipe:result():item():id()) then
+			if has_room then
 				item_progress = item_progress + 1
 			else
 				item_progress = 0
 			end
-		elseif ticks_remaining == 0 and current_state ~= 0 then
+		else
+			item_progress = 0
 			current_burn_time = 0
-			world:set_block_state(pos.x, pos.y, pos.z, 0)
+		end
+		local next_state = 0
+		if ticks_remaining > 0 then
+			next_state = def.active_frames and math.floor(world:get_ticks() / 320) % def.active_frames + 1 or 1
+		end
+		if current_state ~= next_state then world:set_block_state(pos.x, pos.y, pos.z, next_state) end
+
+		if item_progress >= cook_ticks and has_room then
+			item_progress = 0
+			data.inventory:set_stack(0, 0, input_stack:amount() > 1 and input_id or "", input_stack:amount() - 1)
+			data.inventory:set_stack(1, 0, result:item():string_id(), output_stack:amount() + result:amount())
 		end
 
-		if item_progress >= 200 and recipe then
-			item_progress = 0;
-			data.inventory:set_stack(0, 0, (input_stack:amount() - 1 > 0) and input_stack:item():string_id() or "", input_stack:amount() - 1)
-			data.inventory:set_stack(1, 0, recipe:result():item():string_id(), output_stack:amount() + recipe:result():amount())
-		end
-
-		data.meta:set_int("ticks_remaining", ticks_remaining);
-		data.meta:set_int("current_burn_time", current_burn_time);
-		data.meta:set_int("item_progress", item_progress);
+		data.meta:set_int("ticks_remaining", ticks_remaining)
+		data.meta:set_int("current_burn_time", current_burn_time)
+		data.meta:set_int("item_progress", item_progress)
+		data.meta:set_string("input_id", input_id)
+		world:mark_block_modified(pos.x, pos.y, pos.z)
 	end,
 }
+end
+
+register_furnace {id = "furnace", name = "Furnace", texture_prefix = "furnace"}

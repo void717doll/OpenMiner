@@ -27,17 +27,19 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "common/core/Registry.hpp"
-#include "common/core/GameClock.hpp"
-#include "common/scene/component/AnimationComponent.hpp"
-#include "client/scene/component/ItemVisualComponent.hpp"
 #include "common/scene/component/DrawableDef.hpp"
+#include "common/scene/component/AnimationComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
 #include "common/scene/component/RotationComponent.hpp"
+#include "common/world/World.hpp"
 
 #include "client/gui/InventoryCube.hpp"
+#include "common/core/GameClock.hpp"
+#include "client/scene/component/HurtComponent.hpp"
 #include "client/graphics/MobModel.hpp"
 #include "client/graphics/ItemBillboard.hpp"
 #include "client/scene/component/DrawableComponent.hpp"
+#include "client/scene/component/ItemVisualComponent.hpp"
 #include "client/scene/controller/RenderingController.hpp"
 
 void RenderingController::update(entt::registry &registry) {
@@ -71,8 +73,23 @@ void RenderingController::update(entt::registry &registry) {
 
 void RenderingController::draw(entt::registry &registry, RenderTarget &target, RenderStates states) {
 	registry.view<DrawableComponent, PositionComponent, RotationComponent>().each([&](auto entity, auto &drawable, auto &position, auto &rotation) {
-		if (auto *mob = dynamic_cast<MobModel *>(drawable.drawable()))
+		if (m_world) {
+			int x = int(std::floor(position.x)), y = int(std::floor(position.y)), z = int(std::floor(position.z));
+			const Chunk *chunk = m_world->getChunkAtBlockPos(x, y, z);
+			u8 sun = 0, torch = 0;
+			if (chunk && chunk->isInitialized()) {
+				sun = chunk->lightmap().getSunlight(x & (CHUNK_WIDTH - 1), y & (CHUNK_DEPTH - 1), z & (CHUNK_HEIGHT - 1));
+				torch = chunk->lightmap().getTorchlight(x & (CHUNK_WIDTH - 1), y & (CHUNK_DEPTH - 1), z & (CHUNK_HEIGHT - 1));
+			}
+			if (auto *cube = dynamic_cast<InventoryCube *>(drawable.drawable())) cube->setLight(sun, torch);
+			else if (auto *item = dynamic_cast<ItemBillboard *>(drawable.drawable())) item->setLight(sun, torch);
+			else if (auto *mob = dynamic_cast<MobModel *>(drawable.drawable())) mob->setLight(sun, torch);
+		}
+		if (auto *mob = dynamic_cast<MobModel *>(drawable.drawable())) {
 			mob->updateMotion({position.x, position.y, position.z});
+			const auto *hurt = registry.try_get<HurtComponent>(entity);
+			mob->setHurt(hurt && GameClock::getInstance().getTicks() < hurt->until);
+		}
 		Transformable transformable;
 		if (!dynamic_cast<MobModel *>(drawable.drawable()) && registry.all_of<AnimationComponent>(entity)) {
 			auto &visual = registry.get_or_emplace<ItemVisualComponent>(entity);

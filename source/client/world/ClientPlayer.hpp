@@ -30,6 +30,7 @@
 #include <cmath>
 
 #include <glm/glm.hpp>
+#include <deque>
 
 #include "common/world/Player.hpp"
 
@@ -50,9 +51,20 @@ class ClientPlayer : public Player {
 
 		void clearInputs();
 		void pressJump();
+		void toggleNoclip();
+		void pauseMovement();
+		void setRidePosition(bool mounted, const Vector3d &position);
+		bool isRidingMinecart() const { return m_mounted; }
 		void notifyDamage();
 		float hurtEffect() const;
 		u32 damageSerial() const { return m_damageSerial; }
+		void showHit(const Vector3d &position, u16 damage);
+		u32 hitUntil() const { return m_hitUntil; }
+		u16 hitDamage() const { return m_hitDamage; }
+		const Vector3d &hitPosition() const { return m_hitPosition; }
+		void addChatMessage(const std::string &message);
+		const std::deque<std::string> &chatMessages() const { return m_chatMessages; }
+		u32 chatUntil() const { return m_chatUntil; }
 
 		float dirTargetedX() const { return m_forwardDir.x; }
 		float dirTargetedY() const { return m_forwardDir.y; }
@@ -69,6 +81,8 @@ class ClientPlayer : public Player {
 		bool onGround() const { return m_onGround; }
 
 	private:
+		bool m_mounted = false;
+		bool m_dismountRequested = false;
 		bool m_flying = false;
 		u32 m_lastJump = 0;
 		void simulateMovement(const ClientWorld &world);
@@ -86,6 +100,11 @@ class ClientPlayer : public Player {
 		Vector3d m_velocity{0, 0, 0};
 		u32 m_hurtUntil = 0;
 		u32 m_damageSerial = 0;
+		Vector3d m_hitPosition{0, 0, 0};
+		u16 m_hitDamage = 0;
+		u32 m_hitUntil = 0;
+		std::deque<std::string> m_chatMessages;
+		u32 m_chatUntil = 0;
 		Vector3d m_physicsPosition{0, 0, 0};
 		u32 m_lastPhysicsTime = 0;
 		float m_forwardInput = 0;

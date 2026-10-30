@@ -1,6 +1,8 @@
 #ifndef BLOCKSUPPORT_HPP_
 #define BLOCKSUPPORT_HPP_
 
+#include "common/world/WorldBounds.hpp"
+#include "common/world/LiquidState.hpp"
 #include "common/world/TorchSupport.hpp"
 #include "common/world/WorldCollision.hpp"
 
@@ -21,6 +23,12 @@ inline bool hasSolidTop(const World &world, const Vector3i &pos) {
 inline bool blockHasSupport(const World &world, const Vector3i &pos, const BlockState &state, u16 data) {
 	const auto &block = state.block();
 	if (!loadedSupport(world, pos) || !block.placementConstraints().check(world, pos)) return false;
+	if (u16 species = block.getGroupValue("group:om_coral_plant")) {
+		const auto *floor = loadedSupport(world, pos + Vector3i{0, 0, -1});
+		if (!floor || floor->block().getGroupValue("group:om_coral_species") != species) return false;
+		const auto *target = loadedSupport(world, pos);
+		if (block.getGroupValue("group:om_waterlogged") && (!target || liquid::kind(target->block()) != 1)) return false;
+	}
 	if (block.hasGroup("group:om_cave_decoration") && !canPlaceCaveDecoration(world, pos)) return false;
 	u16 rotation = block.isRotatable() ? block.param().getParam(BlockParam::Rotation, data) : 0;
 	u16 attached = block.getGroupValue("group:attached_node");

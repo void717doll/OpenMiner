@@ -26,10 +26,12 @@
  */
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/core/EngineConfig.hpp"
+#include "common/core/GameTime.hpp"
 #include "common/core/Registry.hpp"
 #include "common/world/World.hpp"
 
@@ -111,6 +113,14 @@ u16 World::getBlock(int x, int y, int z) const {
 	return 0;
 }
 
+int World::getLight(int x, int y, int z) const {
+	const Chunk *chunk = getChunkAtBlockPos(x, y, z);
+	if (!chunk || !chunk->isInitialized()) return -1;
+	u8 light = chunk->lightmap().getLightDataRaw(x & (CHUNK_WIDTH - 1), y & (CHUNK_DEPTH - 1), z & (CHUNK_HEIGHT - 1));
+	int nightReduction = int(std::round(11.f * (1.f - GameTime::getSunlightIntensityFromTime(GameTime::getCurrentTime()))));
+	return std::max(int(light & 15), std::max(0, int(light >> 4) - nightReduction));
+}
+
 void World::setBlock(int x, int y, int z, u16 id) const {
 	Chunk *chunk = getChunkAtBlockPos(x, y, z);
 	if (chunk)
@@ -177,7 +187,8 @@ void World::initUsertype(sol::state &lua) {
 		},
 
 		"get_block_state", &World::getBlockState,
-		"set_block_state", &World::setBlockState
+		"set_block_state", &World::setBlockState,
+		"get_light", &World::getLight
 	);
 }
 

@@ -29,11 +29,16 @@
 
 #include "client/scene/controller/AbstractClientController.hpp"
 
+class World;
+
 class RenderingController : public AbstractClientController {
 	public:
+		explicit RenderingController(const World *world = nullptr) : m_world(world) {}
 		void update(entt::registry &registry) override;
 
 		void draw(entt::registry &registry, RenderTarget &target, RenderStates states) override;
+	private:
+		const World *m_world;
 };
 
 #endif // RENDERINGCONTROLLER_HPP_

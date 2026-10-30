@@ -26,6 +26,7 @@
  */
 #include "common/core/EngineConfig.hpp"
 #include "common/core/GameClock.hpp"
+#include "common/core/GameTime.hpp"
 #include "common/scene/component/MobComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
 #include "common/world/Dimension.hpp"
@@ -61,6 +62,9 @@ void ServerWorld::update(bool doTick) {
 		updateMobs();
 		updateItems();
 		updateTnt();
+		updateMinecarts();
+		updateRailDevices();
+		updateRedstoneCircuits();
 		updatePlayerSurvival();
 		m_scene.update();
 	}
@@ -141,23 +145,38 @@ void ServerWorld::tickActiveChunks() {
 }
 
 bool ServerWorld::moveSurvivalPlayer(ServerPlayer &player, double x, double y, double z) {
-	if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id()
+	if (player.isRidingMinecart()) return true;
+	if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != m_dimension.id()
 	 || !std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z)
 	 || std::abs(x) > 1000000000 || std::abs(y) > 1000000000 || std::abs(z) > 1000000000) return false;
 	Vector3d requested{x - player.x(), y - player.y(), z - player.z()};
 	if (requested.length() > 64) return false;
 	DoubleBox box = player.hitbox();
 	box.move(player.x(), player.y(), player.z());
-	if (!playerEnvironment(*this, box).loaded) { player.survival().fallDistance = 0; return false; }
-	Vector3d allowed = retro::movePlayer(*this, box, requested, false, false);
+	auto previousEnvironment = playerEnvironment(*this, box);
+	if (!previousEnvironment.loaded) { player.survival().fallDistance = 0; return false; }
+	Vector3d allowed = player.isNoclip() ? requested : retro::movePlayer(*this, box, requested, false, false);
 	if ((allowed - requested).length() > 0.002) return false;
 	box = player.hitbox(); box.move(x, y, z);
 	PlayerEnvironment environment = playerEnvironment(*this, box);
 	if (!environment.loaded) { player.survival().fallDistance = 0; return false; }
+	auto &stats = player.statistics().general;
+	u64 horizontal = u64(std::round(std::hypot(requested.x, requested.y) * 100));
+	const auto *feet = getBlockState(int(std::floor(x)), int(std::floor(y)), int(std::floor(z)));
+	bool climbing = feet && feet->block().getGroupValue("group:climbable");
+	if (player.isNoclip() || (player.isCreative() && !environment.grounded))
+		stats[PlayerStatistics::FlyCm] += u64(std::round(requested.length() * 100));
+	else if (environment.water) stats[PlayerStatistics::SwimCm] += u64(std::round(requested.length() * 100));
+	else if (climbing && requested.z > 0) stats[PlayerStatistics::ClimbCm] += u64(std::round(requested.z * 100));
+	else stats[PlayerStatistics::WalkCm] += horizontal;
+	if (requested.z < 0 && !environment.water && !player.isCreative())
+		stats[PlayerStatistics::FallCm] += u64(std::round(-requested.z * 100));
+	if (previousEnvironment.grounded && requested.z > 0 && !environment.grounded && !climbing && !environment.water)
+		++stats[PlayerStatistics::Jumps];
 	player.setPosition(x, y, z);
 	u16 damage = player.isCreative() ? 0 : player.survival().moved(requested.z, environment.grounded, environment.water);
 	if (damage) {
-		if (m_server) m_server->damagePlayer(player.clientID(), damage);
+		if (m_server) m_server->damagePlayer(player.clientID(), damage, player.survival().damageCause);
 		else player.damage(player.survival().filterDamage(damage));
 	}
 	return true;
@@ -166,11 +185,14 @@ bool ServerWorld::moveSurvivalPlayer(ServerPlayer &player, double x, double y, d
 void ServerWorld::updatePlayerSurvival() {
 	for (auto &entry : m_players) {
 		auto &player = entry.second;
-		if (!player.isReady() || !player.isOnline() || player.isCreative() || player.dimension() != m_dimension.id()) continue;
+		if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id()) continue;
+		++player.statistics().general[PlayerStatistics::PlayTicks];
+		if (!player.health() || player.isCreative()) continue;
 		DoubleBox box = player.hitbox(); box.move(player.x(), player.y(), player.z());
-		u16 damage = player.survival().tick(playerEnvironment(*this, box));
+		if (player.isRidingMinecart()) box.sizeZ = 1.3;
+		u16 damage = player.survival().tick(playerEnvironment(*this, box, player.isRidingMinecart() ? 0.85 : 1.625));
 		if (damage) {
-			if (m_server) m_server->damagePlayer(player.clientID(), damage);
+			if (m_server) m_server->damagePlayer(player.clientID(), damage, player.survival().damageCause);
 			else player.damage(player.survival().filterDamage(damage));
 		}
 	}
@@ -346,6 +368,22 @@ void ServerWorld::initUsertype(sol::state &lua) {
 	lua.new_usertype<ServerWorld>("ServerWorld",
 		sol::base_classes, sol::bases<World>(),
 
+		"tick_spawner", &ServerWorld::tickSpawner,
+		"use_jukebox", &ServerWorld::useJukebox,
+		"stop_jukebox", &ServerWorld::stopJukebox,
+		"emit_particles", [](ServerWorld &world, int x, int y, int z, u8 effect) {
+			if (world.server()) world.server()->sendParticles({x + 0.5, y + 0.5, z + 0.5}, world.dimension().id(), effect);
+		},
+		"get_ticks", [](const ServerWorld &) { return GameTime::getTicks(); },
+		"is_daytime", [](const ServerWorld &world) { return world.dimension().id() == 0 && GameTime::getTicks() % GameTime::dayLength < 12000; },
+		"mark_block_modified", [](ServerWorld &world, int x, int y, int z) {
+			auto *chunk = static_cast<ServerChunk *>(world.getChunkAtBlockPos(x, y, z));
+			if (chunk && chunk->isInitialized()) chunk->setModified(true);
+		},
+		"validate_portal", &ServerWorld::validatePortal,
+		"grow_tree", &ServerWorld::growTree,
+		"remove_bed_partner", &ServerWorld::removeBedPartner,
+		"validate_bed", &ServerWorld::validateBed,
 		"dimension", &ServerWorld::dimension
 	);
 }
@@ -367,7 +405,8 @@ void ServerWorld::appendCollisionBoxes(const DoubleBox &moving, const DoubleBox 
 	m_scene.registry().view<const MobComponent, const PositionComponent, const DoubleBox>().each(
 		[&](auto entity, const auto &, const auto &position, const auto &localBox) {
 			const auto *traits = m_scene.registry().try_get<BetaMobComponent>(entity);
-			if (position.dimension != m_dimension.id() || (traits && traits->kind >= BetaMobKind::Arrow)) return;
+			if (position.dimension != m_dimension.id()
+			 || (traits && (betaMobIsProjectile(traits->kind) || traits->kind == BetaMobKind::Bat))) return;
 			DoubleBox box = localBox;
 			box.move(position.x, position.y, position.z);
 			add(box);

@@ -134,8 +134,10 @@ bool Chunk::setBlockRaw(int x, int y, int z, u16 type) {
 
 	if (type == 0) {
 		auto it = m_blockData.find(Vector3i{x, y, z});
-		if (it != m_blockData.end())
+		if (it != m_blockData.end()) {
+			onBlockDataRemoved(x, y, z, *it->second);
 			m_blockData.erase(it);
+		}
 	}
 
 	m_data[z][y][x] &= 0xffff0000;

@@ -33,6 +33,7 @@
 
 #include "common/core/IntTypes.hpp"
 #include "common/world/Heightmap.hpp"
+#include "common/world/ModernMineshaft.hpp"
 #include "server/world/TerrainBiomeSampler.hpp"
 
 using Random_t = effolkronium::random_local;
@@ -48,13 +49,14 @@ class TerrainGenerator {
 		void generate(ServerChunk &chunk);
 
 		void setSeed(s32 seed) { m_seed = seed; m_biomeSampler.setSeed(seed); }
+		u16 generationRevision() const { return m_generationRevision; }
+		void setGenerationRevision(u16 revision) { m_generationRevision = revision; }
 
 	private:
 		void fastNoiseGeneration(ServerChunk &chunk);
 
 		bool tryPlaceTree(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const;
 		bool tryPlaceFlora(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const;
-		bool tryPlacePortal(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const;
 
 		void generateOres(ServerChunk &chunk, int x, int y, int z, const Biome &biome, Random_t &rand) const;
 
@@ -64,9 +66,11 @@ class TerrainGenerator {
 		TerrainBiomeSampler m_biomeSampler;
 
 		Heightmap &m_heightmap;
+		modern::MineshaftCache m_mineshafts;
 
 		s32 m_seed = 0;
 		u16 m_dimensionID = 0;
+		u16 m_generationRevision = 1;
 };
 
 #endif // TERRAINGENERATOR_HPP_

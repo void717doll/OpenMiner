@@ -154,7 +154,7 @@ void SoundManager::setListener(const Vector3d &position, const Vector3d &directi
 }
 
 bool SoundManager::playRecord(u8 record, const Vector3d &position) {
-	if (!m_device || record > 2) return false;
+	if (!m_device || record > musicRecords.size()) return false;
 	if (!record) {
 		if (position == m_recordPosition) stopRecord();
 		return true;
@@ -170,7 +170,7 @@ bool SoundManager::playRecord(u8 record, const Vector3d &position) {
 				logger.setName("audio");
 				LoggerHandler::setInstance(logger);
 				Clip clip;
-				loadClip(record == 1 ? "resources/sounds/record_13.wav" : "resources/sounds/record_cat.wav", clip, false);
+				loadClip(std::string("resources/sounds/") + musicRecords[record - 1].file, clip, false);
 				return clip;
 			});
 		}

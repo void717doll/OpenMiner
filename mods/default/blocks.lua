@@ -232,19 +232,21 @@ mod:block {
 	id = "portal",
 	name = "Portal",
 	tiles = "portal.png",
-
 	draw_type = "glass",
 	is_opaque = false,
-
+	is_collidable = false,
+	is_light_source = true,
+	groups = {om_light_level = 7},
+	bounding_box = {0, 0.375, 0, 1, 0.25, 1},
+	states = {{bounding_box = {0.375, 0, 0, 0.25, 1, 1}}},
+	item_drop = {id = "default:portal", amount = 0},
+	on_tick = function(pos, block, chunk, world)
+		world:validate_portal(pos.x, pos.y, pos.z)
+	end,
+	tick_randomly = true,
+	tick_probability = 0.05,
 	on_block_activated = function(pos, block, player, world, client, server)
-		local dim = (player:dimension() + 1) % 2
-		local pos = {
-			x = math.floor(player:x()),
-			y = math.floor(player:y()),
-			z = math.floor(player:z())
-		}
-
-		server:send_player_change_dimension(client.id, pos.x, pos.y, pos.z, dim, client)
+		server:use_portal(client.id, pos.x, pos.y, pos.z)
 	end,
 }
 
@@ -338,6 +340,7 @@ mod:reserve_block_id() -- redstone_lamp
 mod:block {
 	id = "farmland",
 	name = "Farmland",
+	item_drop = {id = "default:dirt", amount = 1},
 	tiles = {"farmland_dry.png", "dirt.png", "dirt.png"},
 	is_opaque = false,
 	groups = {
@@ -346,11 +349,22 @@ mod:block {
 	},
 
 	states = {
-		{ alt_tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
+		{ tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
+		{ tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
+		{ tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
+		{ tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
+		{ tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
+		{ tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
+		{ tiles = {"farmland_wet.png", "dirt.png", "dirt.png"} },
 	},
 
 	draw_type = "boundingbox",
 	bounding_box = {0, 0, 0, 1, 1, 15 / 16},
+	tick_randomly = true,
+	tick_probability = 0.01,
+	on_tick = function(pos, block, chunk, world)
+		farming.soil_tick(pos, block, chunk, world)
+	end,
 }
 
 mod:reserve_block_id() -- grass_path
@@ -364,6 +378,8 @@ mod:block {
 	draw_type = "xshape",
 	inventory_image = "seeds_wheat.png",
 	hardness = 0,
+	groups = {om_crop = 7, attached_node = 3},
+	item_drop = {id = "default:seeds", amount = 1},
 
 	placement_constraints = {
 		[{0, 0, -1}] = {
@@ -382,37 +398,21 @@ mod:block {
 		{ tiles = "wheat_stage_4.png", bounding_box = {0, 0, 0, 1, 1, 10.0 / 16.0}, }, -- 4
 		{ tiles = "wheat_stage_5.png", bounding_box = {0, 0, 0, 1, 1, 12.0 / 16.0}, }, -- 5
 		{ tiles = "wheat_stage_6.png", bounding_box = {0, 0, 0, 1, 1, 14.0 / 16.0}, }, -- 6
-		{ tiles = "wheat_stage_7.png", bounding_box = {0, 0, 0, 1, 1, 1}, },           -- 7
+		{ tiles = "wheat_stage_7.png", bounding_box = {0, 0, 0, 1, 1, 1},
+			item_drop = {id = "default:wheat", amount = 1} },
 	},
 
 	tick_randomly = true,
 	tick_probability = 0.01,
 
 	on_tick = function(pos, block, chunk, world)
-		local block_param = world:get_data(pos.x, pos.y, pos.z)
-		local current_state = block:param():get_param(BlockParamType.State, block_param)
-		if current_state < 7 then
-			world:set_data(pos.x, pos.y, pos.z, current_state + 1)
-		end
+		farming.grow_tick(pos, block, chunk, world)
 	end,
-
-	on_block_activated = function(pos, block, player, world, client, server)
-		local block_param = world:get_data(pos.x, pos.y, pos.z)
-		local current_state = block:param():get_param(BlockParamType.State, block_param)
-		if current_state >= 7 then
-			world:set_data(pos.x, pos.y, pos.z,
-				block:param():set_param(BlockParamType.State, block_param, 0))
-
-			-- FIXME: It should drop the item if 'default:use_item_drops' is enabled
-			local item_stack = ItemStack.new("default:wheat", 1)
-			mods["default"]:give_item_stack(player, item_stack)
-		end
-	end
 }
 
 mod:block {
 	id = "torch",
-	groups = {attached_node = 3},
+	groups = {attached_node = 5, om_torch = 1},
 	name = "Torch",
 	tiles = "torch_on.png",
 
@@ -422,7 +422,8 @@ mod:block {
 
 	inventory_image = "../blocks/torch_on.png",
 
-	draw_type = "boundingbox",
+	draw_type = "torch",
+	is_rotatable = true,
 
 	bounding_box = {7 / 16, 7 / 16, 0, 2 / 16, 2 / 16, 10 / 16},
 

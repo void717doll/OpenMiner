@@ -29,7 +29,7 @@
 
 #include <functional>
 
-#include "client/graphics/Image.hpp"
+#include "client/graphics/NinePatch.hpp"
 #include "client/gui/Text.hpp"
 #include "client/gui/Widget.hpp"
 
@@ -60,11 +60,8 @@ class SliderWidget : public Widget {
 		const Color m_defaultTextColor = Color::fromRGBA32(224, 224, 224);
 		const Color m_hoverColor = Color::fromRGBA32(255, 255, 160);
 
-		Image m_slider{"texture-widgets"};
-		Image m_background{"texture-widgets"};
-
-		Image m_sliderBorder{"texture-widgets"};
-		Image m_backgroundBorder{"texture-widgets"};
+		NinePatch m_slider{"texture-menu_button"};
+		NinePatch m_background{"texture-menu_button"};
 
 		Text m_text;
 

@@ -174,9 +174,9 @@ void SettingsMenuState::addMainButtons() {
 		addDebugButtons();
 	});
 
-	m_menuWidget.addSlider("sound volume: " + std::to_string(int(Config::soundVolume * 100)) + "%", [] (SliderWidget &slider, u32) {
+	m_menuWidget.addSlider("Sound Volume: " + std::to_string(int(Config::soundVolume * 100)) + "%", [] (SliderWidget &slider, u32) {
 		Config::soundVolume = float(slider.getCurrentValue()) / 100;
-		slider.setText("sound volume: " + std::to_string(slider.getCurrentValue()) + "%");
+		slider.setText("Sound Volume: " + std::to_string(slider.getCurrentValue()) + "%");
 	}, 0, 100, int(Config::soundVolume * 100));
 
 	updateWidgetPosition();
@@ -188,7 +188,8 @@ void SettingsMenuState::addInterfaceButtons() {
 	addToggleButton("Show FPS counter", Config::isFpsCounterEnabled, false);
 	addToggleButton("Show hotbar", Config::isHotbarVisible, false);
 	addToggleButton("Show crosshair", Config::isCrosshairVisible, false);
-	addToggleButton("show durability", Config::isItemDurabilityVisible, false);
+	addToggleButton("Show Durability", Config::isItemDurabilityVisible, false);
+	addToggleButton("Always Show Coordinates", Config::isCoordinatesVisible, false);
 
 	updateWidgetPosition();
 }
@@ -277,6 +278,16 @@ void SettingsMenuState::addGraphicsButtons() {
 	addToggleButton("Star Rendering", Config::isStarRenderingEnabled, false);
 
 	addToggleButton("View Bobbing", Config::isViewBobbingEnabled, false);
+
+	m_menuWidget.addSlider("Hand View Depth: " + std::to_string(int(Config::handViewZ)), [](SliderWidget &slider, u32) {
+		Config::handViewZ = float(int(slider.getCurrentValue()) - 100);
+		slider.setText("Hand View Depth: " + std::to_string(int(Config::handViewZ)));
+	}, 0, 200, int(Config::handViewZ) + 100);
+
+	m_menuWidget.addSlider("Gamma: " + std::to_string(int(Config::gamma * 100)) + "%", [](SliderWidget &slider, u32) {
+		Config::gamma = float(slider.getCurrentValue()) / 100.f;
+		slider.setText("Gamma: " + std::to_string(slider.getCurrentValue()) + "%");
+	}, 50, 300, int(Config::gamma * 100));
 
 	updateWidgetPosition();
 }

@@ -33,6 +33,7 @@
 #include "client/world/ClientWorld.hpp"
 
 #include "client/world/mesh/BlockMesher.hpp"
+#include "client/world/mesh/CampfireMesher.hpp"
 #include "client/world/mesh/XShapeMesher.hpp"
 
 // NOTE: TextureAtlas and Registry are accessed from different threads.
@@ -125,6 +126,8 @@ ChunkMeshBuildingJob *ChunkMeshBuilder::buildChunkMesh(ChunkMeshBuildingJob *job
 
 				if (blockState.drawType() == BlockDrawType::XShape)
 					XShapeMesher::addCross(x, y, z, *job, blockState);
+				else if (blockState.drawType() == BlockDrawType::Campfire)
+					CampfireMesher::addBlock(x, y, z, *job, blockState);
 				else
 					BlockMesher::addBlock(x, y, z, *job, blockState, blockParam);
 			}

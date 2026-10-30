@@ -24,6 +24,7 @@
  *
  * =====================================================================================
  */
+#include "common/world/WorldFiles.hpp"
 #include <filesystem.hpp>
 
 #include "common/core/ApplicationStateStack.hpp"
@@ -44,15 +45,14 @@ WorldDeletionState::WorldDeletionState(const std::string &worldName, TitleScreen
 	m_text1.updateVertexBuffer();
 	m_text1.setScale(Config::guiScale, Config::guiScale);
 
-	m_text2.setString("'" + worldName + "' will be lost forever! (A long time!)");
+	m_text2.setString("'" + worldName + "' will be permanently deleted.");
 	m_text2.updateVertexBuffer();
 	m_text2.setScale(Config::guiScale, Config::guiScale);
 
 	m_menuWidget.setScale(Config::guiScale, Config::guiScale);
-	m_menuWidget.addButton("Yes", [this, worldName, titleScreen](TextButton &) {
-		std::string saveFilepath = "saves/" + worldName + ".dat";
-		if (fs::exists(saveFilepath))
-			fs::remove(saveFilepath);
+	m_menuWidget.addButton("Delete World", [this, worldName, titleScreen](TextButton &) {
+		if (fs::exists(worldFiles::directory(worldName))) fs::remove_all(worldFiles::directory(worldName));
+		if (fs::exists(worldFiles::legacy(worldName))) fs::remove(worldFiles::legacy(worldName));
 		m_stateStack->pop(); // WorldDeletionState
 
 		// FIXME: This is needed because there's currently no way to refresh WorldSelectionState
@@ -60,7 +60,7 @@ WorldDeletionState::WorldDeletionState(const std::string &worldName, TitleScreen
 		m_stateStack->push<WorldSelectionState>(titleScreen);
 	}, 150);
 
-	m_menuWidget.addButton("No", [this](TextButton &) {
+	m_menuWidget.addButton("Cancel", [this](TextButton &) {
 		m_stateStack->pop();
 	}, 150);
 

@@ -94,6 +94,19 @@ void ClientPlayer::notifyDamage() {
 	++m_damageSerial;
 }
 
+void ClientPlayer::showHit(const Vector3d &position, u16 damage) {
+	m_hitPosition = position;
+	m_hitDamage = damage;
+	m_hitUntil = GameClock::getInstance().getTicks() + 650;
+}
+
+void ClientPlayer::addChatMessage(const std::string &message) {
+	if (message.empty()) return;
+	m_chatMessages.push_back(message);
+	while (m_chatMessages.size() > 5) m_chatMessages.pop_front();
+	m_chatUntil = GameClock::getInstance().getTicks() + 15000;
+}
+
 float ClientPlayer::hurtEffect() const {
 	if (!m_hurtUntil) return 0;
 	u32 now = GameClock::getInstance().getTicks();
@@ -103,7 +116,7 @@ float ClientPlayer::hurtEffect() const {
 }
 
 void ClientPlayer::pressJump() {
-	if (!isCreative()) return;
+	if (!isCreative() || m_mounted || isNoclip()) return;
 	u32 now = GameClock::getInstance().getTicks();
 	if (m_lastJump && now - m_lastJump < 300) {
 		m_flying = !m_flying;
@@ -112,11 +125,25 @@ void ClientPlayer::pressJump() {
 	} else m_lastJump = now;
 }
 
+void ClientPlayer::toggleNoclip() {
+	if (!isCreative() || m_mounted) return;
+	setNoclip(!isNoclip());
+	if (isNoclip()) m_flying = true;
+	m_velocity.reset(0, 0, 0);
+	addChatMessage(isNoclip() ? "noclip on" : "noclip off");
+}
+
 void ClientPlayer::clearInputs() {
 	m_forwardInput = 0;
 	m_strafeInput = 0;
 	m_jumpPressed = false;
 	m_isSneaking = false;
+}
+
+void ClientPlayer::pauseMovement() {
+	m_lastPhysicsTime = GameClock::getInstance().getTicks();
+	m_physicsRemainder = 0;
+	m_previousPhysicsPosition = m_physicsPosition;
 }
 
 void ClientPlayer::processInputs() {
@@ -127,6 +154,11 @@ void ClientPlayer::processInputs() {
 }
 
 void ClientPlayer::simulateMovement(const ClientWorld &world) {
+	if (!health()) {
+		clearInputs();
+		m_velocity.reset(0, 0, 0);
+		return;
+	}
 	const Chunk *chunk = world.getChunkAtBlockPos(int(std::floor(m_physicsPosition.x)),
 		int(std::floor(m_physicsPosition.y)), int(std::floor(m_physicsPosition.z)));
 	if (!chunk || !chunk->isInitialized()) {
@@ -142,7 +174,7 @@ void ClientPlayer::simulateMovement(const ClientWorld &world) {
 		Vector3d requested{(std::cos(yaw) * m_forwardInput - std::sin(yaw) * m_strafeInput) * 0.5 / length,
 			(std::sin(yaw) * m_forwardInput + std::cos(yaw) * m_strafeInput) * 0.5 / length,
 			(double(m_jumpPressed) - double(m_isSneaking)) * 0.5};
-		m_physicsPosition += retro::movePlayer(world, body, requested, false, false);
+		m_physicsPosition += isNoclip() ? requested : retro::movePlayer(world, body, requested, false, false);
 		m_velocity.reset(0, 0, 0);
 		m_onGround = false;
 		return;
@@ -152,6 +184,10 @@ void ClientPlayer::simulateMovement(const ClientWorld &world) {
 	retro::acceleratePlayer(m_velocity, m_forwardInput, m_strafeInput, m_viewAngleH * math::DEG_TO_RAD,
 		m_jumpPressed, m_isSneaking, wasGrounded, environment);
 	Vector3d requested = m_velocity;
+	if (environment.web) {
+		requested.x *= 0.25; requested.y *= 0.25; requested.z *= 0.05;
+		m_velocity.reset(0, 0, 0);
+	}
 	Vector3d movement = retro::movePlayer(world, body, requested, wasGrounded, m_isSneaking);
 	m_physicsPosition += movement;
 	m_onGround = requested.z < 0 && requested.z != movement.z;
@@ -187,13 +223,41 @@ void ClientPlayer::simulateMovement(const ClientWorld &world) {
 	}
 }
 
+void ClientPlayer::setRidePosition(bool mounted, const Vector3d &position) {
+	bool wasMounted = m_mounted;
+	m_mounted = mounted;
+	m_cameraLocalPos.z = mounted ? 0.85f : 1.625f;
+	m_velocity = {0,0,0};
+	m_onGround = false;
+	m_flying = false;
+	setNoclip(false);
+	if (!mounted || !wasMounted) setPosition(position.x,position.y,position.z);
+	else {
+		m_previousPhysicsPosition = {x(),y(),z()};
+		m_physicsPosition = position;
+		m_physicsRemainder = 0;
+		m_lastPhysicsTime = GameClock::getInstance().getTicks();
+	}
+	if (!mounted) m_dismountRequested = false;
+}
+
 void ClientPlayer::updatePosition(const ClientWorld &world) {
 	u32 now = GameClock::getInstance().getTicks();
 	m_physicsRemainder += std::min(now - m_lastPhysicsTime, u32(500));
 	m_lastPhysicsTime = now;
-	while (m_physicsRemainder >= 50) {
+	if (m_mounted) {
+		m_physicsRemainder = std::min(m_physicsRemainder, u32(50));
+		if (m_isSneaking && !m_dismountRequested) {
+			world.client().sendPlayerDismount();
+			m_dismountRequested = true;
+		}
+		if (!m_isSneaking) m_dismountRequested = false;
+	}
+	while (!m_mounted && m_physicsRemainder >= 50) {
 		m_previousPhysicsPosition = m_physicsPosition;
 		simulateMovement(world);
+		// ledge and corner checks must follow each physics step, not their combined displacement.
+		if (m_physicsPosition != m_previousPhysicsPosition) world.client().sendPlayerPosUpdate();
 		m_physicsRemainder -= 50;
 	}
 	double fraction = double(m_physicsRemainder) / 50;

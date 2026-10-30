@@ -14,6 +14,7 @@ struct PlayerEnvironment {
 	bool submerged = false;
 	bool lava = false;
 	bool fire = false;
+	bool campfire = false;
 	bool cactus = false;
 	bool suffocating = false;
 };
@@ -24,6 +25,7 @@ struct PlayerSurvivalState {
 	s16 fireTicks = -20;
 	u8 hurtTicks = 0;
 	u16 lastDamage = 0;
+	const char *damageCause = "damage";
 
 	u16 filterDamage(u16 amount) {
 		if (!amount) return 0;
@@ -42,6 +44,7 @@ struct PlayerSurvivalState {
 		if (inWater) { fallDistance = 0; return 0; }
 		if (dz < 0) fallDistance -= dz;
 		if (!grounded) return 0;
+		damageCause = "fall";
 		double damage = std::ceil(fallDistance - 3);
 		fallDistance = 0;
 		return u16(std::max(0.0, std::min(65535.0, damage)));
@@ -51,18 +54,26 @@ struct PlayerSurvivalState {
 		if (!environment.loaded) { fallDistance = 0; return 0; }
 		if (hurtTicks) --hurtTicks;
 		u16 damage = 0;
+		damageCause = "damage";
 		if (environment.water) { fallDistance = 0; fireTicks = -20; }
 		if (fireTicks > 0) {
-			if (fireTicks % 20 == 0) damage = 1;
+			if (fireTicks % 20 == 0) { damage = 1; damageCause = "fire"; }
 			--fireTicks;
 		}
-		if (environment.lava) { damage = 4; fireTicks = 600; }
-		if (environment.suffocating || environment.cactus) damage = std::max<u16>(damage, 1);
+		if (environment.lava) { damage = 4; fireTicks = 600; damageCause = "lava"; }
+		if (damage < 1 && environment.campfire) { damage = 1; damageCause = "campfire"; }
+		if (damage < 1 && (environment.suffocating || environment.cactus)) {
+			damage = 1;
+			damageCause = environment.suffocating ? "suffocation" : "cactus";
+		}
 		if (environment.submerged) {
-			if (--air == -20) { air = 0; damage = std::max<u16>(damage, 2); }
+			if (--air == -20) {
+				air = 0;
+				if (damage < 2) { damage = 2; damageCause = "drowning"; }
+			}
 		} else air = 300;
 		if (environment.fire) {
-			damage = std::max<u16>(damage, 1);
+			if (damage < 1) { damage = 1; damageCause = "fire"; }
 			if (++fireTicks == 0) fireTicks = 300;
 		} else if (fireTicks <= 0) fireTicks = -20;
 		if (environment.water || environment.submerged) fireTicks = -20;
@@ -70,7 +81,7 @@ struct PlayerSurvivalState {
 	}
 };
 
-inline PlayerEnvironment playerEnvironment(const World &world, const DoubleBox &box) {
+inline PlayerEnvironment playerEnvironment(const World &world, const DoubleBox &box, double eyeHeight = 1.625) {
 	PlayerEnvironment environment;
 	DoubleBox waterBox = box;
 	waterBox.z += 0.4;
@@ -79,7 +90,7 @@ inline PlayerEnvironment playerEnvironment(const World &world, const DoubleBox &
 	lavaBox.x += 0.1; lavaBox.y += 0.1;
 	lavaBox.sizeX = std::max(0.0, lavaBox.sizeX - 0.2);
 	lavaBox.sizeY = std::max(0.0, lavaBox.sizeY - 0.2);
-	double eyeX = box.x + box.sizeX / 2, eyeY = box.y + box.sizeY / 2, eyeZ = box.z + 1.625;
+	double eyeX = box.x + box.sizeX / 2, eyeY = box.y + box.sizeY / 2, eyeZ = box.z + eyeHeight;
 	for (int z = int(std::floor(box.z - 0.05)); z < int(std::ceil(box.z + box.sizeZ)); ++z)
 		for (int y = int(std::floor(box.y)); y < int(std::ceil(box.y + box.sizeY)); ++y)
 			for (int x = int(std::floor(box.x)); x < int(std::ceil(box.x + box.sizeX)); ++x) {
@@ -101,6 +112,7 @@ inline PlayerEnvironment playerEnvironment(const World &world, const DoubleBox &
 				}
 				if (liquid::kind(state->block()) == 2) environment.lava |= cell.intersects(lavaBox);
 				if (id == "default:fire") environment.fire |= bodyContact;
+				if (id == "default:campfire" && state->id() == 0) environment.campfire |= bodyContact;
 				if (id == "default:cactus") environment.cactus |= bodyContact;
 				if (state->block().id() && state->isOpaque() && state->isCollidable()) {
 					DoubleBox solid = collision::blockBox(*state, world.getData(x, y, z), x, y, z);

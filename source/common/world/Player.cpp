@@ -78,13 +78,21 @@ u16 Player::armorValue() const {
 	return maximum && protection ? u16((protection - 1) * remaining / maximum + 1) : 0;
 }
 
-u16 Player::absorbDamage(u16 amount) {
-	unsigned reduced = unsigned(amount) * (25 - std::min<u16>(20, armorValue())) + m_armorRemainder;
+u16 Player::absorbDamage(u16 amount, const std::string &cause) {
+	unsigned bonus = 0;
+	for (const auto &stack : m_armor.items()) {
+		if (!stack.amount() || !stack.maxDamage() || stack.damage() >= stack.maxDamage()) continue;
+		bonus += stack.item().getGroupValue("group:om_damage_reduction");
+		if (cause == "fall") bonus += stack.item().getGroupValue("group:om_fall_reduction");
+		if (cause == "fire" || cause == "lava") bonus += stack.item().getGroupValue("group:om_fire_reduction");
+	}
+	unsigned reduced = unsigned(amount) * (25 - std::min<u16>(20, armorValue()))
+		* (100 - std::min(80u, bonus)) + m_armorRemainder;
 	for (u16 slot = 0; slot < 4; ++slot) {
 		if (m_armor.getStackRef(0, slot).wear(amount)) m_armor.setChanged(true);
 	}
-	m_armorRemainder = u16(reduced % 25);
-	return u16(reduced / 25);
+	m_armorRemainder = u16(reduced % 2500);
+	return u16(reduced / 2500);
 }
 
 // Note: This function returns an angle4

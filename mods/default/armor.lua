@@ -8,6 +8,9 @@ for material, values in pairs({leather = {0, "leather"}, chain = {1}, iron = {2,
 		local id = piece .. "_" .. material
 		local groups = {om_armor_slot = slot, om_armor_points = points[slot], om_max_damage = durability[slot] * 3 * 2 ^ values[1]}
 		groups["om_armor_" .. piece] = 1
+		if material == "leather" then groups.om_fall_reduction = 10 end
+		if material == "gold" then groups.om_fire_reduction = 10 end
+		if material == "chain" then groups.om_damage_reduction = 5 end
 		mod:item {
 			id = id,
 			name = material .. " " .. piece,

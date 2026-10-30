@@ -27,7 +27,9 @@
 #ifndef SERVERWORLD_HPP_
 #define SERVERWORLD_HPP_
 
+#include <deque>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "common/world/World.hpp"
 #include "server/scene/ServerScene.hpp"
@@ -39,6 +41,7 @@ class Dimension;
 class PlayerList;
 class ServerCommandHandler;
 class ServerPlayer;
+class Player;
 
 class ServerWorld : public World {
 	using ChunkMap = std::unordered_map<Vector3i, std::unique_ptr<ServerChunk>>;
@@ -51,17 +54,51 @@ class ServerWorld : public World {
 		void setCreative(bool creative) { m_creative = creative; }
 		BlockPhysics &blockPhysics() { return m_blockPhysics; }
 		void updateMobs();
+		void tickSpawner(int x, int y, int z);
+		void useJukebox(int x, int y, int z, ServerPlayer &player);
+		void stopJukebox(int x, int y, int z);
+		bool growTree(int x, int y, int z, const std::string &treeID);
 		void updateItems();
 		void updateTnt();
+		void updateMinecarts();
+		void refreshRail(const Vector3i &point);
+		void refreshPoweredRail(const Vector3i &point);
+		bool railDirectlyPowered(const Vector3i &point) const;
+		void watchRailDevice(const Vector3i &point);
+		void updateRailDevices();
+		unsigned redstonePower(const Vector3i &point, bool includeWire = true) const;
+		void queueRedstone(const Vector3i &point);
+		void notifyRedstone(const Vector3i &point);
+		void refreshRedstone(const Vector3i &point);
+		void scheduleRedstone(const Vector3i &point, u16 state, u16 delay);
+		void updateRedstoneCircuits();
+		bool activateRedstone(const Vector3i &point);
+		bool placeRedstoneDust(Player &player, const Vector3i &point, s8 face);
+		bool placeMinecart(Player &player, const Vector3i &point);
+		bool interactMinecart(ServerPlayer &player);
+		bool attackMinecart(ServerPlayer &player);
+		bool dismountMinecart(ServerPlayer &player);
+		bool ignitePortal(const Vector3i &clicked);
+		bool portalFrameAt(Vector3i point, Vector3i &origin, Vector3i &axis) const;
+		void validatePortal(int x, int y, int z);
+		bool findPortalDestination(Vector3i requested, Vector3i &arrival);
 		bool primeTnt(const Vector3i &position, u16 fuse = 80);
+		bool placeBed(ServerPlayer &player, Vector3i foot, u16 &data);
+		void removeBedPartner(int x, int y, int z);
+		void validateBed(int x, int y, int z);
+		bool bedRespawn(Vector3i bed, Vector3d &arrival, bool loadChunks = false);
+		std::string sleepInBed(ServerPlayer &player, Vector3i position);
 		void explodeAt(const Vector3d &position, float strength, u32 seed, const std::string &source);
 		bool dropWorldItem(Vector3d position, const std::string &id, u16 count = 1, u16 damage = 0, bool limited = true);
 		void updatePlayerSurvival();
 		bool moveSurvivalPlayer(ServerPlayer &player, double x, double y, double z);
-		bool spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize = 0);
+		bool spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize = 0, entt::entity *spawned = nullptr);
+		bool spawnProjectile(const std::string &id, Vector3d position, Vector3d direction);
+		bool tryCreateSnowGolem(const Vector3i &pumpkin);
 		bool attackMob(ServerPlayer &player);
 		void dropPlayerItems(ServerPlayer &player);
 		bool dropHeldItem(ServerPlayer &player);
+		bool dropPlayerStack(ServerPlayer &player, const ItemStack &stack);
 		bool interactMob(ServerPlayer &player);
 		entt::entity findMobTarget(ServerPlayer &player, double reach);
 
@@ -90,10 +127,21 @@ class ServerWorld : public World {
 
 		s32 seed() const { return m_seed; }
 		void setSeed(s32 seed) { m_seed = seed; m_terrainGenerator.setSeed(seed); m_heightmap.setSeed(seed); }
+		u16 generationRevision() const { return m_terrainGenerator.generationRevision(); }
+		void setGenerationRevision(u16 revision) { m_terrainGenerator.setGenerationRevision(revision); }
 
 		static void initUsertype(sol::state &lua);
 
 	private:
+		struct RedstoneTimer { u16 block; u16 state; u64 due; };
+		std::deque<Vector3i> m_redstoneQueue, m_redstoneTimerQueue;
+		std::unordered_set<Vector3i> m_redstonePending;
+		std::unordered_map<Vector3i,RedstoneTimer> m_redstoneTimers;
+		u64 m_redstoneTicks = 0;
+		std::unordered_set<Vector3i> m_railDevices;
+		std::deque<Vector3i> m_railDeviceQueue;
+		std::unordered_map<Vector3i,std::deque<u64>> m_torchSwitches;
+		u64 m_railPowerTicks = 0;
 		bool m_creative = false;
 		void processSendRequests();
 		void spawnNetherMobs();

@@ -24,6 +24,7 @@
  *
  * =====================================================================================
  */
+#include "common/world/TorchSupport.hpp"
 #include "common/core/BlockGeometry.hpp"
 #include "common/core/Registry.hpp"
 
@@ -75,7 +76,7 @@ void BlockCursorRaycast::rayCastToAxis(const Axis axis, const glm::dvec3 &positi
                                        const glm::dvec3 &lookAt, const double maxReach,
                                        s32f &bestX, s32f &bestY, s32f &bestZ,
                                        s8f &bestFace, double &bestDepth,
-                                       const ClientWorld &world)
+                                       const ClientWorld &world, bool includeSources)
 {
 	glm::dvec3 isect;
 	double posCoord, lookAtCoord;
@@ -123,7 +124,8 @@ void BlockCursorRaycast::rayCastToAxis(const Axis axis, const glm::dvec3 &positi
 
 		u8f orientation = blockState->block().isRotatable() ? world.getData((int)nx, (int)ny, (int)nz) & 0x1F : 0;
 
-		const FloatBox &boundingBox = blockState->boundingBox();
+		FloatBox boundingBox = blockState->boundingBox();
+		if (blockState->drawType() == BlockDrawType::Torch) { boundingBox = torchSelectionBox(orientation); orientation = 0; }
 		glm::vec3 localCorner1{boundingBox.x, boundingBox.y, boundingBox.z};
 		glm::vec3 localCorner2{boundingBox.sizeX, boundingBox.sizeY, boundingBox.sizeZ};
 		localCorner2 += localCorner1;
@@ -137,7 +139,7 @@ void BlockCursorRaycast::rayCastToAxis(const Axis axis, const glm::dvec3 &positi
 			if (localCorner2.z < localCorner1.z) std::swap(localCorner1.z, localCorner2.z);
 		}
 
-		if (blockState->block().id() && blockState->drawType() != BlockDrawType::Liquid) {
+		if (blockState->block().id() && (blockState->drawType() != BlockDrawType::Liquid || (includeSources && (blockState->block().stringID() == "default:water" || blockState->block().stringID() == "default:lava")))) {
 			// Check bounding box; this should loop over all selection boxes
 			// when they are implemented
 			const glm::dvec3 cubePos{double(nx), double(ny), double(nz)};

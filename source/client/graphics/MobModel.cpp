@@ -26,19 +26,28 @@ MobModel::MobModel(unsigned model, float scale, u8 appearance) {
 
 void MobModel::configure(unsigned model, float scale, u8 appearance) {
 	static const char *names[] = {"", "pig", "zombie", "cow", "sheep", "chicken", "skeleton", "creeper",
-		"spider", "slime", "ghast", "pig_zombie", "wolf", "squid", "zombie", "arrow", "fireball"};
-	if (model == 0 || model >= std::size(names)) throw EXCEPTION("unknown mob model", model);
+		"spider", "slime", "ghast", "pig_zombie", "wolf", "squid", "zombie", "arrow", "fireball", "ocelot", "bat", "axolotl_brown", "rabbit_brown", "snow_golem", "snowball", "egg"};
+	if (model == 0 || (model >= std::size(names) && model != 32)) throw EXCEPTION("unknown mob model", model);
 	m_model = model;
 	m_scale = std::isfinite(scale) && scale > 0 ? scale : 1.f;
 	m_appearance = appearance;
-	std::string name = names[model];
+	std::string name = model == 32 ? "minecart" : names[model];
 	if (model == 12) name = appearance & 2 ? "wolf_tame" : appearance & 1 ? "wolf_angry" : "wolf";
 	if (model == 10 && (appearance & 1)) name = "ghast_shooting";
+	if (model == 19) {
+		static const char *colors[] = {"brown", "yellow", "green", "pink", "black", "purple", "white"};
+		name = "axolotl_" + std::string(colors[appearance % std::size(colors)]);
+	}
+	if (model == 20) {
+		static const char *colors[] = {"brown", "gold", "white", "white_splotched", "salt", "black"};
+		name = "rabbit_" + std::string(colors[appearance % std::size(colors)]);
+	}
 	loadTexture(m_texture, name);
 	if (model == 1 && (appearance & 1)) loadTexture(m_overlay, "pig_saddle");
 	else if (model == 4) loadTexture(m_overlay, "sheep_fur");
 	else if (model == 8) loadTexture(m_overlay, "spider_eyes");
 	else if (model == 9) loadTexture(m_overlay, "slime");
+	else if (model == 21) loadTexture(m_overlay, "snow_golem_pumpkin");
 }
 
 void MobModel::updateMotion(const Vector3d &position) {
@@ -69,7 +78,7 @@ void MobModel::draw(RenderTarget &target, RenderStates states) const {
 		vertices.reserve(mesh.size());
 		float scale = m_model == 10 ? m_scale * 4.5f : m_scale;
 		glm::vec3 right{1,0,0}, up{0,0,1};
-		if (m_model == 16 && target.getView()) {
+		if ((m_model == 16 || m_model == 22 || m_model == 23) && target.getView()) {
 			const auto &view = target.getView()->getViewTransform().getMatrix();
 			glm::mat3 local = glm::inverse(glm::mat3(states.transform.getMatrix()));
 			right = local * glm::vec3(view[0][0],view[1][0],view[2][0]);
@@ -77,7 +86,8 @@ void MobModel::draw(RenderTarget &target, RenderStates states) const {
 		}
 		for (const auto &point : mesh) {
 			Vertex vertex;
-			glm::vec3 position = m_model == 16 ? right * point.x + up * point.z : glm::vec3(point.x,point.y,point.z);
+			vertex.coord3d[3] = m_hurt ? 7.f : 6.f;
+			glm::vec3 position = (m_model == 16 || m_model == 22 || m_model == 23) ? right * point.x + up * point.z : glm::vec3(point.x,point.y,point.z);
 			position *= scale;
 			vertex.coord3d[0] = position.x; vertex.coord3d[1] = position.y; vertex.coord3d[2] = position.z;
 			vertex.texCoord[0] = point.u; vertex.texCoord[1] = point.v;
@@ -88,8 +98,8 @@ void MobModel::draw(RenderTarget &target, RenderStates states) const {
 			if (layer == 1 && m_model == 9) vertex.color[3] = 0.5f;
 			if (layer == 1 && m_model == 8)
 				vertex.color[3] = (1 - GameTime::getSunlightIntensityFromTime(GameTime::getCurrentTime())) * 0.5f;
-			vertex.lightValue[0] = 15;
-			vertex.lightValue[1] = layer == 1 && m_model == 8 ? 15.f : 0.f;
+			vertex.lightValue[0] = m_sunlight;
+			vertex.lightValue[1] = layer == 1 && m_model == 8 ? 15.f : m_torchlight;
 			vertices.push_back(vertex);
 		}
 		m_vertices[layer].init(vertices.data(), u32(vertices.size() * sizeof(Vertex)), true);

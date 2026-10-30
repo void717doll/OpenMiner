@@ -28,6 +28,7 @@
 #include "client/core/GameConfig.hpp"
 #include "client/graphics/BgfxView.hpp"
 #include "client/graphics/Framebuffer.hpp"
+#include "client/core/Config.hpp"
 
 Framebuffer::Framebuffer() {
 	const float minv = (bgfx::getCaps()->originBottomLeft) ? 0.0f : 1.0f;
@@ -109,7 +110,7 @@ void Framebuffer::draw() const {
 	bgfx::setTexture(0, m_colorTextureSampler.handle(), m_textures[0]);
 	bgfx::setTexture(1, m_depthTextureSampler.handle(), m_textures[1]);
 
-	m_effectTypeUniform.setValue(GameConfig::currentScreenEffect, GameConfig::fogDepth);
+	m_effectTypeUniform.setValue(GameConfig::currentScreenEffect, GameConfig::fogDepth, Config::gamma);
 
 	m_depthFogColorUniform.setValue(GameConfig::fogColor);
 

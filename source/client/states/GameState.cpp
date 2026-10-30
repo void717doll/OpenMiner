@@ -43,6 +43,7 @@
 #include "client/graphics/RenderTarget.hpp"
 #include "client/graphics/TextureAtlas.hpp"
 #include "client/states/GameState.hpp"
+#include "client/states/DeathState.hpp"
 #include "client/states/LuaGUIState.hpp"
 #include "client/states/PauseMenuState.hpp"
 
@@ -70,7 +71,7 @@ GameState::GameState()
 }
 
 GameState::~GameState() {
-	if (auto *sound = SoundManager::instance()) sound->setPaused(true);
+	if (auto *sound = SoundManager::instance()) { sound->stopRecord(); sound->setPaused(true); }
 	m_client.disconnect();
 }
 
@@ -84,9 +85,22 @@ void GameState::init() {
 }
 
 void GameState::onStateInactive() {
-	if (auto *sound = SoundManager::instance()) sound->setPaused(true);
+	resetSpyglass();
 	m_player.clearInputs();
 	m_hud.pause();
+}
+
+bool GameState::holdingSpyglass() {
+	int slot = m_player.heldItemSlot();
+	if (slot < 0 || slot >= m_player.inventory().width()) return false;
+	const ItemStack &stack = m_player.inventory().getStack(u16(slot), 0);
+	return stack.amount() && stack.stringID() == "default:spyglass";
+}
+
+void GameState::resetSpyglass() {
+	m_spyglass.reset();
+	m_camera.setFieldOfView(Config::cameraFOV);
+	m_hud.setSpyglass(false);
 }
 
 void GameState::connect() {
@@ -99,6 +113,7 @@ void GameState::connect() {
 }
 
 void GameState::onEvent(const SDL_Event &event) {
+	if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_RIGHT) resetSpyglass();
 	if (event.type == SDL_QUIT) {
 		m_client.disconnect();
 
@@ -107,21 +122,28 @@ void GameState::onEvent(const SDL_Event &event) {
 
 	if (!m_stateStack->empty() && &m_stateStack->top() == this) {
 		KeyboardHandler *keyboardHandler = (KeyboardHandler *)GamePad::getInputHandler();
+		if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT && holdingSpyglass() && m_player.health()) {
+			m_spyglass.begin(m_player.heldItemSlot(), m_player.dimension());
+			m_hud.pause();
+			return;
+		}
+		if (m_spyglass.active() && event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) return;
 
 		if (event.type == SDL_MOUSEMOTION) {
 			if(Config::screenWidth / 2 != event.motion.x || Config::screenHeight / 2 != event.motion.y) {
-				m_player.turnH((float)event.motion.xrel * -0.01f * Config::mouseSensitivity);
-				m_player.turnViewV((float)event.motion.yrel * -0.01f * Config::mouseSensitivity);
+				float sensitivity = Config::mouseSensitivity * (m_spyglass.active() ? 8.f / Config::cameraFOV : 1.f);
+				m_player.turnH((float)event.motion.xrel * -0.01f * sensitivity);
+				m_player.turnViewV((float)event.motion.yrel * -0.01f * sensitivity);
 
 				Mouse::resetToWindowCenter();
 			}
 		}
 		else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-			m_stateStack->push<PauseMenuState>(m_client, this);
+			m_stateStack->push<PauseMenuState>(m_client, m_player, this);
 		}
 		else if (event.type == SDL_WINDOWEVENT) {
 			if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
-				m_stateStack->push<PauseMenuState>(m_client, this);
+				m_stateStack->push<PauseMenuState>(m_client, m_player, this);
 
 				Mouse::setCursorGrabbed(false);
 				Mouse::setCursorVisible(true);
@@ -132,6 +154,10 @@ void GameState::onEvent(const SDL_Event &event) {
 			}
 		}
 		else if (event.type == SDL_KEYDOWN) {
+			if (!event.key.repeat && event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Noclip)) {
+				m_player.toggleNoclip();
+				m_clientCommandHandler.sendPlayerNoclip(m_player.isNoclip());
+			}
 			if (!event.key.repeat && event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Jump)) m_player.pressJump();
 			if (!event.key.repeat && event.key.keysym.sym == keyboardHandler->getKeycode(GameKey::Drop)) {
 				m_clientCommandHandler.sendPlayerDropItem();
@@ -170,15 +196,21 @@ void GameState::onEvent(const SDL_Event &event) {
 }
 
 void GameState::update() {
+	if (!m_player.health() && !m_stateStack->empty() && &m_stateStack->top() == this)
+		m_stateStack->push<DeathState>(m_clientCommandHandler, m_player, this);
+	bool paused = false;
+	for (ApplicationState *state = m_stateStack->empty() ? nullptr : &m_stateStack->top(); state && state != this; state = state->parent())
+		if (dynamic_cast<PauseMenuState *>(state)) paused = true;
+	if (paused != m_paused) {
+		m_clientCommandHandler.sendPlayerPause(paused);
+		m_paused = paused;
+	}
 	if (auto *sound = SoundManager::instance()) {
-		sound->setPaused(m_stateStack->empty() || &m_stateStack->top() != this);
+		sound->setPaused(paused);
 		sound->setListener(m_player.physicsPosition(), {m_player.dirTargetedX(), m_player.dirTargetedY(), m_player.dirTargetedZ()});
 	}
 	m_world.checkPlayerChunk(m_player.x(), m_player.y(), m_player.z());
 	m_world.update(!m_stateStack->empty() && (&m_stateStack->top() == this || m_stateStack->top().parent() == this));
-
-	if (m_camera.getFieldOfView() != Config::cameraFOV)
-		m_camera.setFieldOfView(Config::cameraFOV);
 
 	if (!m_stateStack->empty() && &m_stateStack->top() == this) {
 		m_player.processInputs();
@@ -192,16 +224,21 @@ void GameState::update() {
 		m_areModKeysLoaded = true;
 	}
 
-	m_player.updatePosition(m_world);
+	if (paused) m_player.pauseMovement();
+	else m_player.updatePosition(m_world);
 
 	m_hud.update();
 
 	if (GameClock::getInstance().getTicks() % 100 < 10) {
-		m_clientCommandHandler.sendPlayerPosUpdate();
 		m_clientCommandHandler.sendPlayerRotUpdate();
 	}
 
 	m_client.update();
+	m_spyglass.update(!m_stateStack->empty() && &m_stateStack->top() == this && m_player.health(),
+		holdingSpyglass(), m_player.heldItemSlot(), m_player.dimension());
+	float fov = m_spyglass.fieldOfView(Config::cameraFOV);
+	if (m_camera.getFieldOfView() != fov) m_camera.setFieldOfView(fov);
+	m_hud.setSpyglass(m_spyglass.active());
 
 	static const Sky *sky = nullptr;
 	if (sky != m_world.sky() && m_world.sky()) {

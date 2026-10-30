@@ -2,6 +2,7 @@
 #define SOUNDMANAGER_HPP_
 
 #include <array>
+#include "common/world/MusicRecords.hpp"
 #include <atomic>
 #include <future>
 #include <string>
@@ -57,8 +58,8 @@ class SoundManager {
 		float m_volume = 0.7f;
 		std::unordered_map<std::string, std::vector<Clip>> m_groups;
 		std::array<Voice, 25> m_voices{};
-		std::array<Clip, 2> m_records;
-		std::array<std::future<Clip>, 2> m_recordLoads;
+		std::array<Clip, musicRecords.size()> m_records;
+		std::array<std::future<Clip>, musicRecords.size()> m_recordLoads;
 		Vector3d m_recordPosition{0, 0, 0};
 		u8 m_record = 0;
 		bool m_recordStarting = false;

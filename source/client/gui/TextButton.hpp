@@ -31,7 +31,7 @@
 
 #include <sol/sol.hpp>
 
-#include "client/graphics/Image.hpp"
+#include "client/graphics/NinePatch.hpp"
 #include "client/gui/Text.hpp"
 #include "client/gui/Widget.hpp"
 
@@ -65,9 +65,9 @@ class TextButton : public Widget {
 		const Color m_hoverColor = Color::fromRGBA32(255, 255, 160);
 		const Color m_disabledColor = Color::fromRGBA32(160, 160, 160);
 
-		Image m_background{"texture-widgets"};
-		Image m_hoverBackground{"texture-widgets"};
-		Image m_disabledBackground{"texture-widgets"};
+		NinePatch m_background{"texture-menu_button"};
+		NinePatch m_hoverBackground{"texture-menu_button"};
+		NinePatch m_disabledBackground{"texture-menu_button"};
 
 		Text m_text;
 

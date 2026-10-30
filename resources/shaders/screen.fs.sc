@@ -29,6 +29,7 @@ void main() {
 	// Inverted colors
 	// color = vec4(vec3(1.0 - texture2D(s_colorTexture, v_texcoord0)), 1.0);
 
+	color.rgb = pow(max(color.rgb, vec3(0.0)), vec3(1.0 / max(u_effectType.z, 0.01)));
 	gl_FragColor = color;
 }
 #else

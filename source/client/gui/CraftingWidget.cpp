@@ -28,6 +28,7 @@
 #include "common/core/Registry.hpp"
 
 #include "client/gui/CraftingWidget.hpp"
+#include "client/network/ClientCommandHandler.hpp"
 
 CraftingWidget::CraftingWidget(ClientCommandHandler &client, Inventory &craftingInventory, Widget *parent)
 	: AbstractInventoryWidget(parent), m_client(client), m_craftingInventory(craftingInventory)
@@ -55,6 +56,7 @@ void CraftingWidget::onEvent(const SDL_Event &event) {
 }
 
 void CraftingWidget::consumeRecipe() {
+	if (m_recipe) m_client.sendCraftedItem(m_recipe->result().stringID(), m_recipe->result().amount());
 	for (u16 y = 0; y < m_craftingInventory.height(); ++y) {
 		for (u16 x = 0; x < m_craftingInventory.width(); ++x) {
 			ItemStack stack = m_craftingInventory.getStack(x, y);

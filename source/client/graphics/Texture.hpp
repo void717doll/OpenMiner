@@ -50,6 +50,7 @@ class Texture : public NonCopyable {
 		void loadFromFile(const std::string &filename);
 		void loadFromSurface(SDL_Surface *surface);
 		void loadFromMemory(const bgfx::Memory *mem, int width, int height);
+		void updateRegion(u8 mip, u16 x, u16 y, u16 width, u16 height, const void *pixels);
 		void free();
 
 		const std::string &filename() const { return m_filename; }

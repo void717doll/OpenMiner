@@ -35,10 +35,11 @@
 #include "client/network/Client.hpp"
 #include "client/states/PauseMenuState.hpp"
 #include "client/states/SettingsMenuState.hpp"
+#include "client/states/StatisticsState.hpp"
 #include "client/states/WorldSavingState.hpp"
 
-PauseMenuState::PauseMenuState(Client &client, DrawableState *parent)
-	: InterfaceState(parent), m_client(client)
+PauseMenuState::PauseMenuState(Client &client, const ClientPlayer &player, DrawableState *parent)
+	: InterfaceState(parent), m_client(client), m_player(player)
 {
 	Mouse::setCursorGrabbed(false);
 	Mouse::setCursorVisible(true);
@@ -57,11 +58,15 @@ PauseMenuState::PauseMenuState(Client &client, DrawableState *parent)
 		m_stateStack->push<SettingsMenuState>(this);
 	});
 
+	m_menuWidget.addButton("Statistics...", [this](TextButton &) {
+		m_stateStack->push<StatisticsState>(m_client, m_player, this);
+	});
+
 	m_menuWidget.addButton("Title Screen", [this] (TextButton &) {
 		m_stateStack->push<WorldSavingState>(m_client, false);
 	});
 
-	m_menuWidget.addButton("Exit", [this] (TextButton &) {
+	m_menuWidget.addButton("Quit Game", [this] (TextButton &) {
 		m_stateStack->push<WorldSavingState>(m_client, true);
 	});
 

@@ -173,6 +173,7 @@ void WieldRenderer::draw(RenderTarget &target, RenderStates states) const {
 		position.x -= std::sin(m_walkPhase * 2 * pi) * 0.03f * m_bob;
 		position.y += std::abs(std::sin(m_walkPhase * 2 * pi)) * 0.03f * m_bob;
 	}
+	position.z += Config::handViewZ / 100.f;
 	states.transform.translate(position.x, position.y, -position.z);
 	if (m_cube) {
 		states.transform.scale(1, 1, -1);
@@ -194,6 +195,7 @@ void WieldRenderer::draw(RenderTarget &target, RenderStates states) const {
 		float x = std::min(aspect, 1.6f) * std::tan(36.f * pi / 180) * 1.15f * 0.58f;
 		states.transform.translate(x - swing * 0.26f, -0.47f - (1 - m_equip) * 0.8f
 			+ std::sin(std::sqrt(progress) * 2 * pi) * 0.1f, -1.15f - strike * 0.15f);
+		states.transform.translate(0, 0, -Config::handViewZ / 100.f);
 		states.transform.translate(0.1f, -0.06f, 0);
 		states.transform.rotateZ(-15.f - swing * 25.f);
 		states.transform.rotateY(-20.f + strike * 30.f);
