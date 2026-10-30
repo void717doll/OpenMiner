@@ -40,7 +40,7 @@
 
 - `u16 id()`
 - `std::string label()`
-- `ItemStack get_item_drop()`
+- `ItemStack get_item_drop([Item tool])` applies normal loot rules; omit the tool for environmental breaks.
 
 ## Chunk
 

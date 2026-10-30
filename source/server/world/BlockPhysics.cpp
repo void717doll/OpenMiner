@@ -163,10 +163,10 @@ void BlockPhysics::update(const Vector3i &position) {
 void BlockPhysics::dropAttached(const Vector3i &position) {
 	const auto *state = m_world.getBlockState(position.x, position.y, position.z);
 	if (!state || !state->block().id()) return;
-	std::string item = state->itemDrop().empty() ? state->block().stringID() : state->itemDrop();
-	u16 amount = state->itemDropAmount();
+	ItemStack drop = state->getItemDrop();
 	write(position, 0);
-	m_world.dropWorldItem({position.x + 0.5, position.y + 0.5, double(position.z)}, item, amount);
+	if (drop.amount())
+		m_world.dropWorldItem({position.x + 0.5, position.y + 0.5, double(position.z)}, drop.stringID(), drop.amount());
 }
 
 void BlockPhysics::startFalling(const Vector3i &position) {

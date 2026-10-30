@@ -24,12 +24,39 @@
  *
  * =====================================================================================
  */
+#include <random.hpp>
+
 #include "common/core/Registry.hpp"
 #include "common/world/BlockState.hpp"
 #include "common/world/BetaMining.hpp"
 
 bool BlockState::canHarvest(const Item &item) const {
 	return retro::canHarvest(*this, item);
+}
+
+ItemStack BlockState::getItemDrop(const Item *tool) const {
+	using Random = effolkronium::random_static;
+	const std::string &id = block().stringID();
+	std::string drop = itemDrop();
+	u16 amount = itemDropAmount();
+	bool grass = id == "default:tallgrass" || id == "default:fern";
+	if (tool && tool->stringID() == "default:shears" && (grass || id == "default:oak_leaves")) {
+		drop = id; amount = 1;
+	}
+	else if (id == "default:diamond_ore") { drop = "default:diamond"; amount = 1; }
+	else if (id == "default:redstone_ore") { drop = "default:redstone_dust"; amount = u16(Random::get(4, 5)); }
+	else if (id == "default:lapis_ore") { drop = "default:lapis_lazuli"; amount = u16(Random::get(4, 8)); }
+	else if (grass) {
+		if (Random::get(1, 8) != 1) return ItemStack::Empty;
+		drop = "default:seeds"; amount = 1;
+	}
+	else if (id == "default:oak_leaves") {
+		if (Random::get(1, 20) != 1) return ItemStack::Empty;
+		drop = "default:sapling"; amount = 1;
+	}
+	else if (id == "default:deadbush") return ItemStack::Empty;
+	if (drop.empty() || !amount || !Registry::getInstance().hasItem(drop)) return ItemStack::Empty;
+	return {drop, amount};
 }
 
 void BlockState::serialize(sf::Packet &packet) const {
@@ -67,7 +94,9 @@ void BlockState::initUsertype(sol::state &lua) {
 		"id", &BlockState::id,
 		"block", &BlockState::block,
 		"label", (const std::string &(BlockState::*)() const)&BlockState::label,
-		"get_item_drop", &BlockState::getItemDrop,
+		"get_item_drop", sol::overload(
+			[](const BlockState &state) { return state.getItemDrop(); },
+			[](const BlockState &state, const Item &tool) { return state.getItemDrop(&tool); }),
 		"can_harvest", &BlockState::canHarvest
 	);
 }

@@ -74,3 +74,5 @@ iron ore and iron blocks require a copper, iron or diamond pickaxe. stone and go
 selecting an item shows its name above the hotbar for three seconds, fading during the last second. enable `show durability` under options > interface to keep the held tool or armor's remaining and maximum durability visible. the setting is saved; food, blocks and empty slots have no durability label.
 
 armor protection appears above the right side of the hotbar, opposite the hearts. ten icons fill left to right, with a half icon for an odd protection value. the bar follows armor wear in survival and creative, and is hidden without armor.
+
+unsupported plants and plants displaced by liquids or falling blocks use the same loot rules as mining without a tool. tall grass and ferns have a one-in-eight seed drop; dead bushes drop nothing. shears still collect grass, ferns and leaves when used directly. empty drops stay empty.

@@ -97,7 +97,7 @@ class BlockState : public ISerializable {
 				return 5.f * hardness();
 		}
 
-		ItemStack getItemDrop() const { return {itemDrop(), itemDropAmount()}; }
+		ItemStack getItemDrop(const Item *tool = nullptr) const;
 		bool canHarvest(const Item &item) const;
 
 		void setBlock(const Block *block) { m_block = block; }
