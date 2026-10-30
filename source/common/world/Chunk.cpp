@@ -86,12 +86,10 @@ void Chunk::setBlock(int x, int y, int z, u16 type) {
 	const BlockState &blockState = block.getState(block.param().hasParam(BlockParam::State)
 		? block.param().getParam(BlockParam::State, blockParam) : 0);
 
-	if (blockState.isLightSource())
-		m_lightmap.addTorchlight(x, y, z, 14);
-	else {
-		m_lightmap.removeTorchlight(x, y, z);
-		m_lightmap.removeSunlight(x, y, z);
-	}
+	m_lightmap.removeTorchlight(x, y, z);
+	m_lightmap.removeSunlight(x, y, z);
+	if (u8 emission = lightEmission(blockState))
+		m_lightmap.addTorchlight(x, y, z, emission);
 
 	onBlockPlaced(x, y, z, block);
 	m_world.onBlockPlaced(x + m_x * width, y + m_y * depth, z + m_z * height, block);
@@ -183,18 +181,22 @@ void Chunk::setBlockState(int x, int y, int z, u16 stateID) {
 	const BlockState &newBlockState = block.getState(block.param().hasParam(BlockParam::State)
 		? stateID : 0);
 
-	if (!blockState.isLightSource() && newBlockState.isLightSource()) {
-		m_lightmap.addTorchlight(x, y, z, 14);
-	}
-	else if (blockState.isLightSource() && !newBlockState.isLightSource()) {
-		logDebug() << block.stringID();
-
+	if (lightEmission(blockState) != lightEmission(newBlockState)) {
 		m_lightmap.removeTorchlight(x, y, z);
-		m_lightmap.removeSunlight(x, y, z);
+		if (u8 emission = lightEmission(newBlockState))
+			m_lightmap.addTorchlight(x, y, z, emission);
 	}
+	if (blockState.isOpaque() != newBlockState.isOpaque()) m_lightmap.removeSunlight(x, y, z);
 
 	if (block.param().hasParam(BlockParam::State))
 		setData(x, y, z, block.param().setParam(BlockParam::State, blockParam, stateID));
+}
+
+u8 Chunk::lightEmission(const BlockState &state) {
+	if (!state.isLightSource()) return 0;
+	const auto &block = state.block();
+	return block.hasGroup("group:om_light_level")
+		? u8(std::min<u16>(15, block.getGroupValue("group:om_light_level"))) : 14;
 }
 
 BlockData *Chunk::getBlockData(int x, int y, int z) const {

@@ -91,18 +91,29 @@ void BlockPhysics::seedNode(const Vector3i &position) {
 
 void BlockPhysics::seedChunk(ServerChunk &chunk) {
 	if (!chunk.isInitialized()) return;
+	const auto &blocks = Registry::getInstance().blocks();
+	std::vector<bool> active(blocks.size());
+	for (const auto &entry : blocks) {
+		const Block &block = *entry;
+		active[block.id()] = falls(block) || fluidKind(block) || block.getGroupValue("group:attached_node")
+			|| block.getGroupValue("group:om_power_source") || block.getGroupValue("group:om_redstone_device")
+			|| block.stringID() == "default:tnt";
+	}
+	auto seed = [&](int x, int y, int z) {
+		if (active[chunk.getBlock(x, y, z)])
+			seedNode({x + chunk.x() * CHUNK_WIDTH, y + chunk.y() * CHUNK_DEPTH, z + chunk.z() * CHUNK_HEIGHT});
+	};
 	for (int z = 0; z < CHUNK_HEIGHT; ++z) {
 		for (int y = 0; y < CHUNK_DEPTH; ++y) {
 			for (int x = 0; x < CHUNK_WIDTH; ++x) {
-				Vector3i position{x + chunk.x() * CHUNK_WIDTH, y + chunk.y() * CHUNK_DEPTH, z + chunk.z() * CHUNK_HEIGHT};
-				seedNode(position);
+				seed(x, y, z);
 				// only relevant nodes outside the new chunk need waking at its boundary.
-				if (!x) seedNode(position + directions[1]);
-				if (x == CHUNK_WIDTH - 1) seedNode(position + directions[2]);
-				if (!y) seedNode(position + directions[3]);
-				if (y == CHUNK_DEPTH - 1) seedNode(position + directions[4]);
-				if (!z) seedNode(position + directions[5]);
-				if (z == CHUNK_HEIGHT - 1) seedNode(position + directions[0]);
+				if (!x) seed(x - 1, y, z);
+				if (x == CHUNK_WIDTH - 1) seed(x + 1, y, z);
+				if (!y) seed(x, y - 1, z);
+				if (y == CHUNK_DEPTH - 1) seed(x, y + 1, z);
+				if (!z) seed(x, y, z - 1);
+				if (z == CHUNK_HEIGHT - 1) seed(x, y, z + 1);
 			}
 		}
 	}

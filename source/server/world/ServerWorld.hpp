@@ -74,6 +74,8 @@ class ServerWorld : public World {
 		Chunk *getChunk(int cx, int cy, int cz) const override;
 
 		bool generateChunk(ServerChunk &chunk);
+		void initializeChunkLighting(ServerChunk &chunk);
+		void tickActiveChunks();
 
 		const PlayerList &players() const { return m_players; }
 		const Dimension &dimension() const { return m_dimension; }
@@ -101,6 +103,7 @@ class ServerWorld : public World {
 		const Dimension &m_dimension;
 
 		ChunkMap m_chunks;
+		std::unordered_map<Vector2i, std::vector<ServerChunk *>> m_chunkColumns;
 
 		Heightmap m_heightmap;
 		TerrainGenerator m_terrainGenerator;
@@ -112,6 +115,7 @@ class ServerWorld : public World {
 
 		s32 m_seed = 0;
 		u32 m_mobTick = 0;
+		std::size_t m_activeChunkCursor = 0;
 
 		struct ChunkSendRequest {
 			ChunkSendRequest(const Vector3i &chunkPos_, ServerPlayer &player_, u64 timestamp_)

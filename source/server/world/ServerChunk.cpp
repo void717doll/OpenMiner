@@ -24,7 +24,10 @@
  *
  * =====================================================================================
  */
+#include <array>
+
 #include "common/network/Network.hpp"
+#include "common/core/Registry.hpp"
 #include "common/world/Dimension.hpp"
 #include "common/world/Player.hpp"
 #include "common/world/World.hpp"
@@ -66,6 +69,9 @@ void ServerChunk::process() {
 
 void ServerChunk::onBlockChanged(int x, int y, int z) {
 	if (!m_isInitialized) return;
+	const auto &block = static_cast<const ServerBlock &>(Registry::getInstance().getBlock(getBlock(x, y, z)));
+	if (block.canUpdate()) addTickingBlock(x, y, z, block);
+	else m_tickingBlocks.erase((z * depth + y) * width + x);
 	m_hasBeenModified = true;
 	m_world.blockPhysics().enqueueNeighbors({x + m_x * width, y + m_y * depth, z + m_z * height});
 }
@@ -76,9 +82,7 @@ void ServerChunk::onBlockPlaced(int x, int y, int z, const Block &block) {
 		addTickingBlock(x, y, z, serverBlock);
 	}
 	else {
-		auto it = m_tickingBlocks.find(Vector3i{x, y, z});
-		if (it != m_tickingBlocks.end())
-			m_tickingBlocks.erase(it);
+		m_tickingBlocks.erase((z * depth + y) * width + x);
 	}
 
 	serverBlock.onBlockPlaced(glm::ivec3{x + m_x * CHUNK_WIDTH, y + m_y * CHUNK_DEPTH, z + m_z * CHUNK_HEIGHT}, (ServerWorld &)m_world);
@@ -93,19 +97,34 @@ void ServerChunk::onBlockDestroyed(int x, int y, int z, const Block &block) {
 	m_hasBeenModified = true;
 }
 
-void ServerChunk::tick() {
-	if (!m_tickingBlocks.empty()) {
-		for (auto &it : m_tickingBlocks) {
-			if (!it.second.isTickingRandomly() || m_random.get<bool>(it.second.tickProbability())) {
-				it.second.onTick(
-					glm::ivec3{
-						it.first.x + m_x * width,
-						it.first.y + m_y * depth,
-						it.first.z + m_z * height
-					},
-				*this, m_world, *m_world.server());
-			}
-		}
+void ServerChunk::initializeTickingBlocks() {
+	m_tickingBlocks.clear();
+	m_tickCursor = 0;
+	for (int z = 0; z < height; ++z) for (int y = 0; y < depth; ++y) for (int x = 0; x < width; ++x) {
+		const auto &block = static_cast<const ServerBlock &>(Registry::getInstance().getBlock(getBlock(x, y, z)));
+		if (block.canUpdate()) addTickingBlock(x, y, z, block);
+	}
+}
+
+void ServerChunk::tick(unsigned budget) {
+	if (!m_isInitialized || !m_world.server() || m_tickingBlocks.empty()) return;
+	std::array<u16, 64> selected;
+	unsigned count = std::min<unsigned>(std::min<unsigned>(budget, selected.size()), m_tickingBlocks.size());
+	auto it = m_tickingBlocks.lower_bound(m_tickCursor);
+	for (unsigned i = 0; i < count; ++i) {
+		if (it == m_tickingBlocks.end()) it = m_tickingBlocks.begin();
+		selected[i] = *it++;
+		m_tickCursor = selected[i] + 1;
+	}
+	// callbacks may replace themselves or other ticking blocks.
+	for (unsigned i = 0; i < count; ++i) {
+		u16 index = selected[i];
+		if (!m_tickingBlocks.count(index)) continue;
+		int x = index % width, y = (index / width) % depth, z = index / (width * depth);
+		const auto &block = static_cast<const ServerBlock &>(Registry::getInstance().getBlock(getBlock(x, y, z)));
+		if (!block.canUpdate()) { m_tickingBlocks.erase(index); continue; }
+		if (!block.isTickingRandomly() || m_random.get<bool>(block.tickProbability()))
+			block.onTick({x + m_x * width, y + m_y * depth, z + m_z * height}, *this, m_world, *m_world.server());
 	}
 }
 

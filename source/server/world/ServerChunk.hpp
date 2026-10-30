@@ -28,6 +28,7 @@
 #define SERVERCHUNK_HPP_
 
 #include <random.hpp>
+#include <set>
 
 #include "common/core/IntTypes.hpp"
 #include "common/world/Chunk.hpp"
@@ -50,7 +51,8 @@ class ServerChunk : public Chunk {
 		void onBlockPlaced(int x, int y, int z, const Block &block) override;
 		void onBlockDestroyed(int x, int y, int z, const Block &block) override;
 
-		void tick();
+		void tick(unsigned budget = 64);
+		void initializeTickingBlocks();
 
 		void sendData(const ClientInfo &client);
 
@@ -59,7 +61,7 @@ class ServerChunk : public Chunk {
 
 		void setReadyToSend() { m_isReadyToSend = true; }
 
-		void addTickingBlock(int x, int y, int z, const ServerBlock &block) { m_tickingBlocks.emplace(Vector3i{x, y, z}, block); }
+		void addTickingBlock(int x, int y, int z, const ServerBlock &) { m_tickingBlocks.emplace((z * depth + y) * width + x); }
 
 	private:
 		ServerWorld &m_world;
@@ -69,7 +71,8 @@ class ServerChunk : public Chunk {
 
 		Random_t m_random;
 
-		std::unordered_map<Vector3i, const ServerBlock &> m_tickingBlocks;
+		std::set<u16> m_tickingBlocks;
+		u16 m_tickCursor = 0;
 };
 
 #endif // SERVERCHUNK_HPP_

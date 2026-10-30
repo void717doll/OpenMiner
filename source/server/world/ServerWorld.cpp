@@ -55,8 +55,7 @@ void ServerWorld::update(bool doTick) {
 	processSendRequests();
 
 	if (doTick) {
-		for (auto &it : m_chunks) // TODO: Loop on a subset of this hashmap
-			it.second->tick();
+		tickActiveChunks();
 
 		m_blockPhysics.tick();
 		updateMobs();
@@ -64,6 +63,80 @@ void ServerWorld::update(bool doTick) {
 		updateTnt();
 		updatePlayerSurvival();
 		m_scene.update();
+	}
+}
+
+void ServerWorld::initializeChunkLighting(ServerChunk &chunk) {
+	chunk.lightmap().clearPendingUpdates();
+	for (int z = 0; z < CHUNK_HEIGHT; ++z) for (int y = 0; y < CHUNK_DEPTH; ++y) for (int x = 0; x < CHUNK_WIDTH; ++x) {
+		chunk.lightmap().setLightDataRaw(x, y, z, 0);
+		if (u8 emission = Chunk::lightEmission(*chunk.getBlockState(x, y, z)))
+			chunk.lightmap().addTorchlight(x, y, z, emission);
+	}
+	if (m_dimension.id() != 1) {
+		auto &terrain = m_heightmap.getOrCreateChunk(chunk.x(), chunk.y());
+		std::vector<const ServerChunk *> highChunks;
+		for (const auto *above : m_chunkColumns.at({chunk.x(), chunk.y()})) {
+			if (above->z() > chunk.z() && above->z() * CHUNK_HEIGHT >= 128)
+				highChunks.push_back(above);
+		}
+		std::sort(highChunks.begin(), highChunks.end(), [](const ServerChunk *a, const ServerChunk *b) { return a->z() > b->z(); });
+		auto attenuate = [](u8 light, const BlockState &state) -> u8 {
+			if (!light || state.isOpaque()) return 0;
+			if (!state.block().id() || state.drawType() == BlockDrawType::Glass || state.drawType() == BlockDrawType::XShape) return light;
+			return light - 1;
+		};
+		int ceiling = (chunk.z() + 1) * CHUNK_HEIGHT - 1;
+		std::array<const Chunk *, 4> terrainChunks;
+		for (int z = 0; z < 4; ++z) terrainChunks[z] = getChunk(chunk.x(), chunk.y(), z);
+		for (int y = 0; y < CHUNK_DEPTH; ++y) for (int x = 0; x < CHUNK_WIDTH; ++x) {
+			u8 sunlight = 15;
+			for (const auto *above : highChunks) {
+				for (int z = CHUNK_HEIGHT - 1; z >= 0 && sunlight; --z)
+					sunlight = attenuate(sunlight, *above->getBlockState(x, y, z));
+				if (!sunlight) break;
+			}
+			// unopened terrain above a cave must not become a source of sunlight.
+			for (int z = 127; z > ceiling && sunlight; --z) {
+				const Chunk *above = z >= 0 ? terrainChunks[z / CHUNK_HEIGHT] : getChunkAtBlockPos(chunk.x() * CHUNK_WIDTH + x, chunk.y() * CHUNK_DEPTH + y, z);
+				if (above && (above->isInitialized() || above->getBlock(x, y, z & (CHUNK_HEIGHT - 1))))
+					sunlight = attenuate(sunlight, *above->getBlockState(x, y, z & (CHUNK_HEIGHT - 1)));
+				else {
+					u8 kind = terrain.blockAt(x, y, z);
+					if (kind == 8 || kind == 9 || kind == 10 || kind == 11 || kind == 79) --sunlight;
+					else if (kind) sunlight = 0;
+				}
+			}
+			sunlight = attenuate(sunlight, *chunk.getBlockState(x, y, CHUNK_HEIGHT - 1));
+			if (sunlight) chunk.lightmap().addSunlight(x, y, CHUNK_HEIGHT - 1, sunlight);
+		}
+	}
+	for (unsigned side = 0; side < 6; ++side) {
+		auto *neighbor = chunk.getSurroundingChunk(side);
+		if (neighbor && neighbor->isInitialized()) neighbor->lightmap().refreshBoundaryLights(side ^ 1);
+	}
+	addChunkToUpdate(&chunk);
+}
+
+void ServerWorld::tickActiveChunks() {
+	std::vector<ServerChunk *> active;
+	std::unordered_set<Vector3i> seen;
+	for (const auto &entry : m_players) {
+		const auto &player = entry.second;
+		if (!player.isReady() || !player.isOnline() || player.dimension() != m_dimension.id()) continue;
+		Vector3i center = player.getCurrentChunk();
+		for (int z = -1; z <= 1; ++z) for (int y = -2; y <= 2; ++y) for (int x = -2; x <= 2; ++x) {
+			Vector3i position{center.x + x, center.y + y, center.z + z};
+			if (!seen.emplace(position).second) continue;
+			auto found = m_chunks.find(position);
+			if (found != m_chunks.end() && found->second->isInitialized()) active.push_back(found->second.get());
+		}
+	}
+	if (active.empty()) { m_activeChunkCursor = 0; return; }
+	std::size_t count = std::min<std::size_t>(64, active.size());
+	for (std::size_t i = 0; i < count; ++i) {
+		m_activeChunkCursor %= active.size();
+		active[m_activeChunkCursor++]->tick();
 	}
 }
 
@@ -176,6 +249,7 @@ void ServerWorld::createChunkNeighbours(ServerChunk &chunk) {
 
 		// Get the created neighbour
 		neighbour = it.first->second.get();
+		m_chunkColumns[{neighbour->x(), neighbour->y()}].push_back(neighbour);
 
 		// Assign surrounding chunk pointers
 		chunk.setSurroundingChunk(i, neighbour);
@@ -188,6 +262,7 @@ ServerChunk &ServerWorld::getOrCreateChunk(s32 cx, s32 cy, s32 cz) {
 	if (!chunk) {
 		auto it = m_chunks.emplace(Vector3i{cx, cy, cz}, new ServerChunk(cx, cy, cz, *this));
 		chunk = it.first->second.get();
+		m_chunkColumns[{cx, cy}].push_back(chunk);
 	}
 
 	// Create our neighbours
@@ -211,6 +286,8 @@ bool ServerWorld::generateChunk(ServerChunk &chunk) {
 
 	m_terrainGenerator.generate(chunk);
 	chunk.setInitialized(true);
+	chunk.initializeTickingBlocks();
+	initializeChunkLighting(chunk);
 	m_blockPhysics.seedChunk(chunk);
 
 	return true;

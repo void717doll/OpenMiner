@@ -103,13 +103,8 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 							if ((data & 0xffff) >= definitions.blocks().size() || !definitions.getBlock(u16(data & 0xffff)).id())
 								data = 0;
 
-							chunk.setBlockRaw(x, y, z, u16(data & 0xffff));
-							chunk.setData(x, y, z, u16(data >> 16));
-							chunk.lightmap().setLightData(x, y, z, light);
-
-							const ServerBlock &block = (ServerBlock &)Registry::getInstance().getBlock(data & 0xffff);
-							if (block.canUpdate())
-								chunk.addTickingBlock(x, y, z, block);
+							chunk.setDataRaw(x, y, z, data);
+							// lighting is rebuilt after every saved chunk and trailer is loaded.
 						}
 					}
 				}
@@ -182,6 +177,13 @@ void WorldSaveBasicBackend::load(const std::string &name) {
 			else break;
 		}
 
+		for (auto &world : m_worldList) {
+			for (const auto &entry : world.chunks()) {
+				if (!entry.second->isInitialized()) continue;
+				entry.second->initializeTickingBlocks();
+				world.initializeChunkLighting(*entry.second);
+			}
+		}
 	}
 
 	// logInfo() << "Loading done.";

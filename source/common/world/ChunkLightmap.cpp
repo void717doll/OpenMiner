@@ -102,6 +102,22 @@ void ChunkLightmap::clearPendingUpdates() {
 	m_sunlightRemovalBfsQueue = {};
 }
 
+void ChunkLightmap::refreshBoundaryLights(unsigned side) {
+	int minX = side == Chunk::East ? CHUNK_WIDTH - 1 : 0;
+	int maxX = side == Chunk::West ? 0 : CHUNK_WIDTH - 1;
+	int minY = side == Chunk::North ? CHUNK_DEPTH - 1 : 0;
+	int maxY = side == Chunk::South ? 0 : CHUNK_DEPTH - 1;
+	int minZ = side == Chunk::Top ? CHUNK_HEIGHT - 1 : 0;
+	int maxZ = side == Chunk::Bottom ? 0 : CHUNK_HEIGHT - 1;
+	for (int z = minZ; z <= maxZ; ++z) for (int y = minY; y <= maxY; ++y) for (int x = minX; x <= maxX; ++x) {
+		if (x && x != CHUNK_WIDTH - 1 && y && y != CHUNK_DEPTH - 1 && z && z != CHUNK_HEIGHT - 1) continue;
+		u8 light = m_lightMap[z][y][x];
+		if (light & 0xf) m_torchlightBfsQueue.emplace(x, y, z);
+		if (light & 0xf0) m_sunlightBfsQueue.emplace(x, y, z);
+	}
+	if (hasPendingUpdates()) m_chunk->world().addChunkToUpdate(m_chunk);
+}
+
 void ChunkLightmap::updateLights(unsigned budget) {
 	updateTorchlight(budget);
 	updateSunlight(budget);
@@ -124,11 +140,15 @@ void ChunkLightmap::updateTorchlight(unsigned &budget) {
 		};
 
 		for (const Vector3i &surroundingNode : surroundingNodes) {
+			if (!tryGetLightData(surroundingNode.x, surroundingNode.y, surroundingNode.z)) continue;
 			int level = getTorchlight(surroundingNode.x, surroundingNode.y, surroundingNode.z);
 			if (level != 0 && level < node.value) {
-				setTorchlight(surroundingNode.x, surroundingNode.y, surroundingNode.z, 0);
+				const BlockState *state = m_chunk->getBlockState(surroundingNode.x, surroundingNode.y, surroundingNode.z);
+				u8 emission = state ? Chunk::lightEmission(*state) : 0;
+				setTorchlight(surroundingNode.x, surroundingNode.y, surroundingNode.z, emission);
 
-				m_torchlightRemovalBfsQueue.emplace(surroundingNode.x, surroundingNode.y, surroundingNode.z, level);
+				if (level > emission) m_torchlightRemovalBfsQueue.emplace(surroundingNode.x, surroundingNode.y, surroundingNode.z, level);
+				if (emission) m_torchlightBfsQueue.emplace(surroundingNode.x, surroundingNode.y, surroundingNode.z);
 			}
 			else if (level >= node.value) {
 				m_torchlightBfsQueue.emplace(surroundingNode.x, surroundingNode.y, surroundingNode.z);
@@ -157,6 +177,7 @@ void ChunkLightmap::updateTorchlight(unsigned &budget) {
 
 		u8 lightLevel = getTorchlight(node.x, node.y, node.z);
 		for (const Vector3i &surroundingNode : surroundingNodes) {
+			if (!tryGetLightData(surroundingNode.x, surroundingNode.y, surroundingNode.z)) continue;
 			if (getTorchlight(surroundingNode.x, surroundingNode.y, surroundingNode.z) + 2 <= lightLevel) {
 				const BlockState *blockState = m_chunk->getBlockState(surroundingNode.x, surroundingNode.y, surroundingNode.z);
 				if (blockState && !blockState->isOpaque()) {
@@ -183,6 +204,7 @@ void ChunkLightmap::updateSunlight(unsigned &budget) {
 		};
 
 		for (const Vector3i &surroundingNode : surroundingNodes) {
+			if (!tryGetLightData(surroundingNode.x, surroundingNode.y, surroundingNode.z)) continue;
 			int level = getSunlight(surroundingNode.x, surroundingNode.y, surroundingNode.z);
 			if ((level == 15 && surroundingNode.z == node.z - 1) || (level != 0 && level < node.value)) {
 				setSunlight(surroundingNode.x, surroundingNode.y, surroundingNode.z, 0);
@@ -216,6 +238,7 @@ void ChunkLightmap::updateSunlight(unsigned &budget) {
 
 		u8 sunlightLevel = getSunlight(node.x, node.y, node.z);
 		for (const Vector3i &surroundingNode : surroundingNodes) {
+			if (!tryGetLightData(surroundingNode.x, surroundingNode.y, surroundingNode.z)) continue;
 			u8 neighbourSunlightLevel = getSunlight(surroundingNode.x, surroundingNode.y, surroundingNode.z);
 			if (neighbourSunlightLevel + 2 <= sunlightLevel
 			|| (sunlightLevel == 15 && neighbourSunlightLevel != 15 && surroundingNode.z == node.z - 1)) {
@@ -243,6 +266,7 @@ std::optional<u8> ChunkLightmap::tryGetLightData(int x, int y, int z) const {
 	if(z < 0)             return m_chunk->getSurroundingChunk(4) ? m_chunk->getSurroundingChunk(4)->lightmap().tryGetLightData(x, y, z + CHUNK_HEIGHT) : std::nullopt;
 	if(z >= CHUNK_HEIGHT) return m_chunk->getSurroundingChunk(5) ? m_chunk->getSurroundingChunk(5)->lightmap().tryGetLightData(x, y, z - CHUNK_HEIGHT) : std::nullopt;
 
+	if (!m_chunk->isInitialized()) return std::nullopt;
 	return m_lightMap[z][y][x];
 }
 

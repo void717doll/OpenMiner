@@ -58,7 +58,6 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 	u16 copper = m_dimensionID == 0 && definitions.hasBlock("default:copper_ore")
 		? definitions.getBlockFromStringID("default:copper_ore").id() : 0;
 
-	Chunk *topChunk = chunk.getSurroundingChunk(Chunk::Top);
 	for(s8 y = 0 ; y < CHUNK_DEPTH ; y++) {
 		for(s8 x = 0 ; x < CHUNK_WIDTH ; x++) {
 			u16 biomeIndex = m_dimensionID == 0 ? m_biomeSampler.getBetaBiomeIndex(heightmap.biomeAt(x, y))
@@ -96,7 +95,6 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 					}
 					// preserve decorations previously written by neighboring chunks.
 					if (block || !chunk.getBlock(x, y, z)) chunk.setBlockRaw(x, y, z, block);
-					if (kind == 89) chunk.lightmap().addTorchlight(x, y, z, 14);
 				}
 				else if (heightmap.densityAt(x, y, worldZ) <= 0) {
 					if (worldZ < SEALEVEL) chunk.setBlockRaw(x, y, z, biome.getLiquidBlockID());
@@ -121,14 +119,7 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 						if (registry.hasBlock("default:snow")) chunk.setBlockRaw(x, y, z + 1, registry.getBlockFromStringID("default:snow").id());
 					}
 				}
-				if (!chunk.getBlock(x, y, z) && z == CHUNK_HEIGHT - 1) chunk.lightmap().addSunlight(x, y, z, 15);
 
-				if (topChunk && topChunk->isInitialized()) {
-					u8 sunlightLevel = topChunk->lightmap().getSunlight(x, y, 0);
-					if (sunlightLevel) {
-						chunk.lightmap().addSunlight(x, y, CHUNK_HEIGHT - 1, sunlightLevel);
-					}
-				}
 			}
 		}
 	}

@@ -62,6 +62,7 @@ class ChunkLightmap {
 		void updateLights(unsigned budget = 4096);
 		bool hasPendingUpdates() const;
 		void clearPendingUpdates();
+		void refreshBoundaryLights(unsigned side = 6);
 
 		std::optional<u8> tryGetLightData(int x, int y, int z) const;
 		u8 getLightDataRaw(int x, int y, int z) const { return m_lightMap[z][y][x]; }

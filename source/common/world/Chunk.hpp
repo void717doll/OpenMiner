@@ -70,6 +70,7 @@ class Chunk : public NonCopyable {
 
 		const BlockState *getBlockState(int x, int y, int z) const;
 		void setBlockState(int x, int y, int z, u16 stateID);
+		static u8 lightEmission(const BlockState &state);
 
 		virtual void onBlockChanged(int, int, int) {}
 		virtual void onBlockPlaced(int, int, int, const Block &) {}
