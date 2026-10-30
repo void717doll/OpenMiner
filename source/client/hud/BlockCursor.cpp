@@ -24,6 +24,7 @@
  *
  * =====================================================================================
  */
+#include "common/world/BlockSupport.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/core/GameClock.hpp"
@@ -280,17 +281,23 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 		if (blockState && (!blockState->block().id() || blockState->drawType() == BlockDrawType::Liquid || blockState->drawType() == BlockDrawType::XShape)) {
 			// Second, we check if the new block is not inside the player
 			const Block &newBlock = Registry::getInstance().getBlockFromStringID(hotbar.currentItem().stringID());
+			int mount = -1;
+			if (newBlock.hasGroup("group:om_torch") || newBlock.hasGroup("group:om_wall_switch")) {
+				mount = torchRotationForFace(face);
+				if (mount < 0) return;
+			}
 			const BlockState &newBlockState = newBlock.getState(0); // FIXME: Get state from item stack
-			FloatBox boundingBox = newBlockState.boundingBox() + Vector3f(float(x - m_player.x()), float(y - m_player.y()), float(z - m_player.z()));
-			FloatBox playerBoundingBox = m_player.hitbox();
-			if (!boundingBox.intersects(playerBoundingBox) && newBlock.placementConstraints().check(m_world, {x, y, z})) {
-				u32 block = newBlock.id();
-				if (newBlock.isRotatable()) {
-					u16 data = m_player.getOppositeDirection() & 0x3;
-					m_world.setData(x, y, z, data);
-
-					block |= data << 16;
-				}
+			u16 data = 0;
+			if (newBlock.isRotatable()) {
+				u16 rotation = mount >= 0 ? u16(mount) : m_player.getOppositeDirection() & 0x3;
+				data = newBlock.param().setParam(BlockParam::Rotation, 0, rotation);
+			}
+			if (!blockHasSupport(m_world, {x, y, z}, newBlockState, data)) return;
+			DoubleBox playerBox = m_player.hitbox();
+			playerBox.move(m_player.x(), m_player.y(), m_player.z());
+			if (!newBlockState.isCollidable() || !collision::blockBox(newBlockState, data, x, y, z).intersects(playerBox)) {
+				u32 block = u32(newBlock.id()) | (u32(data) << 16);
+				m_world.setData(x, y, z, data);
 
 				m_world.setBlock(x, y, z, newBlock.id());
 				if (auto *sound = SoundManager::instance())

@@ -25,6 +25,7 @@
  * =====================================================================================
  */
 #include "common/core/GameTime.hpp"
+#include "common/world/BlockSupport.hpp"
 #include "common/core/Registry.hpp"
 #include "common/core/Utils.hpp"
 #include "common/scene/component/AnimationComponent.hpp"
@@ -458,7 +459,8 @@ void ServerCommandHandler::setupCallbacks() {
 					const BlockState &state = definition.getState(stateID);
 					DoubleBox playerBox = player->hitbox();
 					playerBox.move(player->x(), player->y(), player->z());
-					valid = !state.isCollidable() || !collision::blockBox(state, data, x, y, z).intersects(playerBox);
+					valid = blockHasSupport(world, {x, y, z}, state, data)
+						&& (!state.isCollidable() || !collision::blockBox(state, data, x, y, z).intersects(playerBox));
 				}
 				valid = valid && (!previous->block().id() || previous->drawType() == BlockDrawType::Liquid
 					|| previous->drawType() == BlockDrawType::XShape)

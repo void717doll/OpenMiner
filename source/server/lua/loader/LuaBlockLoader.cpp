@@ -267,7 +267,9 @@ inline void LuaBlockLoader::loadGroups(ServerBlock &block, const sol::table &tab
 }
 
 inline void LuaBlockLoader::loadParams(ServerBlock &block) const {
-	if (block.isRotatable())
+	// redstone torches already saved their lit state before wall mounting was added.
+	bool rotationAfterState = block.getGroupValue("group:om_power_source") == 1;
+	if (block.isRotatable() && !rotationAfterState)
 		block.param().allocateBits(BlockParam::Type::Rotation, 5);
 
 	if (block.states().size() > 1) {
@@ -277,6 +279,9 @@ inline void LuaBlockLoader::loadParams(ServerBlock &block) const {
 			++bits;
 		block.param().allocateBits(BlockParam::Type::State, bits);
 	}
+
+	if (block.isRotatable() && rotationAfterState)
+		block.param().allocateBits(BlockParam::Type::Rotation, 5);
 
 	if (block.customParamBits()) {
 		block.param().allocateBits(BlockParam::Type::Custom, block.customParamBits());

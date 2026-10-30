@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // adapted from lunarchy/luanti builtin/game/falling.lua and src/servermap.cpp.
 // liquid algorithm copyright (c) 2010-2024 celeron55, perttu ahola and contributors.
+#include "common/world/BlockSupport.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -152,19 +153,8 @@ void BlockPhysics::update(const Vector3i &position) {
 	if (block.id() && !fluidKind(block)) {
 		bool neighborsLoaded = std::all_of(directions.begin(), directions.end(), [&](const auto &offset) { return loaded(position + offset); });
 		if (neighborsLoaded) {
-			bool supported = block.placementConstraints().check(m_world, position);
-			u16 attached = block.getGroupValue("group:attached_node");
-			if (attached) {
-				Vector3i anchor{0, 0, attached == 4 ? 1 : -1};
-				if ((attached == 1 || attached == 2) && block.isRotatable()) {
-					u16 rotation = block.param().getParam(BlockParam::Rotation, m_world.getData(position.x, position.y, position.z));
-					BlockGeometry::initOrientation();
-					glm::vec3 direction = BlockGeometry::orientMatrices[rotation & 31] * glm::vec3(0, 0, -1);
-					anchor = {int(std::round(direction.x)), int(std::round(direction.y)), int(std::round(direction.z))};
-				}
-				const auto *support = m_world.getBlockState(position.x + anchor.x, position.y + anchor.y, position.z + anchor.z);
-				supported = supported && support && support->isCollidable();
-			}
+			bool supported = blockHasSupport(m_world, position, *state,
+				m_world.getData(position.x, position.y, position.z));
 			if (!supported) { dropAttached(position); return; }
 		}
 	}
