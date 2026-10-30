@@ -51,6 +51,7 @@ class CraftingWidget : public AbstractInventoryWidget {
 		InventoryWidget &craftingResultInventoryWidget() { return m_craftingResultInventoryWidget; }
 
 	private:
+		void consumeRecipe();
 		void draw(RenderTarget &target, RenderStates states) const override;
 
 		ClientCommandHandler &m_client;
@@ -61,7 +62,7 @@ class CraftingWidget : public AbstractInventoryWidget {
 		InventoryWidget m_craftingInventoryWidget{m_client};
 
 		Inventory m_craftingResultInventory{1, 1};
-		InventoryWidget m_craftingResultInventoryWidget{m_client, true};
+		InventoryWidget m_craftingResultInventoryWidget{m_client};
 
 		const Recipe *m_recipe = nullptr;
 };

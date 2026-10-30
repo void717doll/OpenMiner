@@ -46,6 +46,7 @@ class AbstractInventoryWidget : public Widget {
 		bool doItemMatchFilter(const Item &item);
 
 		bool isReadOnly() const { return m_isReadOnly; }
+		virtual bool isOutput() const { return false; }
 
 	protected:
 		std::vector<std::string> m_shiftDestination;

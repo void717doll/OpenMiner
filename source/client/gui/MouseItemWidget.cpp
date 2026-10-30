@@ -50,6 +50,14 @@ void MouseItemWidget::onEvent(const SDL_Event &event) {
 			return;
 		}
 
+		if (m_currentInventoryWidget && m_currentInventoryWidget->isOutput()
+		 && (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)) {
+			stopDragging();
+			ItemStack held = getStack();
+			if (m_currentInventoryWidget->takeOutput(held)) setStack(held);
+			return;
+		}
+
 		if (getStack().amount() == 0) {
 			if (event.button.button == SDL_BUTTON_LEFT) {
 				leftClickBehaviour();
@@ -81,6 +89,7 @@ void MouseItemWidget::onEvent(const SDL_Event &event) {
 }
 
 void MouseItemWidget::leftClickBehaviour() {
+	if (m_currentInventoryWidget && m_currentInventoryWidget->isOutput()) return;
 	if (m_currentInventoryWidget && m_currentInventoryWidget->currentItemWidget() && m_currentInventoryWidget->inventory()) {
 		if (m_currentInventoryWidget->doItemMatchFilter(m_inventory.getStack(0, 0).item())) {
 			ItemWidget *currentItemWidget = m_currentInventoryWidget->currentItemWidget();
@@ -94,6 +103,7 @@ void MouseItemWidget::leftClickBehaviour() {
 }
 
 void MouseItemWidget::rightClickBehaviour() {
+	if (m_currentInventoryWidget && m_currentInventoryWidget->isOutput()) return;
 	if (m_currentInventoryWidget && m_currentInventoryWidget->currentItemWidget() && m_currentInventoryWidget->inventory()) {
 		if (m_currentInventoryWidget->isReadOnly() && !getStack().amount()) {
 			auto *widget = m_currentInventoryWidget->currentItemWidget();
@@ -123,7 +133,7 @@ void MouseItemWidget::startDragging(bool isLeftClickDrag) {
 	m_draggedStack = getStack();
 	m_dragOrigin = nullptr;
 
-	if (m_currentInventoryWidget && !m_currentInventoryWidget->isReadOnly()
+	if (m_currentInventoryWidget && !m_currentInventoryWidget->isReadOnly() && !m_currentInventoryWidget->isOutput()
 	 && m_currentItemWidget && m_currentItemWidget->isEnabled()
 	 && m_currentInventoryWidget->doItemMatchFilter(m_draggedStack.item())
 	 && (m_currentItemWidget->stack().amount() == 0 || m_currentItemWidget->stack().item().stringID() == m_draggedStack.item().stringID())) {
@@ -188,7 +198,7 @@ void MouseItemWidget::draggingBehaviour(ItemWidget *newItemWidget) {
 
 void MouseItemWidget::updateCurrentItem(ItemWidget *currentItemWidget) {
 	if (currentItemWidget && currentItemWidget->isEnabled()) {
-		bool doItemMatchFilter = !m_currentInventoryWidget || (m_currentInventoryWidget->doItemMatchFilter(m_draggedStack.item()) && !m_currentInventoryWidget->isReadOnly());
+		bool doItemMatchFilter = !m_currentInventoryWidget || (m_currentInventoryWidget->doItemMatchFilter(m_draggedStack.item()) && !m_currentInventoryWidget->isReadOnly() && !m_currentInventoryWidget->isOutput());
 		if (m_isDragging && currentItemWidget != m_currentItemWidget && doItemMatchFilter)
 			draggingBehaviour(currentItemWidget);
 

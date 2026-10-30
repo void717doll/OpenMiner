@@ -37,6 +37,7 @@ CraftingWidget::CraftingWidget(ClientCommandHandler &client, Inventory &crafting
 void CraftingWidget::init(u16 offset, u16 size) {
 	m_craftingInventoryWidget.init(m_craftingInventory, offset, size * size);
 	m_craftingResultInventoryWidget.init(m_craftingResultInventory);
+	m_craftingResultInventoryWidget.setOutputHandler([this] { consumeRecipe(); });
 
 	m_craftingInventoryWidget.setParent(this);
 	m_craftingResultInventoryWidget.setParent(this);
@@ -51,21 +52,20 @@ void CraftingWidget::onEvent(const SDL_Event &event) {
 
 	m_currentInventoryWidget = m_craftingResultInventoryWidget.currentItemWidget()
 		? &m_craftingResultInventoryWidget : &m_craftingInventoryWidget;
+}
 
-	if (m_recipe && !m_craftingResultInventory.getStack(0, 0).item().id()) {
-		for (u8 x = 0 ; x < m_craftingInventory.width() ; ++x) {
-			for (u8 y = 0 ; y < m_craftingInventory.height() ; ++y) {
-				const ItemStack &stack = m_craftingInventory.getStack(x, y);
-				if (stack.item().id()) {
-					m_craftingInventory.setStack(x, y, (stack.amount() > 1) ? stack.item().stringID() : "", stack.amount() - 1);
-				}
-			}
+void CraftingWidget::consumeRecipe() {
+	for (u16 y = 0; y < m_craftingInventory.height(); ++y) {
+		for (u16 x = 0; x < m_craftingInventory.width(); ++x) {
+			ItemStack stack = m_craftingInventory.getStack(x, y);
+			if (!stack.amount()) continue;
+			stack.setAmount(stack.amount() - 1);
+			m_craftingInventory.setItemStack(x, y, stack.amount() ? stack : ItemStack::Empty);
 		}
-
-		m_craftingInventoryWidget.init(m_craftingInventory);
-
-		m_recipe = nullptr;
 	}
+	m_craftingInventoryWidget.sendUpdatePacket();
+	m_recipe = nullptr;
+	update();
 }
 
 void CraftingWidget::update() {
@@ -73,16 +73,16 @@ void CraftingWidget::update() {
 	if (recipe && recipe->type() != "craft")
 		recipe = nullptr;
 
-	if ((!m_recipe || m_recipe != recipe)) {
+	if (m_recipe != recipe || !m_craftingResultInventory.getStack(0, 0).amount()) {
 		m_recipe = recipe;
 
 		if (m_recipe)
-			m_craftingResultInventory.setStack(0, 0, m_recipe->result().item().stringID(), m_recipe->result().amount());
+			m_craftingResultInventory.setItemStack(0, 0, m_recipe->result());
 		else
 			m_craftingResultInventory.setStack(0, 0, BLOCK_AIR, 0);
-
-		m_craftingResultInventoryWidget.init(m_craftingResultInventory);
 	}
+	m_craftingInventoryWidget.update();
+	m_craftingResultInventoryWidget.update();
 }
 
 bool CraftingWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest) {
@@ -93,15 +93,8 @@ bool CraftingWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractIn
 	return false;
 }
 
-ItemStack CraftingWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *) {
-	ItemStack stackRet = m_craftingInventory.addItemStack(itemStack->stack());
-
-	if (stackRet.amount() != itemStack->stack().amount()) {
-		m_craftingInventoryWidget.update();
-		m_craftingInventoryWidget.sendUpdatePacket();
-	}
-
-	return stackRet;
+ItemStack CraftingWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) {
+	return m_craftingInventoryWidget.receiveItemStack(itemStack, src);
 }
 
 void CraftingWidget::draw(RenderTarget &target, RenderStates states) const {

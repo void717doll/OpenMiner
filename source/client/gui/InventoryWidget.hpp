@@ -27,6 +27,8 @@
 #ifndef INVENTORYWIDGET_HPP_
 #define INVENTORYWIDGET_HPP_
 
+#include <functional>
+
 #include "client/graphics/RectangleShape.hpp"
 #include "client/gui/AbstractInventoryWidget.hpp"
 #include "client/gui/MouseItemWidget.hpp"
@@ -52,6 +54,9 @@ class InventoryWidget : public AbstractInventoryWidget {
 		ItemStack receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) override;
 
 		void sendUpdatePacket();
+		void setOutputHandler(std::function<void()> handler) { m_outputHandler = std::move(handler); }
+		bool isOutput() const override { return bool(m_outputHandler); }
+		bool takeOutput(ItemStack &held);
 
 		Inventory *inventory() const { return m_inventory; }
 
@@ -64,6 +69,7 @@ class InventoryWidget : public AbstractInventoryWidget {
 		void updateItemWidgets(u16 offset, u16 size, std::string search = "");
 
 		ClientCommandHandler &m_client;
+		std::function<void()> m_outputHandler;
 
 		Inventory *m_inventory = nullptr;
 

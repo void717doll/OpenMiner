@@ -140,6 +140,10 @@ void LuaGUIState::onEvent(const SDL_Event &event) {
 
 	for (auto &it : m_textInputs)
 		it.second.onEvent(event);
+
+	// keep the result current between input events, including shift-clicks.
+	for (auto &it : m_craftingWidgets)
+		it.second.update();
 }
 
 void LuaGUIState::update() {

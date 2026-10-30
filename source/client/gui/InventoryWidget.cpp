@@ -107,6 +107,7 @@ bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractI
 		if (stackRet.amount() != itemStack->stack().amount()) {
 			if (dest != this && !m_isReadOnly)
 				m_inventory->setItemStack(itemStack->x(), itemStack->y(), stackRet.amount() ? stackRet : ItemStack::Empty);
+			if (isOutput()) m_outputHandler();
 
 			update();
 			sendUpdatePacket();
@@ -118,8 +119,13 @@ bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractI
 }
 
 ItemStack InventoryWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) {
-	if (m_isReadOnly) return itemStack->stack();
+	if (m_isReadOnly || isOutput()) return itemStack->stack();
 	ItemStack stack = itemStack->stack();
+	if (src->isOutput()) {
+		// a recipe is taken as one batch, including when shift-clicking.
+		Inventory preview = *m_inventory;
+		if (preview.addItemStack(stack, m_offset, m_size).amount()) return stack;
+	}
 	if (src == this)
 		m_inventory->clearStack(itemStack->x(), itemStack->y());
 
@@ -129,6 +135,18 @@ ItemStack InventoryWidget::receiveItemStack(const ItemWidget *itemStack, Abstrac
 		sendUpdatePacket();
 
 	return stackRet;
+}
+
+bool InventoryWidget::takeOutput(ItemStack &held) {
+	if (!isOutput() || !m_currentItemWidget || !m_currentItemWidget->isEnabled()) return false;
+	const ItemStack output = m_currentItemWidget->stack();
+	if (!output.amount() || (held.amount() && !held.sameItem(output))) return false;
+	if (unsigned(held.amount()) + output.amount() > output.item().maxStackSize()) return false;
+	if (!held.amount()) held = output;
+	else held.setAmount(held.amount() + output.amount());
+	m_currentItemWidget->setStack(ItemStack::Empty);
+	m_outputHandler();
+	return true;
 }
 
 void InventoryWidget::sendUpdatePacket() {
