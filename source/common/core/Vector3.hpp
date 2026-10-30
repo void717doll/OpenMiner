@@ -27,6 +27,7 @@
 #ifndef VECTOR3_HPP_
 #define VECTOR3_HPP_
 
+#include <cmath>
 #include <stdexcept>
 #include <utility>
 
@@ -45,7 +46,7 @@ class Vector3 {
 		template<typename U>
 		Vector3(const Vector3<U> &vector3) : x(vector3.x), y(vector3.y), z(vector3.z) {}
 
-		T length() { return sqrt(x * x + y * y + z * z); }
+		T length() { return std::sqrt(x * x + y * y + z * z); }
 
 		Vector3 operator-() const { return Vector3{-x, -y, -z}; }
 

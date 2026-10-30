@@ -83,31 +83,31 @@ bool ServerApplication::init() {
 }
 
 int ServerApplication::run() {
+	std::string error;
 	try {
 		if (!init()) return 1;
 		mainLoop();
+		logInfo() << "stopping world simulation";
+		if (!m_worldName.empty()) m_worldController.save(m_worldName);
 	}
 	catch (const Exception &e) {
-		m_eventHandler.emplaceEvent<ServerOnlineEvent>(false);
-		logError() << "world simulation error" << e.what();
-
-		ServerConfig::saveConfigToFile("config/server.lua");
-		ServerConfig::options.clear();
-		m_serverCommandHandler.sendServerClosed(std::string("world error: ") + e.what());
-		m_worldController.clearEntities();
-		return 1;
+		error = e.what();
 	}
-
-	logInfo() << "stopping world simulation";
-	if (!m_worldName.empty()) m_worldController.save(m_worldName);
+	catch (const std::exception &e) {
+		error = e.what();
+	}
+	if (!error.empty()) {
+		m_eventHandler.emplaceEvent<ServerOnlineEvent>(false);
+		logError() << "world simulation error" << error;
+	}
 
 	ServerConfig::saveConfigToFile("config/server.lua");
 	ServerConfig::options.clear();
-	m_serverCommandHandler.sendServerClosed("world closed");
+	m_serverCommandHandler.sendServerClosed(error.empty() ? "world closed" : "world error: " + error);
 	m_server.disconnectAllClients();
-	m_registry.clear();
 	m_worldController.clearEntities();
-	return 0;
+	m_registry.clear();
+	return error.empty() ? 0 : 1;
 }
 
 void ServerApplication::update() {

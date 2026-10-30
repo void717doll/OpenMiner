@@ -120,7 +120,8 @@ void LuaEntityLoader::tryLoadVisual(const sol::table &table, entt::registry &reg
 		if (type == "retro_mob") {
 			std::string model = visual.value()["model"].get<std::string>();
 			BetaMobKind kind = betaMobKind(model);
-			if (kind == BetaMobKind::Unknown) throw std::runtime_error("unknown retro mob model");
+			if (kind == BetaMobKind::Unknown)
+				throw std::runtime_error("unknown retro mob model '" + model + "' in entity '" + m_stringID + "'");
 			registry.emplace<DrawableDef>(entity).setMobModel(u8(kind), kind == BetaMobKind::Giant ? 6.f : 1.f);
 		}
 		else if (type == "inventorycube") {
