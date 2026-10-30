@@ -45,6 +45,7 @@ void TerrainGenerator::generate(ServerChunk &chunk) {
 
 void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 	HeightmapChunk &heightmap = m_heightmap.getOrCreateChunk(chunk.x(), chunk.y());
+	if (m_dimensionID == 1) heightmap.populateNether();
 
 	Random_t rand;
 	std::seed_seq seed{u32(m_seed), u32(m_dimensionID), u32(chunk.x()), u32(chunk.y()), u32(chunk.z())};
@@ -87,6 +88,7 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 						case 79: id = "default:ice"; break;
 						case 87: id = "default:netherrack"; break;
 						case 88: id = "default:soul_sand"; break;
+						case 89: id = "default:glowstone"; break;
 					}
 					if (id) {
 						auto &registry = Registry::getInstance();
@@ -94,6 +96,7 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 					}
 					// preserve decorations previously written by neighboring chunks.
 					if (block || !chunk.getBlock(x, y, z)) chunk.setBlockRaw(x, y, z, block);
+					if (kind == 89) chunk.lightmap().addTorchlight(x, y, z, 14);
 				}
 				else if (heightmap.densityAt(x, y, worldZ) <= 0) {
 					if (worldZ < SEALEVEL) chunk.setBlockRaw(x, y, z, biome.getLiquidBlockID());

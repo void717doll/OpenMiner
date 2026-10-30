@@ -23,7 +23,7 @@ comparisons against java compiled from the supplied checkout passed:
 - 524,288 nether surface bytes and 524,288 nether carved bytes matched, including a 64-bit seed.
 - the earlier 1,350 octave samples matched exactly; 3,825 density samples differed by at most 1.14e-13.
 
-the parity claim covers base climate, density, surface, and cave generation. tree/flora/ore population, cross-chunk feature scheduling, portals, and nether fire/glowstone/mushroom/spring population still use oldworld behavior or remain absent. below zero terrain continues as solid material; above the source region it is air. existing saved chunks remain unchanged; newly explored terrain can meet older terrain at seams. parallel generation, superchunks, and a public terrain-formula api remain unfinished.
+the parity claim covers base climate, density, surface, and cave generation. tree/flora/ore population, cross-chunk feature scheduling, portals, and nether fire/mushroom/spring population still use oldworld behavior or remain absent. below zero terrain continues as solid material; above the source region it is air. existing saved chunks remain unchanged; newly explored terrain can meet older terrain at seams. parallel generation, superchunks, and a public terrain-formula api remain unfinished.
 
 ## mobs and controls
 
@@ -62,3 +62,11 @@ water/lava now use queued propagation and level parameters; unsupported sand/gra
 armor protection, wear and model layers follow the supplied beta `ItemArmor`, `InventoryPlayer` and `RenderPlayer`. tnt uses the beta fuse and motion with the shared blast propagation. 99-item stacks and unstackable cookies are requested deviations.
 
 copper tools and ore add a required mining step before iron. copper and creative mode are requested additions to the beta rules.
+
+## nether population
+
+new nether terrain includes hanging glowstone from retromcp's `WorldGenGlowStone1` and `WorldGenGlowStone2`: an air block beneath netherrack starts a cluster, then 1,500 growth attempts add air blocks with exactly one glowstone neighbor. both source passes retain their counts and height ranges. clusters cross horizontal and vertical chunk borders and emit block light. existing saved chunks remain unchanged.
+
+population uses a separate seed for each source column and reads undecorated terrain. this makes results independent of chunk loading order, but does not reproduce beta's shared lava/fire/glowstone random stream or interactions between separate columns' clusters.
+
+nether spawn passes use `BiomeGenHell`'s equal ghast and zombie-pigman weights and `SpawnerAnimals`' three groups of four attempts. they check solid support, the full hitbox, liquids, existing mobs, and a 24-block exclusion around players. ghasts have the source one-in-twenty spawn check and one successful spawn per column per pass; pigmen allow four. only loaded columns within eight chunks of a player are considered. passes run once per second under the existing 64-mob cap, rather than beta's per-tick global population budget. existing ghast fireballs and neutral pigman retaliation remain active.

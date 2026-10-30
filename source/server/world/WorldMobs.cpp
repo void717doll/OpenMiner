@@ -463,7 +463,12 @@ void ServerWorld::updateMobs() {
 		}
 	}
 	for (const auto &shot : shots) spawnShot(*this, shot);
-	if (++m_mobTick % 200 != 0) return;
+	++m_mobTick;
+	if (m_dimension.id() == 1) {
+		if (m_mobTick % 20 == 0) spawnNetherMobs();
+		return;
+	}
+	if (m_mobTick % 200 != 0) return;
 	bool night = GameTime::getTicks() % GameTime::dayLength >= 12000;
 	static const char *passive[] = {"pig", "cow", "sheep", "chicken", "wolf"};
 	static const char *hostile[] = {"zombie", "skeleton", "creeper", "spider"};
@@ -477,16 +482,6 @@ void ServerWorld::updateMobs() {
 		int y = int(std::floor(player.y())) + random.nextInt(65) - 32;
 		double dx = x + 0.5 - player.x(), dy = y + 0.5 - player.y();
 		if (dx * dx + dy * dy < 24 * 24) continue;
-		if (m_dimension.id() == 1) {
-			const char *name = m_mobTick % 400 ? "default:pig_zombie" : "default:ghast";
-			auto model = Registry::getInstance().getEntityFromStringID(name);
-			if (model == entt::null) continue;
-			const auto *box = Registry::getInstance().entityRegistry().try_get<DoubleBox>(model);
-			if (!box) continue;
-			int floor = retro::mobCavityFloor(*this, *box, x + 0.5, y + 0.5, int(std::floor(player.z())));
-			if (floor >= 0) spawnMob(name, x + 0.5, y + 0.5, floor);
-			continue;
-		}
 		if (m_dimension.id() != 0) continue;
 		int cx = int(std::floor(x / 16.0)), cy = int(std::floor(y / 16.0));
 		if (random.nextInt(10) == 0 && retro::slimeChunk(m_seed, cx, cy)) {
@@ -509,6 +504,71 @@ void ServerWorld::updateMobs() {
 				if (biome != retro::Biome::Taiga && biome != retro::Biome::Forest) continue;
 			}
 			spawnMob("default:" + std::string(name), x + 0.5, y + 0.5, z);
+		}
+	}
+}
+
+void ServerWorld::spawnNetherMobs() {
+	auto &registry = m_scene.registry();
+	auto &definitions = Registry::getInstance();
+	unsigned living = 0;
+	registry.view<MobComponent, BetaMobComponent>().each([&](auto, auto &mob, auto &traits) {
+		if (mob.health && !projectile(traits.kind)) ++living;
+	});
+	if (living >= 64) return;
+	std::unordered_set<Vector2i> visited;
+	for (const auto &entry : m_players) {
+		const auto &player = entry.second;
+		if (!player.isReady() || !player.isOnline() || !player.health() || player.dimension() != m_dimension.id()) continue;
+		int centerX = int(std::floor(player.x() / 16)), centerY = int(std::floor(player.y() / 16));
+		for (int cy = centerY - 8; cy <= centerY + 8; ++cy) {
+			for (int cx = centerX - 8; cx <= centerX + 8; ++cx) {
+				if (!visited.emplace(cx, cy).second) continue;
+				std::uint64_t seed = std::uint64_t(std::int64_t(m_seed)) + m_mobTick
+					+ std::uint64_t(std::int64_t(cx)) * 341873128712ULL
+					+ std::uint64_t(std::int64_t(cy)) * 132897987541ULL;
+				retro::Random random(std::int64_t(seed & ((1ULL << 48) - 1)));
+				bool ghast = random.nextInt(2) == 0;
+				const char *name = ghast ? "default:ghast" : "default:pig_zombie";
+				auto model = definitions.getEntityFromStringID(name);
+				if (model == entt::null) continue;
+				const auto *hitbox = definitions.entityRegistry().try_get<DoubleBox>(model);
+				if (!hitbox) continue;
+				int startX = cx * 16 + random.nextInt(16);
+				int z = random.nextInt(128);
+				int startY = cy * 16 + random.nextInt(16);
+				const Chunk *chunk = getChunkAtBlockPos(startX, startY, z);
+				if (!chunk || !chunk->isInitialized() || getBlock(startX, startY, z)) continue;
+				int spawned = 0, limit = ghast ? 1 : 4;
+				for (int group = 0; group < 3 && spawned < limit; ++group) {
+					int x = startX, y = startY;
+					for (int attempt = 0; attempt < 4 && spawned < limit; ++attempt) {
+						x += random.nextInt(6); x -= random.nextInt(6);
+						random.nextInt(1); random.nextInt(1);
+						y += random.nextInt(6); y -= random.nextInt(6);
+						if (retro::mobCavityFloor(*this, *hitbox, x + 0.5, y + 0.5, z, 0) != z) continue;
+						bool clear = true;
+						for (const auto &otherEntry : m_players) {
+							const auto &other = otherEntry.second;
+							if (!other.isOnline() || !other.health() || other.dimension() != m_dimension.id()) continue;
+							double dx = x + 0.5 - other.x(), dy = y + 0.5 - other.y(), dz = z - other.z();
+							if (dx * dx + dy * dy + dz * dz < 24 * 24) { clear = false; break; }
+						}
+						if (!clear) continue;
+						DoubleBox box = *hitbox; box.move(x + 0.5, y + 0.5, z);
+						registry.view<MobComponent, PositionComponent, DoubleBox>().each([&](auto entity, auto &, auto &position, auto &localBox) {
+							if (!clear || projectile(traitsFor(registry, entity).kind)) return;
+							DoubleBox other = localBox; other.move(position.x, position.y, position.z);
+							if (box.intersects(other)) clear = false;
+						});
+						if (!clear || (ghast && random.nextInt(20) != 0)) continue;
+						if (spawnMob(name, x + 0.5, y + 0.5, z)) {
+							++spawned;
+							if (++living >= 64) return;
+						}
+					}
+				}
+			}
 		}
 	}
 }

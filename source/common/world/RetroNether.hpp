@@ -5,6 +5,26 @@
 
 namespace retro {
 
+// the two beta glowstone generators use the same cluster algorithm.
+template <typename ReadBlock, typename WriteBlock>
+bool glowstoneCluster(Random &random, int x, int y, int z, ReadBlock read, WriteBlock write) {
+	if (read(x, y, z) != 0 || read(x, y, z + 1) != 87) return false;
+	write(x, y, z);
+	for (int attempt = 0; attempt < 1500; ++attempt) {
+		int px = x + random.nextInt(8);
+		px -= random.nextInt(8);
+		int pz = z - random.nextInt(12);
+		int py = y + random.nextInt(8);
+		py -= random.nextInt(8);
+		if (read(px, py, pz) != 0) continue;
+		int neighbors = (read(px - 1, py, pz) == 89) + (read(px + 1, py, pz) == 89)
+			+ (read(px, py, pz - 1) == 89) + (read(px, py, pz + 1) == 89)
+			+ (read(px, py - 1, pz) == 89) + (read(px, py + 1, pz) == 89);
+		if (neighbors == 1) write(px, py, pz);
+	}
+	return true;
+}
+
 class NetherTerrain {
 	public:
 		using Blocks = Terrain::Blocks;

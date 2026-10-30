@@ -29,6 +29,7 @@
 
 #include <cstring>
 #include <unordered_map>
+#include <vector>
 
 #include "common/world/RetroTerrain.hpp"
 #include "common/world/RetroNether.hpp"
@@ -36,6 +37,7 @@
 #include "common/core/EngineConfig.hpp"
 #include "common/core/IntTypes.hpp"
 #include "common/core/Vector2.hpp"
+#include "common/core/Vector3.hpp"
 
 class Heightmap;
 
@@ -47,6 +49,7 @@ class HeightmapChunk {
 		}
 
 		void generate();
+		void populateNether();
 		void refreshHeight();
 		std::uint8_t blockAt(int x, int y, int z) const { return z < 0 ? 7 : z >= 128 ? 0 : m_blocks[(x * 16 + y) * 128 + z]; }
 		retro::Biome biomeAt(int x, int y) const { return m_climate.biomes[x * 16 + y]; }
@@ -68,6 +71,7 @@ class HeightmapChunk {
 		std::array<double, 425> m_density{};
 		retro::ClimateMap m_climate;
 		retro::Terrain::Blocks m_blocks{};
+		bool m_populated = false;
 };
 
 class Heightmap {
@@ -75,6 +79,7 @@ class Heightmap {
 		Heightmap(s32 seed, bool nether = false);
 
 		HeightmapChunk &getOrCreateChunk(s32 chunkX, s32 chunkY);
+		const std::vector<Vector3i> &netherGlowstone(s32 chunkX, s32 chunkY);
 
 		int getHighestBlockAt(s32 blockX, s32 blockY);
 		int getHighestChunkAt(s32 blockX, s32 blockY);
@@ -87,6 +92,7 @@ class Heightmap {
 
 	private:
 		std::unordered_map<Vector2i, HeightmapChunk> m_chunks;
+		std::unordered_map<Vector2i, std::vector<Vector3i>> m_netherGlowstone;
 		retro::Terrain m_terrain;
 		retro::NetherTerrain m_netherTerrain;
 		bool m_nether;

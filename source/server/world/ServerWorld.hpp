@@ -94,6 +94,7 @@ class ServerWorld : public World {
 	private:
 		bool m_creative = false;
 		void processSendRequests();
+		void spawnNetherMobs();
 
 		PlayerList &m_players;
 
