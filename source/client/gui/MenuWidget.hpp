@@ -66,6 +66,7 @@ class MenuWidget : public Widget {
 
 		std::deque<std::pair<TextButton, Vector2i>> m_buttons;
 		std::deque<std::pair<SliderWidget, Vector2i>> m_sliders;
+		std::size_t m_revision = 0;
 };
 
 #endif // MENUWIDGET_HPP_

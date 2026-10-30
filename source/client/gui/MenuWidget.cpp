@@ -34,6 +34,7 @@ MenuWidget::MenuWidget(u16 width, u16 height, Widget *parent) : Widget(parent) {
 }
 
 void MenuWidget::reset(u16 width, u16 height) {
+	++m_revision;
 	m_width = width;
 	m_height = height;
 
@@ -45,29 +46,24 @@ void MenuWidget::reset(u16 width, u16 height) {
 }
 
 void MenuWidget::onEvent(const SDL_Event &event) {
-	std::size_t sliderCount = m_sliders.size();
-	std::size_t buttonCount = m_buttons.size();
+	const std::size_t revision = m_revision;
 
 	for (auto &it : m_sliders) {
 		it.first.onEvent(event);
+		if (revision != m_revision) return;
 
 		if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
 			updateWidgetPosition(it.first, it.second.x, it.second.y);
 		}
-
-		if (sliderCount != m_sliders.size())
-			break;
 	}
 
 	for (auto &it : m_buttons) {
 		it.first.onEvent(event);
+		if (revision != m_revision) return;
 
 		if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
 			updateWidgetPosition(it.first, it.second.x, it.second.y);
 		}
-
-		if (buttonCount != m_buttons.size())
-			break;
 	}
 }
 
@@ -84,6 +80,7 @@ void MenuWidget::onGuiScaleChanged(const GuiScaleChangedEvent &event) {
 }
 
 TextButton &MenuWidget::addButton(const std::string &text, const TextButton::CppCallback &callback, u16 width) {
+	++m_revision;
 	int x = int((m_buttons.size() + m_sliders.size()) % m_width);
 	int y = int((m_buttons.size() + m_sliders.size()) / m_width);
 
@@ -107,6 +104,7 @@ void MenuWidget::setButtonEnabled(const std::string &text, bool isEnabled) {
 }
 
 SliderWidget &MenuWidget::addSlider(const std::string &text, const SliderWidget::CppCallback &callback, int min, int max, int initialValue) {
+	++m_revision;
 	int x = int((m_buttons.size() + m_sliders.size()) % m_width);
 	int y = int((m_buttons.size() + m_sliders.size()) / m_width);
 

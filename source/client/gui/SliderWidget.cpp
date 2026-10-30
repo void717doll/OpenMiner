@@ -54,20 +54,27 @@ void SliderWidget::onEvent(const SDL_Event &event) {
 		else
 			m_text.setColor(m_defaultTextColor);
 
-		if (m_isDragging)
-			m_callback(*this, event.type);
+		if (m_isDragging) {
+			auto callback = m_callback;
+			callback(*this, event.type);
+		}
 	}
 	else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
 		m_isDragging = isPointInWidget(event.button.x, event.button.y);
 		updatePercentage(event.button.x);
-		if (m_isDragging)
-			m_callback(*this, event.type);
+		if (m_isDragging) {
+			auto callback = m_callback;
+			callback(*this, event.type);
+		}
 	}
 	else if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
-		if (m_isDragging)
-			m_callback(*this, event.type);
+		bool wasDragging = m_isDragging;
 		setCurrentValue(getCurrentValue());
 		m_isDragging = false;
+		if (wasDragging) {
+			auto callback = m_callback;
+			callback(*this, event.type);
+		}
 	}
 }
 

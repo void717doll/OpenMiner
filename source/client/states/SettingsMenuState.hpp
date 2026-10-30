@@ -72,7 +72,6 @@ class SettingsMenuState : public InterfaceState {
 
 		u16 m_currentKey = GameKey::Undefined;
 		TextButton *m_currentKeyButton = nullptr;
-		Key *m_key = nullptr;
 
 		enum class MenuState {
 			Main,

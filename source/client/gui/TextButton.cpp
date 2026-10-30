@@ -60,10 +60,15 @@ void TextButton::onEvent(const SDL_Event &event) {
 			m_text.setColor(m_defaultColor);
 
 		if (m_isHovered) {
-			if (m_cppCallback)
-				m_cppCallback(*this);
-			else if (m_luaCallback)
-				m_luaCallback(*this);
+			// switching menus can destroy this button and its stored callback.
+			if (m_cppCallback) {
+				auto callback = m_cppCallback;
+				callback(*this);
+			}
+			else if (m_luaCallback) {
+				auto callback = m_luaCallback;
+				callback(*this);
+			}
 		}
 	}
 }

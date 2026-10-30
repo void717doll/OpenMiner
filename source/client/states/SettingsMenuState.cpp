@@ -88,9 +88,6 @@ void SettingsMenuState::onEvent(const SDL_Event &event) {
 			KeyboardHandler *keyboardHandler = dynamic_cast<KeyboardHandler *>(GamePad::getInputHandler());
 			keyboardHandler->setKeycode(m_currentKey, event.key.keysym.sym);
 
-			m_key->setKeycode(event.key.keysym.sym);
-			m_key = nullptr;
-
 			m_currentKeyButton->setText(m_currentKeyButton->text() + keyboardHandler->getKeyName(m_currentKey));
 			m_currentKeyButton = nullptr;
 		}
@@ -144,6 +141,7 @@ void SettingsMenuState::updateWidgetPosition() {
 }
 
 void SettingsMenuState::doneButtonAction() {
+	m_currentKeyButton = nullptr;
 	if (m_state != MenuState::Main) {
 		m_resolutionButton = nullptr;
 		m_state = MenuState::Main;
@@ -292,7 +290,6 @@ void SettingsMenuState::addInputButtons() {
 			button.setText(it.second.name() + ": ");
 			m_currentKey = (u16)it.first;
 			m_currentKeyButton = &button;
-			m_key = const_cast<Key *>(&it.second);
 		});
 	}
 
