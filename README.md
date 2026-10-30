@@ -1,8 +1,35 @@
-# oldworld
+# openminer
 
-oldworld is a small, free and libre block-building game inspired by minecraft beta 1.7.3. gather materials, make tools, build a home, and explore. it runs offline and saves worlds locally.
+openminer is a small, free and libre block-building game inspired by minecraft beta 1.7.3. gather materials, make tools, build a home, and explore. it runs offline and saves worlds locally.
 
 choose survival to mine, craft, farm, and fight mobs, or creative to build with unlimited blocks. food restores health directly. tools wear out, armor provides protection, and caves lead to ores and underground lakes. obsidian portals connect the overworld to the nether.
+
+## changes in this version
+
+- terrain, caves, biomes, mining, movement, and survival rules use minecraft beta 1.7.3 as their reference.
+- refi textures replace the old block, item, mob, and interface artwork. the inventory and hud use compact hearts, an armor bar, item names above the hotbar, and optional durability text.
+- held items use the normal right-hand pose. dropped items have ground collision, pickup delays, rotation, and bobbing.
+- ordinary blocks and items stack to 99. food, tools, and armor do not stack. food heals directly, without a hunger bar.
+- tools wear out, correct tool tiers control drops, and equipment keeps its damage through inventory moves and saves. copper comes between stone and iron.
+- armor appears on the player model. leather adds fall protection, gold adds fire protection, and chainmail adds general damage protection.
+- material sounds cover footsteps, digging, breaking, placement, and item pickups.
+
+## additions
+
+- survival and creative world creation, saved game modes, automatic names for unnamed worlds, and a searchable creative inventory.
+- copper ore and tools, craftable tnt, ferns, three-dimensional armor, and held-item tooltips.
+- nether portals, ghasts, zombie pigmen, glowstone clusters, basalt, quartz, and nether masonry.
+- cave moss, fungi, crystals, lush cave plants, cherry trees, and a spyglass.
+- potatoes, tomatoes, barley, extra food recipes, bone meal, mulch, fertilizer, beehives, honey, and wax.
+- ocelots and bats, working buckets, beds, clocks, minecarts, powered rails, and detector rails.
+- dungeon rooms with loot chests and mob spawners, plus jukeboxes and music discs.
+
+## removals
+
+- multiplayer joining, hosting, dedicated-server startup, and address settings.
+- shields, offhand slots, fireworks, and the block-information overlay.
+- texture-pack selection and overrides; refi artwork is bundled with the game.
+- starter gifts, cheat commands, sprint, and survival flight. creative keeps its own inventory and flight controls.
 
 ## play
 
@@ -36,11 +63,11 @@ cmake --build build --target openminer -j4
 ./build/openminer
 ```
 
-the executable keeps the original `openminer` name. launch it from the project directory so it can find the game files.
+launch the game from the project directory so it can find its files.
 
 ## credits
 
-- **OpenMiner**, by Unarelith, Quentin Bazin, and its contributors: the engine this game is built on.
+- **OpenMiner**, by Unarelith, Quentin Bazin, and its contributors: the original project and engine.
 - **Luanti** and **Lunarchy**: references for movement, block physics, held items, and sound playback.
 - **RetroMCP**: the beta 1.7.3 source reference for terrain, survival rules, mobs, and models. [port notes](docs/retromcp-port.md).
 - **Mineclonia**: gameplay references, models, and sounds. [sound credits](docs/sound-assets.md).
