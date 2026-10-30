@@ -32,10 +32,6 @@ mod:key {
 	default_key = "E",
 
 	callback = function(keyID, client, screen_width, screen_height, gui_scale)
-		if client.creative then
-			show_creative_inventory(keyID, client)
-			return
-		end
 		local gui = LuaGUI.new(keyID)
 
 		gui:set_size(176, 166)

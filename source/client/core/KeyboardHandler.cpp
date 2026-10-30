@@ -116,9 +116,12 @@ bool KeyboardHandler::isKeyPressed(GameKeyID key) {
 }
 
 void KeyboardHandler::addKey(GameKeyID id, const std::string &name, SDL_Keycode defaultKey, const std::string &stringID, Key *key) {
-	auto keyit = m_keysID.find(stringID);
+	std::string bindingID = stringID.empty() ? "_" + name : stringID;
+	auto keyit = m_keysID.find(bindingID);
 	if (keyit == m_keysID.end()) {
-		auto it = m_keys.emplace(id, Key((u16)id, (stringID.empty() ? "_" + name : stringID), name));
+		// saved bindings can arrive in a different order from the mod keys.
+		while (m_keys.count(id)) ++id;
+		auto it = m_keys.emplace(id, Key((u16)id, bindingID, name));
 		it.first->second.setKeycode(defaultKey);
 
 		m_keysID.emplace(it.first->second.stringID(), id);
@@ -129,7 +132,8 @@ void KeyboardHandler::addKey(GameKeyID id, const std::string &name, SDL_Keycode 
 		}
 	}
 	else {
-		Key &keyitem = m_keys.at(keyit->second);
+		id = keyit->second;
+		Key &keyitem = m_keys.at(id);
 		keyitem.setName(name);
 
 		if (key) {
