@@ -10,6 +10,8 @@
 #include "client/audio/SoundManager.hpp"
 
 SoundManager::~SoundManager() {
+	for (auto &load : m_recordLoads)
+		if (load.valid()) load.wait();
 	if (m_device) SDL_CloseAudioDevice(m_device);
 	if (m_audioInitialized) SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	if (s_instance == this) s_instance = nullptr;
@@ -57,7 +59,7 @@ bool SoundManager::init(const std::string &configFile) {
 	return true;
 }
 
-bool SoundManager::loadClip(const std::string &path, Clip &clip) {
+bool SoundManager::loadClip(const std::string &path, Clip &clip, bool resample) {
 	SDL_AudioSpec source{};
 	Uint8 *data = nullptr;
 	Uint32 length = 0;
@@ -65,9 +67,11 @@ bool SoundManager::loadClip(const std::string &path, Clip &clip) {
 		logWarning() << "unable to load sound:" << path << SDL_GetError();
 		return false;
 	}
+	clip.sampleRate = resample ? m_format.freq : source.freq;
+	clip.channels = resample ? m_format.channels : std::min<u8>(2, source.channels);
 	SDL_AudioCVT conversion{};
 	int result = SDL_BuildAudioCVT(&conversion, source.format, source.channels, source.freq,
-		m_format.format, m_format.channels, m_format.freq);
+		m_format.format, clip.channels, clip.sampleRate);
 	if (result < 0) { SDL_FreeWAV(data); return false; }
 	std::vector<Uint8> buffer(std::size_t(length) * std::max(1, conversion.len_mult));
 	std::memcpy(buffer.data(), data, length);
@@ -78,7 +82,7 @@ bool SoundManager::loadClip(const std::string &path, Clip &clip) {
 	std::size_t bytes = conversion.needed ? std::size_t(conversion.len_cvt) : length;
 	clip.samples.resize(bytes / sizeof(float));
 	std::memcpy(clip.samples.data(), buffer.data(), clip.samples.size() * sizeof(float));
-	return clip.samples.size() >= 2;
+	return clip.samples.size() >= clip.channels;
 }
 
 u32 SoundManager::random() {
@@ -93,9 +97,10 @@ bool SoundManager::startVoice(const std::string &group, float gain, float pitch,
 	const Clip &clip = found->second[random() % found->second.size()];
 	SDL_LockAudioDevice(m_device);
 	if (m_paused) { SDL_UnlockAudioDevice(m_device); return false; }
-	auto voice = std::find_if(m_voices.begin(), m_voices.end(), [](const Voice &v) { return !v.clip; });
-	if (voice == m_voices.end())
-		voice = std::min_element(m_voices.begin(), m_voices.end(), [](const Voice &a, const Voice &b) { return a.serial < b.serial; });
+	auto end = m_voices.end() - 1;
+	auto voice = std::find_if(m_voices.begin(), end, [](const Voice &v) { return !v.clip; });
+	if (voice == end)
+		voice = std::min_element(m_voices.begin(), end, [](const Voice &a, const Voice &b) { return a.serial < b.serial; });
 	*voice = Voice{&clip, 0, std::clamp(pitch, 0.25f, 4.f), gain * std::sqrt((1 - pan) * 0.5f),
 		gain * std::sqrt((1 + pan) * 0.5f), ++m_serial};
 	SDL_UnlockAudioDevice(m_device);
@@ -120,6 +125,73 @@ void SoundManager::setListener(const Vector3d &position, const Vector3d &directi
 	m_listener = position;
 	double length = std::hypot(direction.x, direction.y);
 	if (length > 0.001) m_right = {direction.y / length, -direction.x / length, 0};
+	if (!m_device || !m_record) return;
+	Vector3d delta = m_recordPosition - m_listener;
+	double distance = delta.length();
+	if (distance > 65) { stopRecord(); return; }
+	float pan = distance > 0.01 ? float(std::clamp((delta.x * m_right.x + delta.y * m_right.y) / distance, -1.0, 1.0)) : 0;
+	float gain = float(1 - distance / 65);
+	// listener movement must not wait for the audio callback.
+	m_recordLeft.store(gain * std::sqrt((1 - pan) * 0.5f), std::memory_order_relaxed);
+	m_recordRight.store(gain * std::sqrt((1 + pan) * 0.5f), std::memory_order_relaxed);
+	if (!m_recordStarting) return;
+	auto &clip = m_records[m_record - 1];
+	auto &load = m_recordLoads[m_record - 1];
+	if (load.valid()) {
+		if (load.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return;
+		try { clip = load.get(); }
+		catch (const std::exception &error) {
+			logWarning() << "unable to load music:" << error.what();
+			stopRecord();
+			return;
+		}
+	}
+	if (clip.samples.empty()) { stopRecord(); return; }
+	m_recordStarting = false;
+	SDL_LockAudioDevice(m_device);
+	m_voices.back() = Voice{&clip, 0, float(clip.sampleRate) / float(m_format.freq), 0, 0, ++m_serial};
+	SDL_UnlockAudioDevice(m_device);
+}
+
+bool SoundManager::playRecord(u8 record, const Vector3d &position) {
+	if (!m_device || record > 2) return false;
+	if (!record) {
+		if (position == m_recordPosition) stopRecord();
+		return true;
+	}
+	Vector3d delta = position - m_listener;
+	if (delta.length() > 65) return false;
+	stopRecord();
+	auto &load = m_recordLoads[record - 1];
+	if (m_records[record - 1].samples.empty() && !load.valid()) {
+		try {
+			load = std::async(std::launch::async, [this, record] {
+				LoggerHandler logger;
+				logger.setName("audio");
+				LoggerHandler::setInstance(logger);
+				Clip clip;
+				loadClip(record == 1 ? "resources/sounds/record_13.wav" : "resources/sounds/record_cat.wav", clip, false);
+				return clip;
+			});
+		}
+		catch (const std::exception &error) {
+			logWarning() << "unable to start music loading:" << error.what();
+			return false;
+		}
+	}
+	m_recordPosition = position;
+	m_record = record;
+	m_recordStarting = true;
+	setListener(m_listener, {-m_right.y, m_right.x, 0});
+	return true;
+}
+
+void SoundManager::stopRecord() {
+	if (!m_device) return;
+	SDL_LockAudioDevice(m_device);
+	m_voices.back() = {}; m_record = 0;
+	SDL_UnlockAudioDevice(m_device);
+	m_recordStarting = false;
 }
 
 void SoundManager::setVolume(float volume) {
@@ -134,7 +206,7 @@ void SoundManager::setPaused(bool paused) {
 	if (!m_device || m_paused == paused) return;
 	SDL_LockAudioDevice(m_device);
 	m_paused = paused;
-	if (paused) m_voices = {};
+	if (paused) std::fill(m_voices.begin(), m_voices.end() - 1, Voice{});
 	SDL_UnlockAudioDevice(m_device);
 }
 
@@ -148,16 +220,25 @@ void SoundManager::mix(void *context, Uint8 *stream, int length) {
 	for (auto &voice : self.m_voices) {
 		if (!voice.clip) continue;
 		const auto &samples = voice.clip->samples;
-		std::size_t clipFrames = samples.size() / 2;
+		std::size_t channels = voice.clip->channels;
+		std::size_t clipFrames = samples.size() / channels;
+		float leftGain = voice.left, rightGain = voice.right;
+		if (&voice == &self.m_voices.back()) {
+			leftGain = self.m_recordLeft.load(std::memory_order_relaxed);
+			rightGain = self.m_recordRight.load(std::memory_order_relaxed);
+		}
+		leftGain *= self.m_volume;
+		rightGain *= self.m_volume;
 		for (std::size_t frame = 0; frame < frames; ++frame) {
 			std::size_t index = std::size_t(voice.cursor);
 			if (index >= clipFrames) { voice.clip = nullptr; break; }
 			std::size_t next = std::min(index + 1, clipFrames - 1);
 			float fraction = float(voice.cursor - double(index));
-			float left = samples[index * 2] + (samples[next * 2] - samples[index * 2]) * fraction;
-			float right = samples[index * 2 + 1] + (samples[next * 2 + 1] - samples[index * 2 + 1]) * fraction;
-			output[frame * 2] += left * voice.left * self.m_volume;
-			output[frame * 2 + 1] += right * voice.right * self.m_volume;
+			float left = samples[index * channels] + (samples[next * channels] - samples[index * channels]) * fraction;
+			float right = samples[index * channels + channels - 1]
+				+ (samples[next * channels + channels - 1] - samples[index * channels + channels - 1]) * fraction;
+			output[frame * 2] += left * leftGain;
+			output[frame * 2 + 1] += right * rightGain;
 			voice.cursor += voice.pitch;
 		}
 	}
