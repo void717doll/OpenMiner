@@ -413,7 +413,7 @@ mod:block {
 mod:block {
 	id = "torch",
 	groups = {attached_node = 3},
-	name = "Torch (WIP)",
+	name = "Torch",
 	tiles = "torch_on.png",
 
 	is_light_source = true,
