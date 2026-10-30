@@ -24,11 +24,46 @@
  *
  * =====================================================================================
  */
+#include "common/core/Registry.hpp"
 #include "common/network/Network.hpp"
 #include "common/world/Player.hpp"
 
 Player::Player() {
 	m_hitbox = FloatBox{-0.3f, -0.3f, 0, 0.6f, 0.6f, 1.8f};
+}
+
+bool Player::pickItem(const std::string &itemID) {
+	auto &registry = Registry::getInstance();
+	if (!registry.hasItem(itemID) || !registry.getItemFromStringID(itemID).id()
+	 || !m_inventory.width() || !m_inventory.height()) return false;
+	u16 width = m_inventory.width();
+	for (u16 slot = 0; slot < width; ++slot) {
+		const auto &stack = m_inventory.getStack(slot, 0);
+		if (stack.amount() && stack.stringID() == itemID) {
+			setHeldItemSlot(u8(slot));
+			return true;
+		}
+	}
+	u16 target = m_heldItemSlot >= 0 && m_heldItemSlot < width ? u16(m_heldItemSlot) : 0;
+	if (m_inventory.getStack(target, 0).amount()) {
+		for (u16 slot = 0; slot < width; ++slot) {
+			if (!m_inventory.getStack(slot, 0).amount()) { target = slot; break; }
+		}
+	}
+	for (u16 y = 1; y < m_inventory.height(); ++y) {
+		for (u16 x = 0; x < width; ++x) {
+			ItemStack owned = m_inventory.getStack(x, y);
+			if (!owned.amount() || owned.stringID() != itemID) continue;
+			m_inventory.setItemStack(x, y, m_inventory.getStack(target, 0));
+			m_inventory.setItemStack(target, 0, owned);
+			setHeldItemSlot(u8(target));
+			return true;
+		}
+	}
+	if (!isCreative()) return false;
+	m_inventory.setStack(target, 0, itemID, registry.getItemFromStringID(itemID).maxStackSize());
+	setHeldItemSlot(u8(target));
+	return true;
 }
 
 u16 Player::armorValue() const {

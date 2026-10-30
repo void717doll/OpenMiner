@@ -76,6 +76,7 @@ class Player : public ISerializable {
 		const ItemStack &heldItemStack() { return m_inventory.getStack(m_heldItemSlot, 0); }
 		s8 heldItemSlot() const { return m_heldItemSlot; }
 		void setHeldItemSlot(u8 heldItemSlot) { m_heldItemSlot = heldItemSlot; }
+		bool pickItem(const std::string &itemID);
 
 		bool isCreative() const { return m_creative; }
 		void setCreative(bool creative) { m_creative = creative; if (creative) m_health = 20; }

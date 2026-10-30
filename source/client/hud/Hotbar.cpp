@@ -76,10 +76,8 @@ void Hotbar::onEvent(const SDL_Event &event) {
 }
 
 void Hotbar::update() {
-	if (m_cursorPos == -1) {
-		if (m_player.heldItemSlot() == -1)
-			return;
-
+	if (m_player.heldItemSlot() == -1) return;
+	if (m_cursorPos != m_player.heldItemSlot()) {
 		m_cursorPos = m_player.heldItemSlot();
 		m_cursor.setPosition(-1.f + 20.f * (float)m_cursorPos, -1.f);
 	}

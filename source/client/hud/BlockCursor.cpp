@@ -119,6 +119,20 @@ void BlockCursor::onEvent(const SDL_Event &event, const Hotbar &hotbar) {
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT)
 			activateBlock(hotbar);
+		else if (event.button.button == SDL_BUTTON_MIDDLE) {
+			const auto *state = m_world.getBlockState(m_selectedBlock.x, m_selectedBlock.y, m_selectedBlock.z);
+			if (!state || !state->block().id() || state->drawType() == BlockDrawType::Liquid
+			 || state->block().stringID() == "default:portal") return;
+			const auto &block = state->block();
+			std::string itemID = block.stringID();
+			if (block.hasGroup("group:om_crop") || block.hasGroup("group:ci_ignore"))
+				itemID = block.getState(0).itemDrop();
+			if (m_player.pickItem(itemID)) {
+				m_client.sendPlayerInvUpdate();
+				m_client.sendPlayerHeldItemChanged(u8(m_player.heldItemSlot()), m_player.heldItemStack().item().id());
+			}
+			reset();
+		}
 	}
 	else if (event.type == SDL_MOUSEBUTTONUP) {
 		if (event.button.button == SDL_BUTTON_LEFT)

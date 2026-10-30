@@ -43,8 +43,10 @@ choose **play** to create or open a world. new worlds have a seed and a survival
 | shift | sneak |
 | left click | break blocks or attack |
 | right click | place blocks or use items |
-| e | inventory and crafting |
+| middle click | pick the pointed block; creates a stack only in creative |
+| e | inventory, or the creative catalogue in creative worlds |
 | h | creative inventory |
+| i | inventory, crafting, and armor |
 | 1–9 or mouse wheel | select a hotbar slot |
 | q | drop one item |
 | escape | pause |

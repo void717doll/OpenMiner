@@ -44,6 +44,11 @@ void MouseItemWidget::onEvent(const SDL_Event &event) {
 	}
 	else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		updatePosition(event.button.x, event.button.y);
+		if (event.button.button == SDL_BUTTON_MIDDLE && m_currentInventoryWidget
+		 && m_currentInventoryWidget->isReadOnly() && m_currentItemWidget) {
+			setStack(m_currentItemWidget->stack());
+			return;
+		}
 
 		if (getStack().amount() == 0) {
 			if (event.button.button == SDL_BUTTON_LEFT) {
@@ -90,6 +95,15 @@ void MouseItemWidget::leftClickBehaviour() {
 
 void MouseItemWidget::rightClickBehaviour() {
 	if (m_currentInventoryWidget && m_currentInventoryWidget->currentItemWidget() && m_currentInventoryWidget->inventory()) {
+		if (m_currentInventoryWidget->isReadOnly() && !getStack().amount()) {
+			auto *widget = m_currentInventoryWidget->currentItemWidget();
+			if (widget->isEnabled() && widget->stack().amount()) {
+				ItemStack item = widget->stack();
+				item.setAmount(1);
+				setStack(item);
+			}
+			return;
+		}
 		if (!m_currentInventoryWidget->isReadOnly()) {
 			if (m_currentInventoryWidget->doItemMatchFilter(m_inventory.getStack(0, 0).item())) {
 				ItemWidget *currentItemWidget = m_currentInventoryWidget->currentItemWidget();
@@ -109,7 +123,10 @@ void MouseItemWidget::startDragging(bool isLeftClickDrag) {
 	m_draggedStack = getStack();
 	m_dragOrigin = nullptr;
 
-	if (m_currentItemWidget && m_currentItemWidget->isEnabled() && (m_currentItemWidget->stack().amount() == 0 || m_currentItemWidget->stack().item().stringID() == m_draggedStack.item().stringID())) {
+	if (m_currentInventoryWidget && !m_currentInventoryWidget->isReadOnly()
+	 && m_currentItemWidget && m_currentItemWidget->isEnabled()
+	 && m_currentInventoryWidget->doItemMatchFilter(m_draggedStack.item())
+	 && (m_currentItemWidget->stack().amount() == 0 || m_currentItemWidget->stack().item().stringID() == m_draggedStack.item().stringID())) {
 		m_dragOrigin = m_currentItemWidget;
 		m_draggedSlots[m_currentItemWidget] = m_currentItemWidget->stack();
 	}
@@ -192,7 +209,7 @@ void MouseItemWidget::updateCurrentItem(ItemWidget *currentItemWidget) {
 
 void MouseItemWidget::swapItems(ItemWidget &widget, bool isReadOnly) {
 	if (isReadOnly) {
-		setStack(widget.stack());
+		setStack(getStack().amount() ? ItemStack::Empty : widget.stack());
 		return;
 	}
 	ItemStack held = stack();
