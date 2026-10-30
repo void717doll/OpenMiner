@@ -70,3 +70,11 @@ new nether terrain includes hanging glowstone from retromcp's `WorldGenGlowStone
 population uses a separate seed for each source column and reads undecorated terrain. this makes results independent of chunk loading order, but does not reproduce beta's shared lava/fire/glowstone random stream or interactions between separate columns' clusters.
 
 nether spawn passes use `BiomeGenHell`'s equal ghast and zombie-pigman weights and `SpawnerAnimals`' three groups of four attempts. they check solid support, the full hitbox, liquids, existing mobs, and a 24-block exclusion around players. ghasts have the source one-in-twenty spawn check and one successful spawn per column per pass; pigmen allow four. only loaded columns within eight chunks of a player are considered. passes run once per second under the existing 64-mob cap, rather than beta's per-tick global population budget. existing ghast fireballs and neutral pigman retaliation remain active.
+
+## minecart and rail behavior
+
+cart movement now follows `~/modernmcp`'s `EntityMinecart`: movement on each horizontal axis is limited to 0.4 blocks per tick, slopes change momentum, occupied carts retain more momentum, and powered rails accelerate after drag. powered rails without a signal halve cart speed and stop carts below 0.03 blocks per tick. a solid block behind a stationary cart starts it along a powered rail.
+
+track connections follow `BlockBaseRailLogic`, including curves, slopes, existing neighbor connections, and redstone selection at junctions. powered and detector rails stay straight or sloped. mineclonia's eight-rail power range and detector behavior remain in use. invalid torch and rail placements are rejected before prediction or item consumption; removing valid support still drops an attached block. redstone torches support wall mounting while preserving the lit-state bits in older saves.
+
+this covers the existing rideable cart and three rail types. container carts, furnace carts, activator rails, and automatic mob passengers are not included.
