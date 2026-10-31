@@ -12,7 +12,9 @@
 #include "client/graphics/RenderTarget.hpp"
 #include "client/graphics/Vertex.hpp"
 
-ParticleRenderer::ParticleRenderer() { m_vertices.setupDefaultLayout(); }
+ParticleRenderer::ParticleRenderer() {
+	for (auto &vertices : m_vertices) vertices.setupDefaultLayout();
+}
 
 void ParticleRenderer::clear() {
 	m_particles.clear(); m_anchors.clear(); m_lastScan = 0; m_lastEmit = 0;
@@ -48,7 +50,7 @@ void ParticleRenderer::scan(const World &world, Vector3d eye) {
 		}
 		else if (sources < 24 && (id == "default:torch" || id == "default:lava")) {
 			const auto *above = world.getBlockState(x,y,z+1);
-			if (above && !above->block().id() && (id == "default:torch" || seed % 17 == 0)) {
+			if (id == "default:torch" || (above && !above->block().id() && seed % 17 == 0)) {
 				m_anchors.push_back({{x,y,z},id == "default:torch" ? Smoke : Lava}); ++sources;
 			}
 		}
@@ -77,8 +79,21 @@ void ParticleRenderer::draw(const World &world, const Camera &camera, RenderTarg
 		m_lastEmit = now;
 		for (const auto &anchor : m_anchors) {
 			if (anchor.kind == Smoke) {
-				emit(Vector3d(anchor.position)+Vector3d{0.5,0.5,0.75},{0,0,0.45f},Smoke,0.14f,1400);
-				emit(Vector3d(anchor.position)+Vector3d{0.5,0.5,0.7},{0,0,0.1f},Flame,0.12f,300);
+				const auto &p = anchor.position;
+				const auto *state = world.getBlockState(p.x, p.y, p.z);
+				if (!state || state->block().stringID() != "default:torch") continue;
+				u16 rotation = state->block().param().getParam(BlockParam::Rotation, world.getData(p.x, p.y, p.z));
+				Vector3d tip{0.5, 0.5, 0.7};
+				if (rotation) {
+					// the wall mesh's cap is centered at (0.5, 0.2439175, 0.7977425).
+					tip.z = 0.87;
+					if (rotation == 1) tip.x = 0.2439175;
+					else if (rotation == 2) tip.y = 0.2439175;
+					else if (rotation == 3) tip.x = 0.7560825;
+					else if (rotation == 4) tip.y = 0.7560825;
+				}
+				emit(Vector3d(p) + tip + Vector3d{0, 0, 0.05}, {0,0,0.45f}, Smoke, 0.14f, 1400);
+				emit(Vector3d(p) + tip, {0,0,0.1f}, Flame, 0.12f, 300);
 			}
 			else if (anchor.kind == Lava && now % 1000 < 250)
 				emit(Vector3d(anchor.position)+Vector3d{0.5,0.5,1},{0,0,0.35f},Lava,0.18f,1000);
@@ -137,8 +152,8 @@ void ParticleRenderer::draw(const World &world, const Camera &camera, RenderTarg
 	for(unsigned kind=0;kind<Count;++kind) {
 		if(batches[kind].empty())continue;
 		if(m_textures[kind].filename().empty())m_textures[kind].loadFromFile(std::string("mods/default/textures/")+files[kind]);
-		m_vertices.init(batches[kind].data(),u32(batches[kind].size()*sizeof(Vertex)),true);
+		m_vertices[kind].init(batches[kind].data(),u32(batches[kind].size()*sizeof(Vertex)),true);
 		states.texture=&m_textures[kind]; states.isCullFaceEnabled=false; states.isDepthTestEnabled=true;
-		target.draw(m_vertices,0,u32(batches[kind].size()),states);
+		target.draw(m_vertices[kind],0,u32(batches[kind].size()),states);
 	}
 }

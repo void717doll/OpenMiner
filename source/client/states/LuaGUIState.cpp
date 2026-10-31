@@ -318,9 +318,9 @@ void LuaGUIState::loadInventoryWidget(const std::string &name, s32 x, s32 y, sf:
 	std::string inventory, shiftDestination, filter;
 	u16 width, height;
 	u16 offset, count;
-	bool isReadOnly;
+	bool isReadOnly, isOutput;
 	packet >> width >> height >> shiftDestination >> offset >> count >> inventory
-		>> filter >> isReadOnly;
+		>> filter >> isReadOnly >> isOutput;
 
 	Inventory *widgetInventory = nullptr;
 	if (inventory == "player") {
@@ -374,13 +374,18 @@ void LuaGUIState::loadInventoryWidget(const std::string &name, s32 x, s32 y, sf:
 	}
 
 	if (widgetInventory) {
-		m_inventoryWidgets.emplace(name, InventoryWidget{m_client, isReadOnly, &m_mainWidget});
+		m_inventoryWidgets.emplace(name, InventoryWidget{m_client, isReadOnly && !isOutput, &m_mainWidget});
 
 		auto &inventoryWidget = m_inventoryWidgets.at(name);
 		inventoryWidget.setPosition((float)x, (float)y);
 		inventoryWidget.init(*widgetInventory, offset, count);
 		inventoryWidget.setShiftDestination(shiftDestination);
 		inventoryWidget.setFilter(filter);
+		if (isOutput) {
+			inventoryWidget.setOutputHandler([&inventoryWidget] {
+				inventoryWidget.sendUpdatePacket();
+			});
+		}
 	}
 	else {
 		logError() << "Inventory widget" << name << " is invalid";

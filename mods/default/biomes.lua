@@ -65,7 +65,7 @@ mod:biome {
 		},
 		{
 			block = "default:iron_ore",
-			probability = 0.003,
+			probability = 0.0015,
 			size = 8,
 			gen_type = "random_walk",
 		}
@@ -174,7 +174,7 @@ for _, biome in ipairs(beta_biomes) do
 		flora = biome[4] > 0 and {{block = "default:tallgrass", spawns_on = "default:grass", probability = biome[4]}} or {},
 		ores = {
 			{block = "default:coal_ore", probability = 0.001, size = 2, gen_type = "flood_fill"},
-			{block = "default:iron_ore", probability = 0.003, size = 8, gen_type = "random_walk"},
+			{block = "default:iron_ore", probability = 0.0015, size = 8, gen_type = "random_walk"},
 		},
 	}
 end

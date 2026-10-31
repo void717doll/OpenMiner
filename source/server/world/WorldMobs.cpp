@@ -57,6 +57,53 @@ bool waterAt(const World &world, Vector3d point) {
 	return state && liquid::kind(state->block()) == 1 && liquidAt(world, point);
 }
 
+bool lavaInBox(const World &world, const DoubleBox &box) {
+	for (int z = int(std::floor(box.z)); z <= int(std::floor(box.z + box.sizeZ - 0.001)); ++z)
+		for (int y = int(std::floor(box.y)); y <= int(std::floor(box.y + box.sizeY - 0.001)); ++y)
+			for (int x = int(std::floor(box.x)); x <= int(std::floor(box.x + box.sizeX - 0.001)); ++x) {
+				const auto *state = world.getBlockState(x, y, z);
+				if (!state || liquid::kind(state->block()) != 2) continue;
+				const auto *above = world.getBlockState(x, y, z + 1);
+				bool covered = above && liquid::kind(above->block()) == 2;
+				if (box.z < z + liquid::height(state->block(), world.getData(x, y, z), covered)) return true;
+			}
+	return false;
+}
+
+bool lavaAhead(const World &world, DoubleBox box, Vector3d movement) {
+	double length = std::hypot(movement.x, movement.y);
+	if (length < 0.0001) return false;
+	box.move(movement.x * (1 + 0.4 / length), movement.y * (1 + 0.4 / length), 0);
+	if (lavaInBox(world, box)) return true;
+	// check the landing surface too, but allow solid bridges over lava.
+	for (int y = int(std::floor(box.y)); y <= int(std::floor(box.y + box.sizeY - 0.001)); ++y)
+		for (int x = int(std::floor(box.x)); x <= int(std::floor(box.x + box.sizeX - 0.001)); ++x)
+			for (int z = int(std::floor(box.z)); z >= int(std::floor(box.z)) - 3; --z) {
+				const auto *state = world.getBlockState(x, y, z);
+				if (!state) break;
+				if (liquid::kind(state->block()) == 2) return true;
+				if (state->isCollidable() || liquid::kind(state->block()) == 1) break;
+			}
+	return false;
+}
+
+void avoidLava(const World &world, const DoubleBox &box, Vector3d &movement, MobComponent &mob) {
+	// modernmcp rejects lava paths, except when the mob is already in lava and needs to escape.
+	if (lavaInBox(world, box) || !lavaAhead(world, box, movement)) return;
+	double speed = std::hypot(movement.x, movement.y);
+	double heading = std::atan2(movement.y, movement.x);
+	for (double turn : {M_PI / 4, -M_PI / 4, M_PI / 2, -M_PI / 2}) {
+		Vector3d candidate{std::cos(heading + turn) * speed, std::sin(heading + turn) * speed, movement.z};
+		if (lavaAhead(world, box, candidate)) continue;
+		auto step = collision::move(world, box, candidate);
+		if (std::hypot(step.x, step.y) < speed * 0.5) continue;
+		movement = candidate;
+		mob.yaw = float(heading + turn);
+		return;
+	}
+	movement.x = movement.y = 0;
+}
+
 bool segmentBox(Vector3d start, Vector3d delta, const DoubleBox &box, double &distance) {
 	double hit = collision::rayDistance(start, delta, box, distance);
 	if (hit < 0) return false;
@@ -296,6 +343,7 @@ void updateAxolotl(ServerWorld &world, MobComponent &mob, BetaMobComponent &trai
 		else if (mob.age % 20 == 0) mob.health = mob.health <= 2 ? 0 : mob.health - 2;
 	}
 	DoubleBox box = localBox; box.move(position.x, position.y, position.z);
+	if (!swimming) avoidLava(world, box, desired, mob);
 	Vector3d movement = collision::move(world, box, desired);
 	traits.grounded = desired.z < 0 && movement.z > desired.z;
 	if (movement.z != desired.z) mob.verticalSpeed = 0;
@@ -522,6 +570,12 @@ void ServerWorld::updateMobs() {
 				rotation.isUpdated = true;
 				return;
 			}
+			DoubleBox body = localBox; body.move(position.x, position.y, position.z);
+			bool inLava = lavaInBox(*this, body);
+			if (inLava && kind != Kind::PigZombie && kind != Kind::Ghast && mob.age % 10 == 0) {
+				mob.health = mob.health <= 4 ? 0 : mob.health - 4;
+				if (!mob.health) { dead.emplace_back(entity); return; }
+			}
 			if (kind == Kind::Bat) {
 				updateBat(*this, mob, traits, position, localBox, rotation);
 				syncAppearance(registry, entity);
@@ -532,7 +586,7 @@ void ServerWorld::updateMobs() {
 				if (!mob.health) dead.emplace_back(entity);
 				return;
 			}
-			bool swimming = liquidAt(*this, origin + Vector3d{0, 0, localBox.sizeZ * 0.5});
+			bool swimming = waterAt(*this, origin + Vector3d{0, 0, localBox.sizeZ * 0.5});
 			ServerPlayer *target = nullptr;
 			double nearest = kind == Kind::Ghast ? 64 * 64 : kind == Kind::Ocelot ? 12 * 12 : kind == Kind::Rabbit ? 8 * 8 : 16 * 16;
 			bool neutral = kind == Kind::Wolf || kind == Kind::PigZombie;
@@ -681,7 +735,7 @@ void ServerWorld::updateMobs() {
 			if (kind == Kind::PigZombie && traits.anger) speed = walking ? 0.19f : 0;
 			mob.verticalSpeed = std::max(-0.5f, (mob.verticalSpeed - 0.08f) * 0.98f);
 			if (kind == Kind::Chicken && mob.verticalSpeed < 0) mob.verticalSpeed *= 0.6f;
-			if (swimming && kind != Kind::Squid) mob.verticalSpeed = std::max(mob.verticalSpeed, 0.08f);
+			if ((swimming || inLava) && kind != Kind::Squid) mob.verticalSpeed = std::max(mob.verticalSpeed, 0.08f);
 			Vector3d desired{std::cos(mob.yaw) * speed, std::sin(mob.yaw) * speed, mob.verticalSpeed};
 			if (kind == Kind::Slime) {
 				if (traits.grounded) {
@@ -718,6 +772,10 @@ void ServerWorld::updateMobs() {
 			}
 			if (kind == Kind::Squid && !swimming) desired.x = desired.y = 0;
 			DoubleBox box = localBox; box.move(position.x, position.y, position.z);
+			if (kind != Kind::Ghast && kind != Kind::Squid) {
+				avoidLava(*this, box, desired, mob);
+				if (kind == Kind::Rabbit) { traits.velocity.x = desired.x; traits.velocity.y = desired.y; }
+			}
 			Vector3d movement = collision::move(*this, box, desired);
 			traits.grounded = desired.z < 0 && movement.z > desired.z;
 			if (movement.z != desired.z) mob.verticalSpeed = 0;

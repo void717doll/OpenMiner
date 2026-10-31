@@ -24,7 +24,9 @@ StatisticsState::StatisticsState(Client &client, const ClientPlayer &player, Dra
 	m_title.setString("Statistics");
 	m_worldName.setString(GameConfig::worldName);
 	m_worldName.setColor(Color::fromRGBA32(180, 180, 180));
-	m_panel.setFillColor(Color::fromRGBA32(0, 0, 0, 170));
+	m_background.setColor(Color::fromRGBA32(70, 70, 70));
+	m_panel.setFillColor(Color::fromRGBA32(0, 0, 0, 120));
+	m_scrollbar.setFillColor(Color::fromRGBA32(150, 150, 150));
 	const char *tabs[] = {"General", "Blocks", "Items"};
 	for (int tab = 0; tab < 3; ++tab) {
 		m_tabs.addButton(tabs[tab], [this, tab](TextButton &) {
@@ -72,6 +74,10 @@ void StatisticsState::refresh() {
 		}
 		std::sort(m_rows.begin(), m_rows.end(), [](const Row &a, const Row &b) { return a.name < b.name; });
 	}
+	m_tabs.setButtonEnabled("General", m_tab != 0);
+	m_tabs.setButtonEnabled("Blocks", m_tab != 1);
+	m_tabs.setButtonEnabled("Items", m_tab != 2);
+	updateRowLabels();
 }
 
 void StatisticsState::onEvent(const SDL_Event &event) {
@@ -79,8 +85,9 @@ void StatisticsState::onEvent(const SDL_Event &event) {
 	if (m_stateStack->empty() || &m_stateStack->top() != this) return;
 	if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) { m_stateStack->pop(); return; }
 	if (event.type == SDL_MOUSEWHEEL) {
-		int visible = std::max(1, (int(Config::screenHeight) / Config::guiScale - 108) / 14);
+		int visible = visibleRows();
 		m_offset = std::clamp(m_offset - event.wheel.y * 3, 0, std::max(0, int(m_rows.size()) - visible));
+		updateRowLabels();
 	}
 	m_tabs.onEvent(event);
 	m_done.onEvent(event);
@@ -92,12 +99,15 @@ void StatisticsState::update() {
 }
 
 void StatisticsState::updateWidgetPosition() {
-	float scale = Config::guiScale;
+	m_scale = std::max(1, std::min({int(Config::guiScale), int(Config::screenWidth) / 320, int(Config::screenHeight) / 200}));
+	float scale = m_scale;
+	m_background.setScale(scale * 2, scale * 2);
+	m_background.setPosRect(0, 0, Config::screenWidth / (scale * 2), Config::screenHeight / (scale * 2));
+	m_background.setClipRect(0, 0, Config::screenWidth / (scale * 2), Config::screenHeight / (scale * 2));
 	m_title.setScale(scale, scale);
 	m_worldName.setScale(scale, scale);
 	m_tabs.setScale(scale, scale);
 	m_done.setScale(scale, scale);
-	m_text.setScale(scale, scale);
 	m_title.updateVertexBuffer();
 	m_worldName.updateVertexBuffer();
 	m_title.setPosition((Config::screenWidth - m_title.getSize().x * scale) / 2, 10 * scale);
@@ -106,37 +116,59 @@ void StatisticsState::updateWidgetPosition() {
 	m_done.setPosition((Config::screenWidth - m_done.getGlobalBounds().sizeX) / 2, Config::screenHeight - 26 * scale);
 	m_panel.setPosition(0, 35 * scale);
 	m_panel.setSize(Config::screenWidth, std::max(0.f, Config::screenHeight - 92 * scale));
+	updateRowLabels();
 }
 
-void StatisticsState::draw(RenderTarget &target, RenderStates states) const {
-	prepareDraw(target, states);
-	target.draw(m_panel, states);
-	target.draw(m_title, states);
-	target.draw(m_worldName, states);
-	float scale = Config::guiScale;
+int StatisticsState::visibleRows() const {
+	return std::max(1, (int(Config::screenHeight) / m_scale - 58 - (m_tab ? 56 : 40)) / (m_tab ? 18 : 10));
+}
+
+void StatisticsState::updateRowLabels() {
+	m_labels.clear();
+	float scale = m_scale;
 	float left = Config::screenWidth / 2.f - 145 * scale;
-	auto text = [&](const std::string &value, float x, float y, bool right = false) {
-		m_text.setString(value);
-		m_text.updateVertexBuffer();
-		m_text.setPosition(x - (right ? m_text.getSize().x * scale : 0), y);
-		target.draw(m_text, states);
+	auto text = [&](const std::string &value, float x, float y, bool right = false, bool dim = false) {
+		auto label = std::make_unique<Text>();
+		label->setScale(scale, scale);
+		label->setString(value);
+		if (dim) label->setColor(Color::fromRGBA32(170, 170, 170));
+		label->updateVertexBuffer();
+		label->setPosition(x - (right ? label->getSize().x * scale : 0), y);
+		m_labels.push_back(std::move(label));
 	};
 	if (m_tab) {
 		text(m_tab == 1 ? "Mined" : "Used", left + 190 * scale, 40 * scale, true);
 		text("Crafted", left + 240 * scale, 40 * scale, true);
 		text(m_tab == 1 ? "Placed" : "Broken", left + 290 * scale, 40 * scale, true);
 	}
-	int visible = std::max(1, (int(Config::screenHeight) / Config::guiScale - 108) / 14);
+	int visible = visibleRows();
+	m_offset = std::clamp(m_offset, 0, std::max(0, int(m_rows.size()) - visible));
+	float top = (m_tab ? 56 : 40) * scale;
+	float height = visible * (m_tab ? 18 : 10) * scale;
+	float thumb = m_rows.size() > unsigned(visible) ? height * visible / m_rows.size() : 0;
+	m_scrollbar.setSize(2 * scale, thumb);
+	m_scrollbar.setPosition(left + 300 * scale, top + (thumb ? (height - thumb) * m_offset / (m_rows.size() - visible) : 0));
 	if (m_rows.empty()) text("No statistics yet", left, 56 * scale);
 	for (int row = 0; row < visible && row + m_offset < int(m_rows.size()); ++row) {
 		const auto &entry = m_rows[row + m_offset];
-		float y = (56 + row * 14) * scale;
+		float y = top + row * (m_tab ? 18 : 10) * scale;
+		bool dim = (row + m_offset) % 2;
 		std::string name = entry.name;
 		if (m_tab && name.size() > 24) name = name.substr(0, 21) + "...";
-		text(name, left, y);
+		text(name, left, y, false, dim);
 		for (int column = 0; column < (m_tab ? 3 : 1); ++column)
-			text(entry.values[column], left + (m_tab ? 190 + column * 50 : 290) * scale, y, true);
+			text(entry.values[column], left + (m_tab ? 190 + column * 50 : 290) * scale, y, true, dim);
 	}
+}
+
+void StatisticsState::draw(RenderTarget &target, RenderStates states) const {
+	prepareDraw(target, states);
+	target.draw(m_background, states);
+	target.draw(m_panel, states);
+	target.draw(m_scrollbar, states);
+	target.draw(m_title, states);
+	target.draw(m_worldName, states);
+	for (const auto &label : m_labels) target.draw(*label, states);
 	target.draw(m_tabs, states);
 	target.draw(m_done, states);
 	target.disableView();

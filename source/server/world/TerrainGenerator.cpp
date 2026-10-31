@@ -120,7 +120,7 @@ void TerrainGenerator::fastNoiseGeneration(ServerChunk &chunk) {
 				}
 				if (chunk.getBlock(x, y, z) == biome.getDeepBlockID()) generateOres(chunk, x, y, z, biome, rand);
 				if (copper && worldZ >= 4 && worldZ <= 64 && chunk.getBlock(x, y, z) == biome.getDeepBlockID()
-				 && copperRandom.get<bool>(0.004f))
+				 && copperRandom.get<bool>(0.0045f))
 					randomWalkOrePlace(chunk, x, y, z, copperRandom, copper, biome.getDeepBlockID(), 8);
 				if (isGeneratingTopBlock && chunk.getBlock(x, y, z) == biome.getTopBlockID()) {
 					bool placedTree = tryPlaceTree(chunk, x, y, z + 1, biome, rand);

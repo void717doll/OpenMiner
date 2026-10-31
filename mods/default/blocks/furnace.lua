@@ -117,7 +117,7 @@ mod:block {
 				count = 1,
 			},
 
-			is_read_only = true,
+			is_output = true,
 
 			size = {x = 1, y = 1},
 

@@ -38,7 +38,7 @@ class ParticleRenderer {
 		u64 m_lastScan = 0, m_lastEmit = 0;
 		u32 m_random = 1;
 		std::array<Texture, Count> m_textures;
-		VertexBuffer m_vertices;
+		std::array<VertexBuffer, Count> m_vertices;
 };
 
 #endif
