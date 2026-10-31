@@ -1,7 +1,10 @@
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/shaders")
 
 function(compile_shaders)
-	if(UNIX AND NOT APPLE)
+	if(APPLE)
+		set(platform osx)
+		set(PROFILES 120)
+	elseif(UNIX)
 		set(platform linux)
 		set(PROFILES 120 spirv)
 	else()

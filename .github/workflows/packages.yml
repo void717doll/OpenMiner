@@ -1,0 +1,177 @@
+name: packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: packages-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x64
+            runner: ubuntu-22.04
+            platform: linux
+            arch: x86_64
+          - name: macos-intel
+            runner: macos-15-intel
+            platform: macos
+            arch: x86_64
+          - name: macos-silicon
+            runner: macos-14
+            platform: macos
+            arch: arm64
+          - name: windows-x64
+            runner: windows-2022
+            platform: windows
+            arch: x64
+            triplet: x64-windows-static-md
+          - name: windows-x86
+            runner: windows-2022
+            platform: windows
+            arch: Win32
+            triplet: x86-windows-static-md
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: install cmake
+        run: python -m pip install cmake==3.31.6 ninja
+
+      - name: read game version
+        id: version
+        shell: bash
+        run: |
+          version=$(python packaging/version.py)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: install linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libsqlite3-dev libzstd-dev libpng-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev \
+            libgl1-mesa-dev libasound2-dev libpulse-dev libudev-dev libdbus-1-dev \
+            libfuse2 rpm patchelf desktop-file-utils
+
+      - name: install mac dependencies
+        if: matrix.platform == 'macos'
+        run: brew install pkg-config sqlite zstd libpng dylibbundler
+
+      - name: install windows dependencies
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          & "$env:VCPKG_INSTALLATION_ROOT/vcpkg.exe" install sqlite3 zstd libpng --triplet '${{ matrix.triplet }}'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: configure linux
+        if: matrix.platform == 'linux'
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DOM_BUILD_TESTS=OFF -DGIT_SUBMODULE=OFF -DSDL_SHARED=OFF \
+            -DSDL2IMAGE_JPG=OFF -DSDL2IMAGE_WEBP=OFF -DSDL2IMAGE_TIF=OFF -DSDL2IMAGE_AVIF=OFF -DSDL2IMAGE_JXL=OFF
+
+      - name: configure mac
+        if: matrix.platform == 'macos'
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES='${{ matrix.arch }}' -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix sqlite);$(brew --prefix zstd);$(brew --prefix libpng)" \
+            -DOM_BUILD_TESTS=OFF -DGIT_SUBMODULE=OFF -DSDL_SHARED=OFF \
+            -DSDL2IMAGE_JPG=OFF -DSDL2IMAGE_WEBP=OFF -DSDL2IMAGE_TIF=OFF -DSDL2IMAGE_AVIF=OFF -DSDL2IMAGE_JXL=OFF
+
+      - name: configure windows
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G 'Visual Studio 17 2022' -A '${{ matrix.arch }}' `
+            "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            '-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}' -DOM_BUILD_TESTS=OFF -DGIT_SUBMODULE=OFF `
+            -DSDL_SHARED=OFF -DSDL2IMAGE_JPG=OFF -DSDL2IMAGE_WEBP=OFF -DSDL2IMAGE_TIF=OFF -DSDL2IMAGE_AVIF=OFF -DSDL2IMAGE_JXL=OFF
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: build
+        run: cmake --build build --config Release --target openminer --parallel 3
+
+      - name: package deb and rpm
+        if: matrix.platform == 'linux'
+        run: |
+          mkdir -p dist
+          cpack --config build/CPackConfig.cmake -G DEB -B dist
+          cpack --config build/CPackConfig.cmake -G RPM -B dist
+          dpkg-deb --info dist/*.deb
+          rpm -qpi dist/*.rpm
+
+      - name: package appimage
+        if: matrix.platform == 'linux'
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+          ARCH: x86_64
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cmake --install build --component Runtime --prefix "$PWD/build/AppDir/usr"
+          curl -fL --retry 3 https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -o build/linuxdeploy.AppImage
+          chmod +x build/linuxdeploy.AppImage
+          export OUTPUT="$PWD/dist/openminer-$VERSION-x86_64.AppImage"
+          build/linuxdeploy.AppImage --appdir build/AppDir \
+            --executable build/AppDir/usr/bin/openminer-bin \
+            --desktop-file packaging/openminer.desktop \
+            --icon-file resources/textures/world_icon.png --icon-filename openminer \
+            --custom-apprun packaging/AppRun --output appimage
+          test -s "$OUTPUT"
+
+      - name: package mac app
+        if: matrix.platform == 'macos'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          mkdir -p dist
+          cmake --install build --config Release --component Runtime --prefix "$PWD/build/mac"
+          app="$PWD/build/mac/OpenMiner.app"
+          dylibbundler -b -cd -x "$app/Contents/MacOS/openminer-bin" \
+            -d "$app/Contents/Frameworks" -p '@executable_path/../Frameworks/'
+          codesign --force --deep --sign - "$app"
+          codesign --verify --deep --strict "$app"
+          lipo -verify_arch "$ARCH" "$app/Contents/MacOS/openminer-bin"
+          ln -s /Applications build/mac/Applications
+          hdiutil create -volname OpenMiner -srcfolder build/mac -ov -format UDZO "dist/openminer-$VERSION-macos-$ARCH.dmg"
+
+      - name: package windows zip
+        if: matrix.platform == 'windows'
+        run: cpack --config build/CPackConfig.cmake -C Release -G ZIP -B dist
+
+      - name: checksums
+        shell: bash
+        run: python packaging/checksums.py dist
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: openminer-${{ steps.version.outputs.version }}-${{ matrix.name }}
+          path: |
+            dist/*.deb
+            dist/*.rpm
+            dist/*.AppImage
+            dist/*.dmg
+            dist/*.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30

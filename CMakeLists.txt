@@ -47,3 +47,5 @@ add_subdirectory(tests)
 if (MSVC)
 	include(vs_folders)
 endif()
+
+include(packaging)

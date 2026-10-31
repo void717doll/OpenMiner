@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OpenMiner
+Comment=Build and explore a block world
+Exec=openminer
+Icon=openminer
+Terminal=false
+Categories=Game;Simulation;
