@@ -41,3 +41,5 @@ the armor hud uses unchanged `textures/HUD/hbarmor_icon.png` and `hbarmor_bgicon
 `minetest_game_mods/bees` supplies the hive, comb, honey, wax, smoker, and small bee sprite textures. these are unchanged copies; the bee is rendered as a small billboard around active hives.
 
 additional bundled textures cover birch and spruce wood, leaves and saplings; five live/dead coral sets; cobwebs; and mineclonia music discs. their source paths and checksums are recorded in `refi-assets.json`.
+
+stone slabs use the unchanged top and side textures from `textures/stairs_mcl_stairs_mcl_walls`. oak, sandstone, and cobblestone slabs reuse their existing block textures.

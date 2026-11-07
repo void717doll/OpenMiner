@@ -30,6 +30,7 @@
 #include "common/math/Math.hpp"
 #include "common/resource/ResourceHandler.hpp"
 #include "common/world/Block.hpp"
+#include "common/world/FenceGeometry.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/graphics/TextureAtlas.hpp"
@@ -77,81 +78,89 @@ void InventoryCube::updateVertexBuffer(const Block &block, u8 state) {
 
 	const BlockState &blockState = block.getState(state);
 
-	Vertex vertices[nFaces][nVertsPerFace];
+	std::vector<Vertex> mesh;
+	auto boxes = block.hasGroup("group:fence") ? retro::fenceBoxes(true, true, false, false)
+		: std::vector<FloatBox>{blockState.boundingBox()};
+	mesh.reserve(boxes.size() * 36);
+	for (const auto &boundingBox : boxes) {
+		Vertex vertices[nFaces][nVertsPerFace]{};
 
-	glm::vec3 vertexPos[nVertsPerCube] {
-		// Order is important. It matches the bit order defined in BlockGeometry::cubeVerts.
-		glm::vec3{0,      0,      0},
-		glm::vec3{m_size, 0,      0},
-		glm::vec3{0,      m_size, 0},
-		glm::vec3{m_size, m_size, 0},
-		glm::vec3{0,      0,      m_size},
-		glm::vec3{m_size, 0,      m_size},
-		glm::vec3{0,      m_size, m_size},
-		glm::vec3{m_size, m_size, m_size},
-	};
+		glm::vec3 vertexPos[nVertsPerCube] {
+			// Order is important. It matches the bit order defined in BlockGeometry::cubeVerts.
+			glm::vec3{0,      0,      0},
+			glm::vec3{m_size, 0,      0},
+			glm::vec3{0,      m_size, 0},
+			glm::vec3{m_size, m_size, 0},
+			glm::vec3{0,      0,      m_size},
+			glm::vec3{m_size, 0,      m_size},
+			glm::vec3{0,      m_size, m_size},
+			glm::vec3{m_size, m_size, m_size},
+		};
 
-	const FloatBox &boundingBox = blockState.boundingBox();
 
-	constexpr s8f faceValue[nFaces]{2, 2, 4, 4, 3, 3};
+		constexpr s8f faceValue[nFaces]{2, 2, 4, 4, 3, 3};
 
-	for (u8 f = 0; f < nFaces; ++f) {
-		// Calculate UV's
-		// These are tough to obtain. Note that texture Y grows in the up-down direction, and so does V.
-		// Vertex index in the bitmap array and U/V correspondence is:
-		//    U0V0 -> 3 2 <- U1V0
-		//    U0V1 -> 0 1 <- U1V1
-		float U0, V0, U1, V1;
-		if (blockState.drawType() == BlockDrawType::Cactus) {
-			U0 = 0.f;
-			V0 = 0.f;
-			U1 = 1.f;
-			V1 = 1.f;
-		}
-		else {
-			U0 = (f == 0) ? 1.f - (boundingBox.y + boundingBox.sizeY) : (f == 1) ? boundingBox.y :
-			     (f == 3) ? 1.f - (boundingBox.x + boundingBox.sizeX) : boundingBox.x;
-			V0 = (f <= 3) ? 1.f - (boundingBox.z + boundingBox.sizeZ) : (f == 4) ? boundingBox.y : 1.f - (boundingBox.y + boundingBox.sizeY);
-			U1 = (f == 0) ? 1.f - boundingBox.y : (f == 1) ? boundingBox.y + boundingBox.sizeY :
-			     (f == 3) ? 1.f - boundingBox.x : boundingBox.x + boundingBox.sizeX;
-			V1 = (f <= 3) ? 1.f - boundingBox.z : (f == 4) ? boundingBox.y + boundingBox.sizeY : 1.f - boundingBox.y;
-		}
-
-		const FloatRect &blockTexCoords = m_textureAtlas->getTexCoords(blockState.tiles().getTextureForFace(f));
-
-		for (u8f v = 0; v < nVertsPerFace; ++v) {
+		for (u8 f = 0; f < nFaces; ++f) {
+			// Calculate UV's
+			// These are tough to obtain. Note that texture Y grows in the up-down direction, and so does V.
+			// Vertex index in the bitmap array and U/V correspondence is:
+			//    U0V0 -> 3 2 <- U1V0
+			//    U0V1 -> 0 1 <- U1V1
+			float U0, V0, U1, V1;
 			if (blockState.drawType() == BlockDrawType::Cactus) {
-				vertices[f][v].coord3d[0] = vertexPos[cubeVerts[f][v]].x - boundingBox.x * faceNormals[f][0] * m_size;
-				vertices[f][v].coord3d[1] = vertexPos[cubeVerts[f][v]].y - boundingBox.y * faceNormals[f][1] * m_size;
-				vertices[f][v].coord3d[2] = vertexPos[cubeVerts[f][v]].z - boundingBox.z * faceNormals[f][2] * m_size;
+				U0 = 0.f;
+				V0 = 0.f;
+				U1 = 1.f;
+				V1 = 1.f;
 			}
 			else {
-				vertices[f][v].coord3d[0] = vertexPos[cubeVerts[f][v]].x * boundingBox.sizeX + boundingBox.x * m_size;
-				vertices[f][v].coord3d[1] = vertexPos[cubeVerts[f][v]].y * boundingBox.sizeY + boundingBox.y * m_size;
-				vertices[f][v].coord3d[2] = vertexPos[cubeVerts[f][v]].z * boundingBox.sizeZ + boundingBox.z * m_size;
+				U0 = (f == 0) ? 1.f - (boundingBox.y + boundingBox.sizeY) : (f == 1) ? boundingBox.y :
+				     (f == 3) ? 1.f - (boundingBox.x + boundingBox.sizeX) : boundingBox.x;
+				V0 = (f <= 3) ? 1.f - (boundingBox.z + boundingBox.sizeZ) : (f == 4) ? boundingBox.y : 1.f - (boundingBox.y + boundingBox.sizeY);
+				U1 = (f == 0) ? 1.f - boundingBox.y : (f == 1) ? boundingBox.y + boundingBox.sizeY :
+				     (f == 3) ? 1.f - boundingBox.x : boundingBox.x + boundingBox.sizeX;
+				V1 = (f <= 3) ? 1.f - boundingBox.z : (f == 4) ? boundingBox.y + boundingBox.sizeY : 1.f - boundingBox.y;
 			}
-			vertices[f][v].coord3d[3] = faceValue[f];
 
-			float U = (v == 0 || v == 3) ? U0 : U1;
-			float V = (v >= 2) ? V0 : V1;
-			vertices[f][v].texCoord[0] = math::qlerpf(blockTexCoords.x, blockTexCoords.x + blockTexCoords.sizeX, U);
-			vertices[f][v].texCoord[1] = math::qlerpf(blockTexCoords.y, blockTexCoords.y + blockTexCoords.sizeY, V);
+			const FloatRect &blockTexCoords = m_textureAtlas->getTexCoords(blockState.tiles().getTextureForFace(f));
 
-			const Color &colorMultiplier = blockState.colorMultiplier();
-			vertices[f][v].color[0] = colorMultiplier.r;
-			vertices[f][v].color[1] = colorMultiplier.g;
-			vertices[f][v].color[2] = colorMultiplier.b;
-			vertices[f][v].color[3] = colorMultiplier.a;
+			for (u8f v = 0; v < nVertsPerFace; ++v) {
+				if (blockState.drawType() == BlockDrawType::Cactus) {
+					vertices[f][v].coord3d[0] = vertexPos[cubeVerts[f][v]].x - boundingBox.x * faceNormals[f][0] * m_size;
+					vertices[f][v].coord3d[1] = vertexPos[cubeVerts[f][v]].y - boundingBox.y * faceNormals[f][1] * m_size;
+					vertices[f][v].coord3d[2] = vertexPos[cubeVerts[f][v]].z - boundingBox.z * faceNormals[f][2] * m_size;
+				}
+				else {
+					vertices[f][v].coord3d[0] = vertexPos[cubeVerts[f][v]].x * boundingBox.sizeX + boundingBox.x * m_size;
+					vertices[f][v].coord3d[1] = vertexPos[cubeVerts[f][v]].y * boundingBox.sizeY + boundingBox.y * m_size;
+					vertices[f][v].coord3d[2] = vertexPos[cubeVerts[f][v]].z * boundingBox.sizeZ + boundingBox.z * m_size;
+				}
+				vertices[f][v].coord3d[3] = faceValue[f];
 
-			// FIXME: Find a way to get the light from the position
-			if (m_isEntity) {
-				vertices[f][v].lightValue[0] = m_sunlight;
-				vertices[f][v].lightValue[1] = m_torchlight;
+				float U = (v == 0 || v == 3) ? U0 : U1;
+				float V = (v >= 2) ? V0 : V1;
+				vertices[f][v].texCoord[0] = math::qlerpf(blockTexCoords.x, blockTexCoords.x + blockTexCoords.sizeX, U);
+				vertices[f][v].texCoord[1] = math::qlerpf(blockTexCoords.y, blockTexCoords.y + blockTexCoords.sizeY, V);
+
+				const Color &colorMultiplier = blockState.colorMultiplier();
+				vertices[f][v].color[0] = colorMultiplier.r;
+				vertices[f][v].color[1] = colorMultiplier.g;
+				vertices[f][v].color[2] = colorMultiplier.b;
+				vertices[f][v].color[3] = colorMultiplier.a;
+
+				// FIXME: Find a way to get the light from the position
+				if (m_isEntity) {
+					vertices[f][v].lightValue[0] = m_sunlight;
+					vertices[f][v].lightValue[1] = m_torchlight;
+				}
 			}
 		}
-	}
 
-	m_vbo.init(vertices, sizeof(vertices), true);
+		for (const auto &face : vertices)
+			for (unsigned index : {0, 1, 2, 2, 3, 0}) mesh.push_back(face[index]);
+	}
+	m_vertexCount = mesh.size();
+	m_vbo.init(mesh.data(), mesh.size() * sizeof(Vertex), true);
 }
 
 void InventoryCube::draw(RenderTarget &target, RenderStates states) const {
@@ -169,5 +178,5 @@ void InventoryCube::draw(RenderTarget &target, RenderStates states) const {
 
 	states.isDepthTestEnabled = m_isEntity;
 
-	target.drawElements(m_vbo, target.cubeIndexBuffer(), 0, 0, states);
+	target.draw(m_vbo, 0, m_vertexCount, states);
 }

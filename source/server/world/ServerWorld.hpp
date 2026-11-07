@@ -90,6 +90,7 @@ class ServerWorld : public World {
 		std::string sleepInBed(ServerPlayer &player, Vector3i position);
 		void explodeAt(const Vector3d &position, float strength, u32 seed, const std::string &source);
 		bool dropWorldItem(Vector3d position, const std::string &id, u16 count = 1, u16 damage = 0, bool limited = true);
+		void dropContainerItems(Vector3i position, const Inventory &inventory);
 		void updatePlayerSurvival();
 		bool moveSurvivalPlayer(ServerPlayer &player, double x, double y, double z);
 		bool spawnMob(const std::string &id, double x, double y, double z, u8 slimeSize = 0, entt::entity *spawned = nullptr);

@@ -23,7 +23,7 @@ comparisons against java compiled from the supplied checkout passed:
 - 524,288 nether surface bytes and 524,288 nether carved bytes matched, including a 64-bit seed.
 - the earlier 1,350 octave samples matched exactly; 3,825 density samples differed by at most 1.14e-13.
 
-the parity claim covers base climate, density, surface, and cave generation. tree/flora/ore population, cross-chunk feature scheduling, portals, and nether fire/mushroom/spring population still use oldworld behavior or remain absent. terrain below y=0 and above the source region is air. placement is limited to y=0 through y=255; bedrock keeps the source irregular y=0 through y=4 layers. existing saved chunks remain unchanged; newly explored terrain can meet older terrain at seams. parallel generation, superchunks, and a public terrain-formula api remain unfinished.
+the parity claim covers base climate, density, surface, and cave generation. population changes are described below. flora, cross-chunk feature scheduling, portals, and nether fire/mushroom/spring population still differ from the reference. terrain below y=0 and above the source region is air. placement is limited to y=0 through y=255; bedrock keeps the source irregular y=0 through y=4 layers. existing saved chunks remain unchanged; newly explored terrain can meet older terrain at seams. parallel generation, superchunks, and a public terrain-formula api remain unfinished.
 
 ## mobs and controls
 
@@ -92,3 +92,17 @@ regular and redstone torches share mineclonia's floor and wall mesh geometry, co
 modernmcp supplies the one-folder-per-world organization. openminer keeps its own save format inside `saves/<name>/map.sqlite`; this is not an anvil or nbt save and cannot be opened by minecraft. lunarchy's sqlite chunk storage and whole-record zstandard compression are the storage reference. chunk palettes store block names, block parameters, and sparse inventories/metadata. lighting is rebuilt on load. entities, players, game mode, generation revision, bed spawn, health, score, and armor remain in the world-state record.
 
 saves use a sqlite transaction. unchanged chunks are skipped; chunks with inventories or timers are checked on each save. old flat `.dat` saves remain readable and migrate on save, retaining the original as `<name>/legacy.dat`. new worlds do not need that backup. the menu lists both formats, sorts by last-save time, and renames or deletes the whole world folder.
+
+## ores and building blocks
+
+gold, redstone, diamond, and lapis now populate new overworld chunks using retromcp's `WorldGenMinable` ellipsoids and `ChunkProviderGenerate` counts. gold has two size-eight attempts per column at y=0–31; redstone has eight size-seven attempts and diamond one size-seven attempt at y=0–15. lapis has one size-six attempt at `random(16) + random(16)`. these are the starting heights: beta adds two to four blocks to the vein endpoints, and the ellipsoids can extend beyond them. y=12 is in the diamond and redstone range.
+
+neighboring source columns are replayed and writes are clipped to each destination chunk, keeping the new veins independent of chunk loading order. the four ores share a separate population stream; earlier beta lakes, dungeons, dirt, gravel, coal, and iron do not advance that stream. this reproduces the vein algorithm and placement ranges, not complete seed-identical beta ore locations. copper and iron retain the requested balance. saved chunks are unchanged.
+
+fences now connect to neighboring fences, use beta's post and rail dimensions, and have its 1.5-block-high collision box. placing a fence requires a solid block or fence below it; removing that support afterward does not drop the fence. inventories, held fences, and dropped fences use the same parts.
+
+oak, stone, sandstone, and cobblestone slabs combine into matching double slabs. double slabs drop two halves. the stone slab uses refi's slab top and side textures. beta's wooden slab also requires a pickaxe. mixed slabs remain separate, and merging cannot fill the player's hitbox.
+
+mining uses one shared tool-speed calculation. axes speed up chests, logs, planks, and bookshelves; beta's lists omit fences and crafting tables. furnaces require a pickaxe to drop, but do not receive its speed bonus. lit furnaces drop the ordinary furnace. chest, furnace, and crafting-table contents scatter in stacks of up to thirty, preserving item counts and damage. breaking the same position again produces no additional contents.
+
+verification: 300 vein cases matched the supplied java generator, including the next random value. the build and 200 tests passed. local handler checks covered slab consumption, collision, double drops, container contents, lit furnaces, fence support, and reversed ore generation order. native previews checked connected fences, slab textures, and inventory meshes.

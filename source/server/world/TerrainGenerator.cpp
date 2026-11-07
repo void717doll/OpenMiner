@@ -34,6 +34,7 @@
 #include "server/world/TerrainGenerator.hpp"
 #include "server/world/MineshaftTerrain.hpp"
 #include "server/world/OceanTerrain.hpp"
+#include "server/world/OreTerrain.hpp"
 #include "common/world/BetaTreeShape.hpp"
 
 #include <array>
@@ -46,6 +47,7 @@ TerrainGenerator::TerrainGenerator(Heightmap &heightmap, const Dimension &dimens
 
 void TerrainGenerator::generate(ServerChunk &chunk) {
 	fastNoiseGeneration(chunk);
+	if (m_dimensionID == 0) decorateOreTerrain(chunk, m_seed);
 	if (m_generationRevision == 1) {
 		decorateExpansionTerrain(chunk, m_heightmap, m_dimensionID, m_seed);
 		if (m_dimensionID == 0) decorateDungeonTerrain(chunk, m_heightmap, m_seed);

@@ -1,4 +1,5 @@
 #include <cmath>
+#include <random>
 #include <unordered_set>
 
 #include <glm/gtc/quaternion.hpp>
@@ -1118,6 +1119,27 @@ bool ServerWorld::interactMob(ServerPlayer &player) {
 	if (handled) syncAppearance(registry, entity);
 	if (handled && m_server) m_server->sendPlayerInvUpdate(player.clientID());
 	return handled;
+}
+
+void ServerWorld::dropContainerItems(Vector3i position, const Inventory &inventory) {
+	std::mt19937 random(u32(m_seed) ^ u32(position.x) ^ (u32(position.y) * 31) ^ (u32(position.z) * 131) ^ m_mobTick);
+	std::uniform_real_distribution<float> offset(0.1f, 0.9f);
+	std::uniform_int_distribution<unsigned> split(10, 30);
+	std::normal_distribution<float> velocity(0, 1);
+	for (const auto &stack : inventory.items()) {
+		if (!stack.amount() || !stack.item().id()) continue;
+		Vector3d point{position.x + offset(random), position.y + offset(random), position.z + offset(random) - 0.3};
+		unsigned remaining = stack.amount();
+		while (remaining) {
+			u16 count = u16(std::min(remaining, split(random)));
+			remaining -= count;
+			auto entity = dropItem(*this, point, stack.stringID(), count, stack.damage(), false);
+			if (entity == entt::null) continue;
+			// beta stores velocity in blocks per tick; item physics uses blocks per second.
+			auto &body = m_scene.registry().get_or_emplace<PhysicalComponent>(entity);
+			body.velocity = {velocity(random), velocity(random), velocity(random) + 4};
+		}
+	}
 }
 
 bool ServerWorld::dropWorldItem(Vector3d position, const std::string &id, u16 count, u16 damage, bool limited) {

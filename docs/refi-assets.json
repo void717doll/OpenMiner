@@ -6437,6 +6437,36 @@
         16,
         16
       ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/refi_stone_slab_top.png",
+      "source": "textures/stairs_mcl_stairs_mcl_walls/mcl_stairs_stone_slab_top.png",
+      "operation": "copy",
+      "source_sha256": "2366eaf244d381bd8ae6d1e43a1ea0a9c28802484b68bbd996b2ee2f8899262a",
+      "output_sha256": "2366eaf244d381bd8ae6d1e43a1ea0a9c28802484b68bbd996b2ee2f8899262a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/refi_stone_slab_side.png",
+      "source": "textures/stairs_mcl_stairs_mcl_walls/mcl_stairs_stone_slab_side.png",
+      "operation": "copy",
+      "source_sha256": "70241896fa5b404f53386e9faa02707c5011713013a8e453dfb810fdac783ee9",
+      "output_sha256": "70241896fa5b404f53386e9faa02707c5011713013a8e453dfb810fdac783ee9",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
     }
   ],
   "unchanged_engine_ui": [

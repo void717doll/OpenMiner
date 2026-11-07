@@ -28,7 +28,7 @@ local modpath = mod:path()
 
 mod:block {
 	id = "workbench",
-	name = "Workbench",
+	name = "Crafting Table",
 	tiles = {"crafting_table_top.png", "crafting_table_top.png", "crafting_table_front.png", "crafting_table_side.png"},
 	groups = {
 		om_material_wood = 1

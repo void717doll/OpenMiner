@@ -584,6 +584,14 @@ void ServerCommandHandler::setupCallbacks() {
 			const BlockState *previous = world.getBlockState(x, y, z);
 			u16 id = u16(block & 0xffff);
 			const auto &blocks = Registry::getInstance().blocks();
+			bool merged = false;
+			if (id > 0 && id < blocks.size()) {
+				Vector3i destination{x, y, z};
+				merged = resolveSlabPlacement(world, destination, *blocks[id]);
+				x = destination.x; y = destination.y; z = destination.z;
+				previous = world.getBlockState(x, y, z);
+				if (merged) block = u32(id) | (u32(blocks[id]->param().setParam(BlockParam::State, 0, 1)) << 16);
+			}
 			ItemStack stack;
 			if (player->heldItemSlot() >= 0 && player->heldItemSlot() < player->inventory().width())
 				stack = player->heldItemStack();
@@ -596,6 +604,7 @@ void ServerCommandHandler::setupCallbacks() {
 					? definition.param().getParam(BlockParam::State, data) : 0;
 				valid = stateID < definition.states().size();
 				if (definition.stringID() == "default:bed") valid = stateID == 0;
+				if (definition.hasGroup("group:om_slab")) valid = stateID == (merged ? 1 : 0);
 				if (valid) {
 					const BlockState &state = definition.getState(stateID);
 					DoubleBox playerBox = player->hitbox();
@@ -603,7 +612,7 @@ void ServerCommandHandler::setupCallbacks() {
 					valid = blockHasSupport(world, {x, y, z}, state, data)
 						&& (!state.isCollidable() || !collision::blockBox(state, data, x, y, z).intersects(playerBox));
 				}
-				valid = valid && (!previous->block().id() || previous->drawType() == BlockDrawType::Liquid
+				valid = valid && (merged || !previous->block().id() || previous->drawType() == BlockDrawType::Liquid
 					|| previous->drawType() == BlockDrawType::XShape)
 					&& definition.placementConstraints().check(world, {x, y, z});
 			}
@@ -624,8 +633,11 @@ void ServerCommandHandler::setupCallbacks() {
 				player->inventory().setStack(player->heldItemSlot(), 0,
 					stack.amount() > 1 ? stack.item().stringID() : "", stack.amount() - 1);
 			sendPlayerInvUpdate(client.id);
-			world.setData(x, y, z, u16(block >> 16));
-			world.setBlock(x, y, z, u16(block & 0xffff));
+			if (merged) world.setBlockState(x, y, z, 1);
+			else {
+				world.setData(x, y, z, u16(block >> 16));
+				world.setBlock(x, y, z, u16(block & 0xffff));
+			}
 			++player->statistics().items[blocks[id]->stringID()].placed;
 
 			const BlockState *blockState = world.getBlockState(x, y, z);

@@ -68,6 +68,7 @@ set(SOURCE_FILES
 	world/TerrainGenerator.cpp
 	world/MineshaftTerrain.cpp
 	world/OceanTerrain.cpp
+	world/OreTerrain.cpp
 	world/WorldController.cpp
 	world/save/WorldSaveBasicBackend.cpp
 	world/save/ChunkDatabase.cpp

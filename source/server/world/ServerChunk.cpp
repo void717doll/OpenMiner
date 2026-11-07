@@ -99,11 +99,7 @@ void ServerChunk::onBlockDestroyed(int x, int y, int z, const Block &block) {
 
 void ServerChunk::onBlockDataRemoved(int x, int y, int z, const BlockData &data) {
 	if (!m_isInitialized) return;
-	Vector3d position{x + m_x * width + 0.5, y + m_y * depth + 0.5, z + m_z * height + 0.5};
-	for (const ItemStack &stack : data.inventory.items()) {
-		if (stack.amount() && stack.item().id())
-			m_world.dropWorldItem(position, stack.stringID(), stack.amount(), stack.damage(), false);
-	}
+	m_world.dropContainerItems({x + m_x * width, y + m_y * depth, z + m_z * height}, data.inventory);
 }
 
 void ServerChunk::initializeTickingBlocks() {

@@ -299,7 +299,10 @@ void ClientCommandHandler::setupCallbacks() {
 	m_client.setCommandCallback(Network::Command::BlockUpdate, [this](Network::Packet &packet) {
 		s32 x, y, z;
 		u32 block;
-		packet >> x >> y >> z >> block;
+		if (!(packet >> x >> y >> z >> block)) return;
+		const auto *previous = m_world.getBlockState(x, y, z);
+		if (previous && previous->block().id() == u16(block) && previous->block().hasGroup("group:om_slab"))
+			m_world.setBlockState(x, y, z, previous->block().param().getParam(BlockParam::State, u16(block >> 16)));
 		m_world.setBlock(x, y, z, u16(block & 0xffff));
 		m_world.setData(x, y, z, u16((block >> 16) & 0xffff));
 	});

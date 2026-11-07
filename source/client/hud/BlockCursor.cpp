@@ -277,17 +277,19 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 			blockState = m_world.getBlockState(x, y, z);
 		}
 
-		// First, we check if the new block is not replacing another block
-		if (blockState && (!blockState->block().id() || blockState->drawType() == BlockDrawType::Liquid || blockState->drawType() == BlockDrawType::XShape)) {
-			// Second, we check if the new block is not inside the player
-			const Block &newBlock = Registry::getInstance().getBlockFromStringID(hotbar.currentItem().stringID());
+		const Block &newBlock = Registry::getInstance().getBlockFromStringID(hotbar.currentItem().stringID());
+		Vector3i destination{x, y, z};
+		bool merged = resolveSlabPlacement(m_world, destination, newBlock);
+		x = destination.x; y = destination.y; z = destination.z;
+		blockState = m_world.getBlockState(x, y, z);
+		if (blockState && (merged || !blockState->block().id() || blockState->drawType() == BlockDrawType::Liquid || blockState->drawType() == BlockDrawType::XShape)) {
 			int mount = -1;
 			if (newBlock.hasGroup("group:om_torch") || newBlock.hasGroup("group:om_wall_switch")) {
 				mount = torchRotationForFace(face);
 				if (mount < 0) return;
 			}
-			const BlockState &newBlockState = newBlock.getState(0); // FIXME: Get state from item stack
-			u16 data = 0;
+			const BlockState &newBlockState = newBlock.getState(merged ? 1 : 0);
+			u16 data = merged ? newBlock.param().setParam(BlockParam::State, 0, 1) : 0;
 			if (newBlock.isRotatable()) {
 				u16 rotation = mount >= 0 ? u16(mount) : m_player.getOppositeDirection() & 0x3;
 				data = newBlock.param().setParam(BlockParam::Rotation, 0, rotation);
@@ -297,9 +299,11 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 			playerBox.move(m_player.x(), m_player.y(), m_player.z());
 			if (!newBlockState.isCollidable() || !collision::blockBox(newBlockState, data, x, y, z).intersects(playerBox)) {
 				u32 block = u32(newBlock.id()) | (u32(data) << 16);
-				m_world.setData(x, y, z, data);
-
-				m_world.setBlock(x, y, z, newBlock.id());
+				if (merged) m_world.setBlockState(x, y, z, 1);
+				else {
+					m_world.setData(x, y, z, data);
+					m_world.setBlock(x, y, z, newBlock.id());
+				}
 				if (auto *sound = SoundManager::instance())
 					sound->playBlock(newBlock.getState(0), BlockSound::Place, {x + 0.5, y + 0.5, z + 0.5});
 

@@ -217,15 +217,17 @@ mod:block {
 	id = "oak_slab",
 	name = "Oak Wood Slab",
 	tiles = "oak_planks.png",
-	groups = {
-		om_material_wood = 1,
-		om_fuel = 300,
-	},
-
+	-- beta's wooden slab uses the same rock material and tools as stone slabs.
+	groups = {om_material_stone = 1, om_slab = 1},
+	hardness = 2,
+	harvest_requirements = Capability.Pickaxe,
 	draw_type = "boundingbox",
 	is_opaque = false,
-
-	bounding_box = {0, 0, 0, 1, 1, 0.5}
+	bounding_box = {0, 0, 0, 1, 1, 0.5},
+	states = {{
+		bounding_box = {0, 0, 0, 1, 1, 1}, is_opaque = true,
+		item_drop = {id = "default:oak_slab", amount = 2},
+	}},
 }
 
 mod:block {

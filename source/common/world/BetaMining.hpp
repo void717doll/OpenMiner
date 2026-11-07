@@ -17,6 +17,10 @@ inline u16 attackDamage(const Item &item) {
 inline bool canHarvest(const BlockState &state, const Item &item) {
 	if (!state.block().id() || !std::isfinite(state.hardness()) || state.hardness() < 0
 	 || state.drawType() == BlockDrawType::Liquid) return false;
+	if (state.block().hasGroup("group:om_web")) {
+		u16 type = item.getGroupValue("group:om_tool_type");
+		return type == 1 || type == 4;
+	}
 	if (!(state.harvestRequirements() & 1)) return true;
 	if (!(item.harvestCapability() & 1)) return false;
 
@@ -50,7 +54,37 @@ inline float breakTime(const BlockState &state, const Item &item) {
 		effective = false;
 	float speed = effective ? item.miningSpeed() : 1.f;
 	if (!std::isfinite(speed) || speed <= 0) speed = 1.f;
-	return 1.5f * state.hardness() / speed;
+	float time = 1.5f * state.hardness() / speed;
+	u16 type = item.getGroupValue("group:om_tool_type");
+	u16 kind = item.getGroupValue("group:om_tool_kind");
+	const std::string &id = state.block().stringID();
+	if (kind) {
+		bool effective = false;
+		if (kind == 1) effective = id == "default:oak_planks" || id == "default:oak_wood"
+			|| id == "default:birch_planks" || id == "default:birch_wood"
+			|| id == "default:spruce_planks" || id == "default:spruce_wood"
+			|| id == "default:cherry_planks" || id == "default:cherry_wood"
+			|| id == "default:bookshelf" || id == "default:chest";
+		if (kind == 2) {
+			effective = state.block().hasGroup("group:om_slab");
+			for (const char *block : {"cobblestone", "cobblestone_mossy", "stone", "sandstone", "iron_ore",
+				"iron_block", "copper_ore", "coal_ore", "gold_block", "gold_ore", "diamond_ore", "diamond_block", "ice",
+				"netherrack", "lapis_ore", "lapis_block", "stone_slab", "double_stone_slab"})
+				if (id == std::string("default:") + block) { effective = true; break; }
+		}
+		if (kind == 3) {
+			for (const char *block : {"grass", "dirt", "sand", "gravel", "snow", "snow_layer", "clay", "farmland"})
+				if (id == std::string("default:") + block) { effective = true; break; }
+		}
+		time = 1.5f * state.hardness() / (effective && std::isfinite(item.miningSpeed()) && item.miningSpeed() > 0 ? item.miningSpeed() : 1.f);
+	}
+	if (type == 1) time = 1.5f * state.hardness() / (state.block().hasGroup("group:om_web") ? 15.f : 1.5f);
+	if (type == 4) {
+		float speed = state.drawType() == BlockDrawType::Leaves || state.block().hasGroup("group:om_web") ? 15.f
+			: state.block().stringID() == "default:wool" ? 5.f : 1.f;
+		time = 1.5f * state.hardness() / speed;
+	}
+	return time;
 }
 
 }

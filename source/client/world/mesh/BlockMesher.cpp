@@ -28,6 +28,7 @@
 #include "common/world/LiquidState.hpp"
 #include "common/scene/MinecloniaLeverMesh.hpp"
 #include "common/scene/MinecloniaTorchMesh.hpp"
+#include "common/world/FenceGeometry.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/world/mesh/BlockMesher.hpp"
@@ -112,6 +113,18 @@ void addRail(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job, const BlockState &s
 void BlockMesher::addBlock(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job,
                            const BlockState &blockState, u16 blockParam)
 {
+	if (blockState.block().hasGroup("group:fence")) {
+		u16 id = blockState.block().id();
+		auto boxes = retro::fenceBoxes(job.chunkData.getBlockID(x - 1, y, z) == id,
+			job.chunkData.getBlockID(x + 1, y, z) == id, job.chunkData.getBlockID(x, y - 1, z) == id,
+			job.chunkData.getBlockID(x, y + 1, z) == id);
+		BlockState part = blockState;
+		for (const auto &box : boxes) {
+			part.boundingBox(box);
+			addBlock(x, y, z, job, part, box, 0, orientMatrices[0]);
+		}
+		return;
+	}
 	if (blockState.drawType() == BlockDrawType::Torch) { addTorch(x, y, z, job, blockState, blockParam); return; }
 	if (blockState.drawType() == BlockDrawType::Lever) { addLever(x,y,z,job,blockState); return; }
 	if (blockState.drawType() == BlockDrawType::Rail) { addRail(x,y,z,job,blockState); return; }

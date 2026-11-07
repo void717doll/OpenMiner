@@ -166,7 +166,8 @@ void BlockPhysics::update(const Vector3i &position) {
 		return;
 	}
 
-	if (block.id() && (!fluidKind(block) || block.getGroupValue("group:om_waterlogged"))) {
+	// fences need support when placed, but beta keeps them after that support is removed.
+	if (block.id() && !block.hasGroup("group:fence") && (!fluidKind(block) || block.getGroupValue("group:om_waterlogged"))) {
 		bool neighborsLoaded = std::all_of(directions.begin(), directions.end(), [&](const auto &offset) { return loaded(position + offset); });
 		if (neighborsLoaded) {
 			bool supported = blockHasSupport(m_world, position, *state,

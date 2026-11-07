@@ -52,6 +52,7 @@ class InventoryCube : public Drawable, public Transformable {
 		const TextureAtlas *m_textureAtlas;
 
 		VertexBuffer m_vbo;
+		u32 m_vertexCount = 0;
 
 		Transformable m_transform;
 

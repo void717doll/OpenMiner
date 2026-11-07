@@ -2,7 +2,7 @@ mod:block {
 	id = "oak_fence", name = "Oak Fence",
 	tiles = "oak_planks.png", hardness = 2,
 	draw_type = "boundingbox", is_opaque = false,
-	bounding_box = {0.375, 0.375, 0, 0.25, 0.25, 1},
+	bounding_box = {0, 0, 0, 1, 1, 1},
 	groups = {om_material_wood = 1, fence = 1, om_fuel = 300},
 }
 

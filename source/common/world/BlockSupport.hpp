@@ -11,6 +11,19 @@ inline const BlockState *loadedSupport(const World &world, const Vector3i &pos) 
 	return chunk && chunk->isInitialized() ? world.getBlockState(pos.x, pos.y, pos.z) : nullptr;
 }
 
+inline bool resolveSlabPlacement(const World &world, Vector3i &pos, const Block &block) {
+	if (!block.hasGroup("group:om_slab")) return false;
+	const auto *target = loadedSupport(world, pos);
+	if (!target) return false;
+	if (target->block().id() == block.id() && target->id() == 0) return true;
+	if (target->block().id() && target->drawType() != BlockDrawType::Liquid && target->drawType() != BlockDrawType::XShape)
+		return false;
+	const auto *below = loadedSupport(world, pos + Vector3i{0, 0, -1});
+	if (!below || below->block().id() != block.id() || below->id() != 0) return false;
+	--pos.z;
+	return true;
+}
+
 inline bool hasSolidTop(const World &world, const Vector3i &pos) {
 	const auto *state = loadedSupport(world, pos);
 	if (!state || !state->block().id() || !state->isCollidable()) return false;
@@ -23,6 +36,10 @@ inline bool hasSolidTop(const World &world, const Vector3i &pos) {
 inline bool blockHasSupport(const World &world, const Vector3i &pos, const BlockState &state, u16 data) {
 	const auto &block = state.block();
 	if (!loadedSupport(world, pos) || !block.placementConstraints().check(world, pos)) return false;
+	if (block.hasGroup("group:fence")) {
+		const auto *floor = loadedSupport(world, pos + Vector3i{0, 0, -1});
+		return floor && floor->block().id() && floor->isCollidable();
+	}
 	if (u16 species = block.getGroupValue("group:om_coral_plant")) {
 		const auto *floor = loadedSupport(world, pos + Vector3i{0, 0, -1});
 		if (!floor || floor->block().getGroupValue("group:om_coral_species") != species) return false;

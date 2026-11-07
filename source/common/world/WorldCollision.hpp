@@ -10,7 +10,7 @@
 namespace collision {
 
 inline DoubleBox blockBox(const BlockState &state, u16 data, int x, int y, int z) {
-	DoubleBox box = state.boundingBox();
+	DoubleBox box = state.block().hasGroup("group:fence") ? DoubleBox{0, 0, 0, 1, 1, 1.5} : DoubleBox(state.boundingBox());
 	if (state.block().isRotatable()) {
 		BlockGeometry::initOrientation();
 		u16 orientation = state.block().param().getParam(BlockParam::Rotation, data);
