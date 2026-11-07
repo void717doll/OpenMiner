@@ -35,6 +35,7 @@
 #include "common/network/Network.hpp"
 #include "common/network/NetworkUtils.hpp"
 #include "common/world/Player.hpp"
+#include "common/world/Chest.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/core/Mouse.hpp"
@@ -73,6 +74,7 @@ LuaGUIState::LuaGUIState(ClientCommandHandler &client, ClientPlayer &player, Cli
 }
 
 void LuaGUIState::onEvent(const SDL_Event &event) {
+	if (!blockInventoriesValid()) return;
 	if (event.type == SDL_QUIT) finishInventory();
 	InterfaceState::onEvent(event);
 
@@ -110,26 +112,27 @@ void LuaGUIState::onEvent(const SDL_Event &event) {
 	if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT
 	 && m_currentInventoryWidget && !m_currentInventoryWidget->shiftDestination().empty()
 	 && m_mouseItemWidget.currentItemWidget() && GamePad::isKeyPressed(GameKey::Shift)) {
-		for (const std::string &shiftDestination : m_currentInventoryWidget->shiftDestination()) {
-			AbstractInventoryWidget *dest = nullptr;
-
-			auto it = m_craftingWidgets.find(shiftDestination);
-			if (it != m_craftingWidgets.end())
-				dest = &it->second;
-
-			if (!dest) {
-				auto it = m_inventoryWidgets.find(shiftDestination);
-				if (it != m_inventoryWidgets.end())
-					dest = &it->second;
+		const ItemWidget *source = m_mouseItemWidget.currentItemWidget();
+		bool finished = false;
+		// fill existing stacks across every destination before using empty slots.
+		for (bool mergeOnly : {true, false}) {
+			for (const std::string &shiftDestination : m_currentInventoryWidget->shiftDestination()) {
+				AbstractInventoryWidget *dest = nullptr;
+				auto crafting = m_craftingWidgets.find(shiftDestination);
+				if (crafting != m_craftingWidgets.end()) dest = &crafting->second;
+				auto inventory = m_inventoryWidgets.find(shiftDestination);
+				if (!dest && inventory != m_inventoryWidgets.end()) dest = &inventory->second;
+				if (!dest) {
+					logWarning() << "Destination not found:" << shiftDestination;
+					continue;
+				}
+				if (m_currentInventoryWidget->sendItemStackToDest(source, dest, mergeOnly)
+				 && (!source->stack().amount() || m_currentInventoryWidget->isReadOnly() || m_currentInventoryWidget->isOutput())) {
+					finished = true;
+					break;
+				}
 			}
-
-			if (!dest) {
-				logWarning() << "Destination not found:" << shiftDestination;
-				return;
-			}
-
-			if (m_currentInventoryWidget->sendItemStackToDest(m_mouseItemWidget.currentItemWidget(), dest))
-				break;
+			if (finished) break;
 		}
 	}
 	else {
@@ -152,8 +155,11 @@ void LuaGUIState::onEvent(const SDL_Event &event) {
 
 void LuaGUIState::update() {
 	InterfaceState::update();
-	if (!m_player.health()) {
+	if (!m_player.health() || !blockInventoriesValid()) {
 		finishInventory();
+		Mouse::setCursorGrabbed(true);
+		Mouse::setCursorVisible(false);
+		Mouse::resetToWindowCenter();
 		isActive = false;
 		m_stateStack->pop();
 		return;
@@ -196,6 +202,24 @@ void LuaGUIState::update() {
 	m_mouseItemWidget.updateCurrentItem(currentItemWidget);
 }
 
+bool LuaGUIState::blockInventoriesValid() const {
+	for (const auto &source : m_blockInventories) {
+		const auto &pos = source.position;
+		const auto *data = m_world.getBlockData(pos.x, pos.y, pos.z);
+		if (!data || &data->inventory != source.inventory || m_world.getBlock(pos.x, pos.y, pos.z) != source.block) return false;
+		if (Registry::getInstance().getBlock(source.block).hasGroup("group:om_chest")) {
+			const auto halves = chest::halves(m_world, pos);
+			if (halves.size() != m_blockInventories.size() || !chest::canOpen(m_world, halves)) return false;
+			for (const auto &half : halves) {
+				if (std::none_of(m_blockInventories.begin(), m_blockInventories.end(), [&](const auto &entry) {
+					return entry.position == half;
+				})) return false;
+			}
+		}
+	}
+	return true;
+}
+
 void LuaGUIState::finishInventory() {
 	if (m_isFinished) return;
 	m_isFinished = true;
@@ -221,6 +245,7 @@ void LuaGUIState::finishInventory() {
 void LuaGUIState::draw(RenderTarget &target, RenderStates states) const {
 	if (m_parent)
 		target.draw(*(DrawableState *)m_parent, states);
+	if (!blockInventoriesValid()) return;
 
 	prepareDraw(target, states);
 
@@ -340,6 +365,7 @@ void LuaGUIState::loadInventoryWidget(const std::string &name, s32 x, s32 y, sf:
 		}
 
 		widgetInventory = &data->inventory;
+		m_blockInventories.push_back({block, widgetInventory, m_world.getBlock(block.x, block.y, block.z)});
 	}
 	else if (inventory == "temp") {
 		std::string inventoryName;

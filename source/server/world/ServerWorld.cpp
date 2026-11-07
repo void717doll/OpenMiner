@@ -30,9 +30,11 @@
 #include "common/scene/component/MobComponent.hpp"
 #include "common/scene/component/PositionComponent.hpp"
 #include "common/world/Dimension.hpp"
+#include "common/world/Chest.hpp"
 #include "server/core/PlayerList.hpp"
 #include "server/core/ServerConfig.hpp"
 #include "server/network/ServerCommandHandler.hpp"
+#include "server/network/Server.hpp"
 #include "server/world/ServerPlayer.hpp"
 #include <array>
 #include <chrono>
@@ -364,6 +366,55 @@ void ServerWorld::processSendRequests() {
 	}
 }
 
+void ServerWorld::initializeChest(int x, int y, int z) {
+	if (!getBlockData(x, y, z)) addBlockData(x, y, z, 9, 3);
+	const Vector3i placed{x, y, z};
+	if (!chest::canPlace(*this, placed)) return;
+	std::vector<Vector3i> positions{placed};
+	// placement callbacks run before the new block id is written.
+	for (const auto &offset : chest::neighbors) {
+		const auto *next = chest::loaded(*this, placed + offset);
+		if (next && next->block().hasGroup("group:om_chest")) positions.push_back(placed + offset);
+	}
+	if (positions.size() != 2) return;
+	const Vector3i other = positions[1];
+	const auto &block = getBlockState(other.x, other.y, other.z)->block();
+	u16 rotation = block.param().getParam(BlockParam::Rotation, getData(other.x, other.y, other.z)) & 3;
+	u16 axis = positions[0].x != positions[1].x ? 1 : 0;
+	if ((rotation & 1) != axis) rotation = axis;
+	for (const auto &pos : positions) {
+		u16 previous = getData(pos.x, pos.y, pos.z);
+		u16 data = block.param().setParam(BlockParam::Rotation, previous, rotation);
+		if (data == previous) continue;
+		setData(pos.x, pos.y, pos.z, data);
+		if (m_server) {
+			Network::Packet update;
+			update << Network::Command::BlockUpdate << s32(pos.x) << s32(pos.y) << s32(pos.z)
+				<< (u32(block.id()) | (u32(data) << 16));
+			m_server->server().sendToAllClients(update);
+		}
+	}
+}
+
+std::vector<glm::ivec3> ServerWorld::prepareChest(int x, int y, int z, ServerPlayer &player) {
+	const auto positions = chest::halves(*this, {x, y, z});
+	if (!chest::canOpen(*this, positions)) return {};
+	for (const auto &pos : positions) {
+		const auto *data = getBlockData(pos.x, pos.y, pos.z);
+		if (data && (data->inventory.width() != 9 || data->inventory.height() != 3)) return {};
+	}
+	initializeChest(x, y, z);
+	std::vector<glm::ivec3> result;
+	for (const auto &pos : positions) {
+		auto *data = getBlockData(pos.x, pos.y, pos.z);
+		if (!data) data = addBlockData(pos.x, pos.y, pos.z, 9, 3);
+		static_cast<ServerChunk *>(getChunkAtBlockPos(pos.x, pos.y, pos.z))->setModified(true);
+		if (m_server) m_server->sendBlockInvUpdate(pos.x, pos.y, pos.z, data->inventory, player.client());
+		result.emplace_back(pos.x, pos.y, pos.z);
+	}
+	return result;
+}
+
 void ServerWorld::initUsertype(sol::state &lua) {
 	lua.new_usertype<ServerWorld>("ServerWorld",
 		sol::base_classes, sol::bases<World>(),
@@ -371,6 +422,10 @@ void ServerWorld::initUsertype(sol::state &lua) {
 		"tick_spawner", &ServerWorld::tickSpawner,
 		"use_jukebox", &ServerWorld::useJukebox,
 		"stop_jukebox", &ServerWorld::stopJukebox,
+		"initialize_chest", &ServerWorld::initializeChest,
+		"prepare_chest", [](ServerWorld &world, int x, int y, int z, ServerPlayer &player) {
+			return sol::as_table(world.prepareChest(x, y, z, player));
+		},
 		"emit_particles", [](ServerWorld &world, int x, int y, int z, u8 effect) {
 			if (world.server()) world.server()->sendParticles({x + 0.5, y + 0.5, z + 0.5}, world.dimension().id(), effect);
 		},

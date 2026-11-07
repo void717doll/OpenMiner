@@ -41,8 +41,8 @@ class CraftingWidget : public AbstractInventoryWidget {
 
 		void update() override;
 
-		bool sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest) override;
-		ItemStack receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) override;
+		bool sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest, bool mergeOnly = false) override;
+		ItemStack receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src, bool mergeOnly = false) override;
 
 		ItemWidget *currentItemWidget() const { return m_craftingResultInventoryWidget.currentItemWidget() ? m_craftingResultInventoryWidget.currentItemWidget() : m_craftingInventoryWidget.currentItemWidget(); }
 		InventoryWidget *currentInventoryWidget() const { return m_currentInventoryWidget; }

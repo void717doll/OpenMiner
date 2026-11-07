@@ -29,6 +29,7 @@
 #include "common/scene/MinecloniaLeverMesh.hpp"
 #include "common/scene/MinecloniaTorchMesh.hpp"
 #include "common/world/FenceGeometry.hpp"
+#include "common/world/StairGeometry.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/world/mesh/BlockMesher.hpp"
@@ -113,6 +114,15 @@ void addRail(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job, const BlockState &s
 void BlockMesher::addBlock(s8f x, s8f y, s8f z, ChunkMeshBuildingJob &job,
                            const BlockState &blockState, u16 blockParam)
 {
+	if (blockState.block().hasGroup("group:om_stairs")) {
+		u16 rotation = blockState.block().param().getParam(BlockParam::Rotation, blockParam);
+		BlockState part = blockState;
+		for (const auto &box : retro::stairBoxes(rotation)) {
+			part.boundingBox(box);
+			addBlock(x, y, z, job, part, box, 0, orientMatrices[0]);
+		}
+		return;
+	}
 	if (blockState.block().hasGroup("group:fence")) {
 		u16 id = blockState.block().id();
 		auto boxes = retro::fenceBoxes(job.chunkData.getBlockID(x - 1, y, z) == id,
@@ -232,8 +242,28 @@ void BlockMesher::addBlockFace(s8f x, s8f y, s8f z, s8f f, ChunkMeshBuildingJob 
 
 	const FloatBox &boundingBox = blockState.boundingBox();
 
-	const std::string &texture = blockState.tiles().getTextureForFace(f);
-	const FloatRect &blockTexCoords = job.textureAtlas->getTexCoords(texture);
+	const std::string *texture = &blockState.tiles().getTextureForFace(f);
+	int chestPartner = 0;
+	const auto &tiles = blockState.tiles().textureFilenames();
+	if (blockState.block().hasGroup("group:om_chest") && tiles.size() >= 10) {
+		u16 rotation = blockState.block().param().getParam(BlockParam::Rotation, job.chunkData.getBlockParam(x, y, z));
+		const glm::vec3 axis = orientMatrices[rotation & 31] * glm::vec3{0, 1, 0};
+		for (int side : {-1, 1}) {
+			s8f nx = x + s8f(axis.x) * side, ny = y + s8f(axis.y) * side;
+			const auto *neighbor = job.chunkData.getBlockState(nx, ny, z);
+			if (neighbor && neighbor->block().id() == blockState.block().id()
+			 && neighbor->block().param().getParam(BlockParam::Rotation, job.chunkData.getBlockParam(nx, ny, z)) == rotation) {
+				if (chestPartner) { chestPartner = 0; break; }
+				chestPartner = side;
+			}
+		}
+		if (chestPartner) {
+			if (f == BlockFace::East) texture = &tiles[chestPartner > 0 ? 6 : 7];
+			else if (f == BlockFace::West) texture = &tiles[8];
+			else if (f == BlockFace::Top || f == BlockFace::Bottom) texture = &tiles[9];
+		}
+	}
+	const FloatRect &blockTexCoords = job.textureAtlas->getTexCoords(*texture);
 
 	// Calculate UV's
 	// These are tough to obtain. Note that texture Y grows in the up-down direction, and so does V.
@@ -304,6 +334,15 @@ void BlockMesher::addBlockFace(s8f x, s8f y, s8f z, s8f f, ChunkMeshBuildingJob 
 
 		float U = (v == 0 || v == 3) ? U0 : U1;
 		float V = (v >= 2) ? V0 : V1;
+		if (chestPartner) {
+			if (f == BlockFace::Top || f == BlockFace::Bottom) {
+				float oldU = U;
+				U = f == BlockFace::Top ? 1.f - V : V;
+				V = f == BlockFace::Top ? oldU : 1.f - oldU;
+				if (chestPartner < 0) U = 1.f - U;
+			}
+			else if (f == BlockFace::West && chestPartner < 0) U = 1.f - U;
+		}
 		vertices[v].texCoord[0] = math::qlerpf(blockTexCoords.x, blockTexCoords.x + blockTexCoords.sizeX, U);
 		vertices[v].texCoord[1] = math::qlerpf(blockTexCoords.y, blockTexCoords.y + blockTexCoords.sizeY, V);
 

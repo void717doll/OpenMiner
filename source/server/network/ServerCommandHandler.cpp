@@ -605,6 +605,8 @@ void ServerCommandHandler::setupCallbacks() {
 				valid = stateID < definition.states().size();
 				if (definition.stringID() == "default:bed") valid = stateID == 0;
 				if (definition.hasGroup("group:om_slab")) valid = stateID == (merged ? 1 : 0);
+				if (definition.hasGroup("group:om_stairs") || definition.hasGroup("group:om_chest"))
+					valid = valid && definition.param().getParam(BlockParam::Rotation, data) < 4;
 				if (valid) {
 					const BlockState &state = definition.getState(stateID);
 					DoubleBox playerBox = player->hitbox();
@@ -638,6 +640,7 @@ void ServerCommandHandler::setupCallbacks() {
 				world.setData(x, y, z, u16(block >> 16));
 				world.setBlock(x, y, z, u16(block & 0xffff));
 			}
+			block = u32(world.getBlock(x, y, z)) | (u32(world.getData(x, y, z)) << 16);
 			++player->statistics().items[blocks[id]->stringID()].placed;
 
 			const BlockState *blockState = world.getBlockState(x, y, z);
@@ -768,9 +771,17 @@ void ServerCommandHandler::setupCallbacks() {
 		Vector3<s32> pos;
 		packet >> pos.x >> pos.y >> pos.z;
 
-		BlockData *data = getWorldForClient(client.id).getBlockData(pos.x, pos.y, pos.z);
-		if (data)
-			packet >> data->inventory;
+		auto &world = getWorldForClient(client.id);
+		BlockData *data = world.getBlockData(pos.x, pos.y, pos.z);
+		if (data) {
+			Inventory inventory;
+			packet >> inventory;
+			if (!packet || inventory.width() != data->inventory.width() || inventory.height() != data->inventory.height()
+			 || !inventory.inBlock() || inventory.blockPos() != pos) return;
+			data->inventory = std::move(inventory);
+			auto *chunk = static_cast<ServerChunk *>(world.getChunkAtBlockPos(pos.x, pos.y, pos.z));
+			if (chunk) chunk->setModified(true);
+		}
 		else
 			logError() << "BlockInvUpdate: No block data found at" << pos.x << pos.y << pos.z;
 	});

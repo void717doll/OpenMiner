@@ -137,7 +137,7 @@ class Registry : public ISerializable {
 		const Biome &getBiomeFromStringID(const std::string &stringID);
 		entt::entity getEntityFromStringID(const std::string &stringID);
 
-		const Recipe *getRecipe(const Inventory &inventory) const;
+		const Recipe *getRecipe(const Inventory &inventory, const std::string &type = "") const;
 
 		EntityCallbackContainer &addEntityCallbackContainer(const std::string &stringID);
 		EntityCallbackContainer &getEntityCallbackContainer(const std::string &stringID);

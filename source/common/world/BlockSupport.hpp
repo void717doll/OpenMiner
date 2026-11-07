@@ -2,6 +2,7 @@
 #define BLOCKSUPPORT_HPP_
 
 #include "common/world/WorldBounds.hpp"
+#include "common/world/Chest.hpp"
 #include "common/world/LiquidState.hpp"
 #include "common/world/TorchSupport.hpp"
 #include "common/world/WorldCollision.hpp"
@@ -36,6 +37,7 @@ inline bool hasSolidTop(const World &world, const Vector3i &pos) {
 inline bool blockHasSupport(const World &world, const Vector3i &pos, const BlockState &state, u16 data) {
 	const auto &block = state.block();
 	if (!loadedSupport(world, pos) || !block.placementConstraints().check(world, pos)) return false;
+	if (block.hasGroup("group:om_chest")) return chest::canPlace(world, pos);
 	if (block.hasGroup("group:fence")) {
 		const auto *floor = loadedSupport(world, pos + Vector3i{0, 0, -1});
 		return floor && floor->block().id() && floor->isCollidable();

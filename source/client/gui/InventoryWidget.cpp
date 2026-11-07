@@ -101,9 +101,9 @@ void InventoryWidget::applySearch(const std::string &search) {
 	}
 }
 
-bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest) {
+bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest, bool mergeOnly) {
 	if (dest->doItemMatchFilter(itemStack->stack().item())) {
-		ItemStack stackRet = dest->receiveItemStack(itemStack, this);
+		ItemStack stackRet = dest->receiveItemStack(itemStack, this, mergeOnly);
 		if (stackRet.amount() != itemStack->stack().amount()) {
 			if (dest != this && !m_isReadOnly)
 				m_inventory->setItemStack(itemStack->x(), itemStack->y(), stackRet.amount() ? stackRet : ItemStack::Empty);
@@ -118,18 +118,18 @@ bool InventoryWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractI
 	return false;
 }
 
-ItemStack InventoryWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) {
-	if (m_isReadOnly || isOutput()) return itemStack->stack();
+ItemStack InventoryWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src, bool mergeOnly) {
+	if (m_isReadOnly || isOutput() || (mergeOnly && src == this)) return itemStack->stack();
 	ItemStack stack = itemStack->stack();
 	if (src->isOutput()) {
 		// a recipe is taken as one batch, including when shift-clicking.
 		Inventory preview = *m_inventory;
-		if (preview.addItemStack(stack, m_offset, m_size).amount()) return stack;
+		if (preview.addItemStack(stack, m_offset, m_size, mergeOnly).amount()) return stack;
 	}
 	if (src == this)
 		m_inventory->clearStack(itemStack->x(), itemStack->y());
 
-	ItemStack stackRet = m_inventory->addItemStack(stack, m_offset, m_size);
+	ItemStack stackRet = m_inventory->addItemStack(stack, m_offset, m_size, mergeOnly);
 
 	if (stackRet.amount() != stack.amount())
 		sendUpdatePacket();

@@ -67,6 +67,7 @@ class LuaGUIState : public InterfaceState {
 
 		void centerMainWidget();
 		void finishInventory();
+		bool blockInventoriesValid() const;
 
 		ClientCommandHandler &m_client;
 
@@ -80,6 +81,8 @@ class LuaGUIState : public InterfaceState {
 		std::vector<std::unique_ptr<Widget>> m_widgets;
 		std::vector<std::unique_ptr<Drawable>> m_drawables;
 		std::unordered_map<std::string, Inventory> m_inventories;
+		struct BlockInventory { Vector3i position; const Inventory *inventory; u16 block; };
+		std::vector<BlockInventory> m_blockInventories;
 		std::unordered_map<std::string, Texture> m_textures;
 		std::unordered_map<std::string, TextInput> m_textInputs;
 		std::unordered_map<std::string, std::string> m_textInputInventories;

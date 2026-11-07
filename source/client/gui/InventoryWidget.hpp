@@ -50,8 +50,8 @@ class InventoryWidget : public AbstractInventoryWidget {
 
 		void applySearch(const std::string &search);
 
-		bool sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest) override;
-		ItemStack receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) override;
+		bool sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest, bool mergeOnly = false) override;
+		ItemStack receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src, bool mergeOnly = false) override;
 
 		void sendUpdatePacket();
 		void setOutputHandler(std::function<void()> handler) { m_outputHandler = std::move(handler); }

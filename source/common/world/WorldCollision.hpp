@@ -6,6 +6,7 @@
 #include "common/core/BlockGeometry.hpp"
 #include "common/world/World.hpp"
 #include "common/world/LunarchyCollision.hpp"
+#include "common/world/StairGeometry.hpp"
 
 namespace collision {
 
@@ -23,6 +24,17 @@ inline DoubleBox blockBox(const BlockState &state, u16 data, int x, int y, int z
 	}
 	box.move(x, y, z);
 	return box;
+}
+
+inline bool intersectsBlock(const BlockState &state, u16 data, int x, int y, int z, const DoubleBox &body) {
+	if (!state.block().hasGroup("group:om_stairs")) return blockBox(state, data, x, y, z).intersects(body);
+	u16 rotation = state.block().param().getParam(BlockParam::Rotation, data);
+	for (const auto &part : retro::stairBoxes(rotation)) {
+		DoubleBox box = part;
+		box.move(x, y, z);
+		if (box.intersects(body)) return true;
+	}
+	return false;
 }
 
 inline double clipAxis(const DoubleBox &box, const DoubleBox &obstacle, int axis, double movement) {
@@ -80,8 +92,17 @@ inline std::vector<Obstacle> collectObstacles(const World &world, const DoubleBo
 				int bouncy = state->block().getGroupValue("group:bouncy");
 				if (bouncy >= 32768)
 					bouncy -= 65536;
-				obstacles.push_back({blockBox(*state, world.getData(x, y, z), x, y, z),
-					bouncy, state->block().getGroupValue("group:slippery"), false, false, {x, y, z}});
+				u16 data = world.getData(x, y, z);
+				u16 slippery = state->block().getGroupValue("group:slippery");
+				if (state->block().hasGroup("group:om_stairs")) {
+					u16 rotation = state->block().param().getParam(BlockParam::Rotation, data);
+					for (const auto &part : retro::stairBoxes(rotation)) {
+						DoubleBox stair = part;
+						stair.move(x, y, z);
+						obstacles.push_back({stair, bouncy, slippery, false, false, {x, y, z}});
+					}
+				}
+				else obstacles.push_back({blockBox(*state, data, x, y, z), bouncy, slippery, false, false, {x, y, z}});
 			}
 		}
 	}

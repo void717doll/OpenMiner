@@ -166,8 +166,9 @@ void BlockPhysics::update(const Vector3i &position) {
 		return;
 	}
 
-	// fences need support when placed, but beta keeps them after that support is removed.
-	if (block.id() && !block.hasGroup("group:fence") && (!fluidKind(block) || block.getGroupValue("group:om_waterlogged"))) {
+	// fences and chests have placement rules, but do not break when those conditions change.
+	if (block.id() && !block.hasGroup("group:fence") && !block.hasGroup("group:om_chest")
+	 && (!fluidKind(block) || block.getGroupValue("group:om_waterlogged"))) {
 		bool neighborsLoaded = std::all_of(directions.begin(), directions.end(), [&](const auto &offset) { return loaded(position + offset); });
 		if (neighborsLoaded) {
 			bool supported = blockHasSupport(m_world, position, *state,

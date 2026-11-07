@@ -2,37 +2,40 @@ local modpath = mod:path()
 
 mod:block {
 	id = "chest", name = "Chest",
-	tiles = {"refi_chest_top.png", "refi_chest_top.png", "refi_chest_front.png", "refi_chest_side.png"},
+	tiles = {"refi_chest_top.png", "refi_chest_top.png", "refi_chest_front.png", "refi_chest_side.png",
+		"refi_chest_side.png", "refi_chest_side.png", "refi_chest_double_front_left.png", "refi_chest_double_front_right.png",
+		"refi_chest_double_back.png", "refi_chest_double_top.png"},
 	is_rotatable = true, hardness = 2.5,
-	groups = {om_material_wood = 1, om_fuel = 300},
+	groups = {om_material_wood = 1, om_fuel = 300, om_chest = 1},
 	on_block_placed = function(pos, world)
-		world:add_block_data(pos.x, pos.y, pos.z, 9, 3)
+		world:initialize_chest(pos.x, pos.y, pos.z)
 	end,
 	on_block_activated = function(pos, block, player, world, client, server)
-		local above = world:get_block_state(pos.x, pos.y, pos.z + 1)
-		if not above or above:is_opaque() then return end
-		local data = world:get_block_data(pos.x, pos.y, pos.z)
-		if not data then data = world:add_block_data(pos.x, pos.y, pos.z, 9, 3) end
-		world:mark_block_modified(pos.x, pos.y, pos.z)
+		local halves = world:prepare_chest(pos.x, pos.y, pos.z, player)
+		if #halves == 0 then return end
+		local extra = (#halves - 1) * 54
+		local destination = #halves == 2 and "chest_1,chest_2" or "chest_1"
 		local gui = LuaGUI.new()
-		gui:set_size(176, 166)
+		gui:set_size(176, 166 + extra)
 		gui:set_centered(true)
 		gui:image {name = "background", pos = {x = 0, y = 0}, texture = modpath .. "/textures/gui/inventory.png",
-			size = {x = 176, y = 166}, border = 5}
+			size = {x = 176, y = 166 + extra}, border = 5}
+		for index, half in ipairs(halves) do
+			gui:inventory {
+				name = "chest_" .. index, pos = {x = 7, y = 17 + (index - 1) * 54}, size = {x = 9, y = 3},
+				inventory = {source = "block", block = {x = half.x, y = half.y, z = half.z}, offset = 0, count = 27},
+				shift_destination = "inv_main,inv_hotbar",
+			}
+		end
 		gui:inventory {
-			name = "chest", pos = {x = 7, y = 17}, size = {x = 9, y = 3},
-			inventory = {source = "block", block = {x = pos.x, y = pos.y, z = pos.z}, offset = 0, count = 27},
-			shift_destination = "inv_main,inv_hotbar",
-		}
-		gui:inventory {
-			name = "inv_main", pos = {x = 7, y = 83}, size = {x = 9, y = 3},
+			name = "inv_main", pos = {x = 7, y = 83 + extra}, size = {x = 9, y = 3},
 			inventory = {source = "player", player = "player", inventory_name = "main", offset = 9, count = 27},
-			shift_destination = "chest",
+			shift_destination = destination,
 		}
 		gui:inventory {
-			name = "inv_hotbar", pos = {x = 7, y = 141}, size = {x = 9, y = 1},
+			name = "inv_hotbar", pos = {x = 7, y = 141 + extra}, size = {x = 9, y = 1},
 			inventory = {source = "player", player = "player", inventory_name = "main", offset = 0, count = 9},
-			shift_destination = "chest",
+			shift_destination = destination,
 		}
 		gui:show(client)
 	end,

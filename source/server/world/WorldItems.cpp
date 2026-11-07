@@ -28,7 +28,7 @@ void ServerWorld::updateItems() {
 			DoubleBox currentBox = hitbox;
 			currentBox.move(position.x, position.y, position.z);
 			bool stuck = inside && inside->block().id() && inside->isCollidable()
-				&& collision::blockBox(*inside, getData(current.x, current.y, current.z), current.x, current.y, current.z).intersects(currentBox);
+				&& collision::intersectsBlock(*inside, getData(current.x, current.y, current.z), current.x, current.y, current.z, currentBox);
 			if (body.forceDirection.isZero() && stuck) {
 				for (const Vector3i &direction : {Vector3i{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}}) {
 					Vector3i neighbor = current + direction;

@@ -198,9 +198,9 @@ entt::entity Registry::getEntityFromStringID(const std::string &stringID) {
 	return it->second;
 }
 
-const Recipe *Registry::getRecipe(const Inventory &inventory) const {
+const Recipe *Registry::getRecipe(const Inventory &inventory, const std::string &type) const {
 	for (auto &recipe : m_recipes) {
-		if (recipe->isMatching(inventory))
+		if ((type.empty() || recipe->type() == type) && recipe->isMatching(inventory))
 			return recipe.get();
 	}
 	return nullptr;
@@ -319,7 +319,7 @@ void Registry::initUsertype(sol::state &lua) {
 		"get_sky",    &Registry::getSky,
 		"get_tree",   &Registry::getTree,
 		"get_biome",  &Registry::getBiome,
-		"get_recipe", &Registry::getRecipe,
+		"get_recipe", [](const Registry &registry, const Inventory &inventory) { return registry.getRecipe(inventory); },
 		"get_key",    &Registry::getKey,
 
 		"get_block_from_string", &Registry::getBlockFromStringID,

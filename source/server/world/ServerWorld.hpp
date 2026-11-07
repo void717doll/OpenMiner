@@ -57,6 +57,8 @@ class ServerWorld : public World {
 		void tickSpawner(int x, int y, int z);
 		void useJukebox(int x, int y, int z, ServerPlayer &player);
 		void stopJukebox(int x, int y, int z);
+		void initializeChest(int x, int y, int z);
+		std::vector<glm::ivec3> prepareChest(int x, int y, int z, ServerPlayer &player);
 		bool growTree(int x, int y, int z, const std::string &treeID);
 		void updateItems();
 		void updateTnt();

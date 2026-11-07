@@ -6467,6 +6467,66 @@
         16,
         16
       ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/refi_chest_double_front_left.png",
+      "source": "textures/mcl_chests/mcl_chests_big_front_leftside.png",
+      "operation": "copy",
+      "source_sha256": "1272df1ddb3471356406e0c6e453d85c97aed05d202e9929ca4b15fad3dbce26",
+      "output_sha256": "1272df1ddb3471356406e0c6e453d85c97aed05d202e9929ca4b15fad3dbce26",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/refi_chest_double_front_right.png",
+      "source": "textures/mcl_chests/mcl_chests_big_front_rightside.png",
+      "operation": "copy",
+      "source_sha256": "9bf1de614d24f2895084e5789c53e5b463d47020f9e5705413766fdd91214c56",
+      "output_sha256": "9bf1de614d24f2895084e5789c53e5b463d47020f9e5705413766fdd91214c56",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/refi_chest_double_back.png",
+      "source": "textures/mcl_chests/mcl_chests_big_back_rightside.png",
+      "operation": "copy",
+      "source_sha256": "f586594ec337c25be372b7365938f5881951bfa4a8c20eb3fefd90b5f3ea8f64",
+      "output_sha256": "f586594ec337c25be372b7365938f5881951bfa4a8c20eb3fefd90b5f3ea8f64",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "destination": "mods/default/textures/blocks/refi_chest_double_top.png",
+      "source": "textures/mcl_chests/mcl_chests_big_top_leftside.png",
+      "operation": "copy",
+      "source_sha256": "3e662ac3a141e1cae4a917fcddcff57782606e5b38cac396d7680a33d169968a",
+      "output_sha256": "3e662ac3a141e1cae4a917fcddcff57782606e5b38cac396d7680a33d169968a",
+      "source_size": [
+        16,
+        16
+      ],
+      "output_size": [
+        16,
+        16
+      ]
     }
   ],
   "unchanged_engine_ui": [

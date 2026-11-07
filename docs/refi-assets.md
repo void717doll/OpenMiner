@@ -43,3 +43,5 @@ the armor hud uses unchanged `textures/HUD/hbarmor_icon.png` and `hbarmor_bgicon
 additional bundled textures cover birch and spruce wood, leaves and saplings; five live/dead coral sets; cobwebs; and mineclonia music discs. their source paths and checksums are recorded in `refi-assets.json`.
 
 stone slabs use the unchanged top and side textures from `textures/stairs_mcl_stairs_mcl_walls`. oak, sandstone, and cobblestone slabs reuse their existing block textures.
+
+double chests use the unchanged front halves, back half, and top half from `textures/mcl_chests`. runtime texture coordinates mirror the back and top onto their matching halves; the front has one central latch.

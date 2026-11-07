@@ -292,6 +292,7 @@ void BlockCursor::activateBlock(const Hotbar &hotbar) {
 			u16 data = merged ? newBlock.param().setParam(BlockParam::State, 0, 1) : 0;
 			if (newBlock.isRotatable()) {
 				u16 rotation = mount >= 0 ? u16(mount) : m_player.getOppositeDirection() & 0x3;
+				if (newBlock.hasGroup("group:om_stairs")) rotation = m_player.getDirection();
 				data = newBlock.param().setParam(BlockParam::Rotation, 0, rotation);
 			}
 			if (!worldBounds::contains(z) || !blockHasSupport(m_world, {x, y, z}, newBlockState, data)) return;

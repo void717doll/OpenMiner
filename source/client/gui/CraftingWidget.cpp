@@ -71,9 +71,7 @@ void CraftingWidget::consumeRecipe() {
 }
 
 void CraftingWidget::update() {
-	const Recipe *recipe = Registry::getInstance().getRecipe(m_craftingInventory);
-	if (recipe && recipe->type() != "craft")
-		recipe = nullptr;
+	const Recipe *recipe = Registry::getInstance().getRecipe(m_craftingInventory, "craft");
 
 	if (m_recipe != recipe || !m_craftingResultInventory.getStack(0, 0).amount()) {
 		m_recipe = recipe;
@@ -87,16 +85,16 @@ void CraftingWidget::update() {
 	m_craftingResultInventoryWidget.update();
 }
 
-bool CraftingWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest) {
+bool CraftingWidget::sendItemStackToDest(const ItemWidget *itemStack, AbstractInventoryWidget *dest, bool mergeOnly) {
 	if (m_currentInventoryWidget) {
-		return m_currentInventoryWidget->sendItemStackToDest(itemStack, dest);
+		return m_currentInventoryWidget->sendItemStackToDest(itemStack, dest, mergeOnly);
 	}
 
 	return false;
 }
 
-ItemStack CraftingWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src) {
-	return m_craftingInventoryWidget.receiveItemStack(itemStack, src);
+ItemStack CraftingWidget::receiveItemStack(const ItemWidget *itemStack, AbstractInventoryWidget *src, bool mergeOnly) {
+	return m_craftingInventoryWidget.receiveItemStack(itemStack, src, mergeOnly);
 }
 
 void CraftingWidget::draw(RenderTarget &target, RenderStates states) const {

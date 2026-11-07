@@ -103,6 +103,12 @@ fences now connect to neighboring fences, use beta's post and rail dimensions, a
 
 oak, stone, sandstone, and cobblestone slabs combine into matching double slabs. double slabs drop two halves. the stone slab uses refi's slab top and side textures. beta's wooden slab also requires a pickaxe. mixed slabs remain separate, and merging cannot fill the player's hitbox.
 
+oak and cobblestone stairs use beta's four upright directions and two-part collision shape. six blocks craft four stairs in either mirrored pattern. breaking a stair returns its parent block, following beta's drop behavior; cobblestone stairs require a pickaxe. stair icons, held items, and dropped items use the stair shape.
+
+two neighboring chests share a 54-slot screen with the same slot order from either half. each half keeps its own saved contents, so breaking one drops only its contents and leaves the other as a single chest. placement rejects triples, and a solid block above either lid prevents opening the pair.
+
 mining uses one shared tool-speed calculation. axes speed up chests, logs, planks, and bookshelves; beta's lists omit fences and crafting tables. furnaces require a pickaxe to drop, but do not receive its speed bonus. lit furnaces drop the ordinary furnace. chest, furnace, and crafting-table contents scatter in stacks of up to thirty, preserving item counts and damage. breaking the same position again produces no additional contents.
 
 verification: 300 vein cases matched the supplied java generator, including the next random value. the build and 200 tests passed. local handler checks covered slab consumption, collision, double drops, container contents, lit furnaces, fence support, and reversed ore generation order. native previews checked connected fences, slab textures, and inventory meshes.
+
+chest and stair checks cover four-direction placement, stair walking and item landing, crafting, shift transfers across both chest halves, blocked lids, triple rejection, saving across chunk boundaries, and breaking either half without duplicating contents. native checks exercised chest clicks, reopening from either half, and removal while open; screenshots checked the 54-slot layout, joined chest textures, and stair meshes. stairs retain the engine's existing partial-block lighting.

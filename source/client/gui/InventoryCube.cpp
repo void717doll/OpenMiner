@@ -31,6 +31,7 @@
 #include "common/resource/ResourceHandler.hpp"
 #include "common/world/Block.hpp"
 #include "common/world/FenceGeometry.hpp"
+#include "common/world/StairGeometry.hpp"
 
 #include "client/core/Config.hpp"
 #include "client/graphics/TextureAtlas.hpp"
@@ -81,6 +82,10 @@ void InventoryCube::updateVertexBuffer(const Block &block, u8 state) {
 	std::vector<Vertex> mesh;
 	auto boxes = block.hasGroup("group:fence") ? retro::fenceBoxes(true, true, false, false)
 		: std::vector<FloatBox>{blockState.boundingBox()};
+	if (block.hasGroup("group:om_stairs")) {
+		auto stairs = retro::stairBoxes(0);
+		boxes.assign(stairs.begin(), stairs.end());
+	}
 	mesh.reserve(boxes.size() * 36);
 	for (const auto &boundingBox : boxes) {
 		Vertex vertices[nFaces][nVertsPerFace]{};
