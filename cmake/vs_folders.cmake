@@ -8,7 +8,6 @@ set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMAKE_P
 #-----------------------------------------------------------------------------------------
 set_target_properties(${CMAKE_PROJECT_NAME}            PROPERTIES FOLDER "source")
 set_target_properties(${CMAKE_PROJECT_NAME}_common     PROPERTIES FOLDER "source")
-set_target_properties(${CMAKE_PROJECT_NAME}_server     PROPERTIES FOLDER "source")
 set_target_properties(${CMAKE_PROJECT_NAME}_server_lib PROPERTIES FOLDER "source")
 
 #-----------------------------------------------------------------------------------------
