@@ -48,6 +48,12 @@ add_subdirectory(SFML)
 #------------------------------------------------------------------------------
 # - zlib
 #------------------------------------------------------------------------------
-add_subdirectory(zlib)
-
-target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/zlib)
+if(APPLE)
+	# the bundled zlib mistakes modern macos headers for classic mac os.
+	find_package(ZLIB REQUIRED)
+	add_library(zlibstatic INTERFACE)
+	target_link_libraries(zlibstatic INTERFACE ZLIB::ZLIB)
+else()
+	add_subdirectory(zlib)
+	target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/zlib)
+endif()
